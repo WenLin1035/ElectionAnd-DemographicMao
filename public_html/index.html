@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<!--
+Author: Wen Lin
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>GUI</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="newcss.css">
+        <script language="javascript" type="text/javascript">
+            //zoom in
+            function afunction(){
+                document.getElementById("formap").style.backgroundImage = "url('cencus.png')";
+                document.getElementById("formap").style.backgroundSize = "100% 100%";
+                document.getElementById("formap").style.backgroundRepeat = "no-repeat";
+            }
+            //zoom out
+            function bfunction(){
+                document.getElementById("formap").style.backgroundImage = "url('map.png')";
+                document.getElementById("formap").style.backgroundSize = "100% 100%";
+                document.getElementById("formap").style.backgroundRepeat = "no-repeat";
+            }
+            //change comment
+            function changecomment(){
+                var x = document.getElementById("currentcmt");
+                x.innerHTML = document.getElementById("comment").value;
+            }
+        </script>
+    </head>
+    <body>
+        <div class="split left">
+            <div class="centered">
+                <h1>Information</h1>
+                <label for="States">State:</label>
+                <select id="States"> <!-- needs to be replaced by data from DB -->
+                    <option value="State">State</option>
+                    <option value ="Arizona" onclick="zoomin()">Arizona</option>
+                    <option value="Rhode Island">Rhode Island</option>
+                    <option value="North Carolina">North Carolina</option>
+                </select>
+                <br>
+                <br>
+                <label for="Precincts">Precinct:</label>
+                <select id="Precincts"> <!-- needs to be replaced by DB data -->
+                    <option value="precint">Precinct</option>
+                </select>
+                <h4>Population:</h4>
+                <label id="pplnum">X</label>
+                <label> people</label><br> <!-- needs to be replaced by DB data -->
+                <label for="demographics">Demographics:</label>
+                <select id="demographics">
+                    <option value="Parties">Party</option>
+                    <option value="race">Race</option>
+                </select>
+                <br>
+                <label>Democratic: </label><label id="demonum">X</label><label>%</label> <!-- needs to be replaced by DB data -->
+                <input type="color" id="demcolor" name="repcolor" value="#0066ff">
+                <label>Republican: </label><label id="repnum">Y</label><label>%</label> <!-- needs to be replaced by DB data -->
+                <input type="color" id="repcolor" name="repcolor" value="#ff0000">
+                <br>
+                <label>White: </label><label id="whitenum">X</label><label>%</label> <!-- needs to be replaced by DB data -->
+                <input type="color" id="whitecolor" name="whitecolor" value="#0066ff">
+                <label>Non-White: </label><label id="nonnum">Y</label><label>%</label> <!-- needs to be replaced by DB data -->
+                <input type="color" id="othercolor" name="othercolor" value="#ff0000">
+                <br><br><br>
+                <p>Comments:</p>
+                <p id="currentcmt"></p>
+                <br><br><br>
+                <label for="comment">New Comments:</label><br>
+                <textarea id="comment" name="comment" rows="5" cols="40"></textarea>
+                <br>
+                <button onclick="changecomment()">submit</button><!-- need to add func that saves comments into precinct comment string var in database -->
+                <br><br><br><br><br><br><br><br><br><br><br>
+                <button onclick="document.getElementById('datapopup').style.display='block'" style="width:auto;">Change Data</button>
+                <button onclick="document.getElementById('borderpopup').style.display='block'" style="width:auto;">Fix Borders</button>
+                <br>
+                <button onclick="document.getElementById('changepopup').style.display='block'" style="width:auto;margin:5px;">Change Log</button>
+            </div>
+            <p style="bottom: 6px;">Data Source:</p>
+        </div>
+        <!-- right side of the page -->
+        <div class="right">
+            <div id="formap">
+                <div id="zoom">
+                    <button type="button" onclick="afunction()"><img src="zoom_in.png" alt="zoom in" style="width: 20px;height: 20px;text-align: center;"></button><br>
+                    <button type="button" onclick="bfunction()"><img src="Zoom_out.png" alt="zoom out" style="width: 20px;height: 20px;text-align: center;"></button>
+                </div>
+            </div>
+        </div>
+        <!-- this is popup window for changing data info -->
+        <div id="datapopup" class="modal">
+            <div class="modal-content">
+                <button onclick="document.getElementById('datapopup').style.display='none'" style="float:right;">X</button>
+                <p>Current state: a state</p>
+                <p><b>Changes</b></p>
+                <label for="statename">Name:</label>
+                <input type="text" id="statename" name="statename"><br>
+                <p>How many people voted for which party:</p>
+                <label for="demo">Democrats:</label>
+                <input type="text" id="demo" name="demo"><br><br>
+                <label for="demo">Republicans:</label>
+                <input type="text" id="repub" name="repub"><br><br>
+                <center><button>Save</button></center>
+            </div>
+        </div>
+        <!-- this is popup window for changing border -->
+        <div id="borderpopup" class="modal">
+            <div class="modal-content">
+                <button onclick="document.getElementById('borderpopup').style.display='none'" style="float:right;">X</button>
+                <label for="precinct1">Precinct to extend:</label>
+                <select id="precinct1">
+                    <option value="num1">precinct</option>
+                    <option>precinct1</option>
+                </select>
+                <br>
+                <br>
+                <label for="precinct2">Precinct to connect to:</label>
+                <select id="precinct2">
+                    <option value="num2">precinct</option>
+                    <option>precinct1</option>
+                </select>
+                <br><br>
+                <center><button>Save</button></center>
+            </div>
+        </div>
+        <!-- shows log of what user has done -->
+        <div id="changepopup" class="modal">
+            <div class="modal-content">
+                <button onclick="document.getElementById('changepopup').style.display='none'" style="float:right;">X</button>
+                <h4>Log</h4>
+                <br><br>
+                <center><button style="bottom: 0px;">Save</button></center>
+            </div>
+        </div>
+    </body>
+</html>
