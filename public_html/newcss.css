@@ -37,7 +37,6 @@ and open the template in the editor.
                 left:0;
                 height: 100%;
                 width: 100%;
-                background-image: url('map.png');
                 background-repeat: no-repeat;
                 background-size: 100% 100%;
             }
