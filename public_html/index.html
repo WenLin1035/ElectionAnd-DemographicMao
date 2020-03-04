@@ -62,14 +62,14 @@ and open the template in the editor.
                 </select>
                 <br>
                 <label>Democratic: </label><label id="demonum">X</label><label>%</label> <!-- needs to be replaced by DB data -->
-                <input type="color" id="demcolor" name="repcolor" value="#0066ff"><br>
+                <input type="color" onchange="changeAllColor();" id="demcolor" name="repcolor" value="#0066ff"><br>
                 <label>Republican: </label><label id="repnum">Y</label><label>%</label> <!-- needs to be replaced by DB data -->
-                <input type="color" id="repcolor" name="repcolor" value="#ff0000"><br>
+                <input type="color" id="repcolor" onchange="changeAllColor()" name="repcolor" value="#ff0000"><br>
                 <br>
                 <label>White: </label><label id="whitenum">X</label><label>%</label> <!-- needs to be replaced by DB data -->
-                <input type="color" id="whitecolor" name="whitecolor" value="#0066ff"><br>
+                <input type="color" id="whitecolor" onchange="changeAllColor()" name="whitecolor" value="#0066ff"><br>
                 <label>Non-White: </label><label id="nonnum">Y</label><label>%</label> <!-- needs to be replaced by DB data -->
-                <input type="color" id="othercolor" name="othercolor" value="#ff0000">
+                <input type="color" id="othercolor" onchange="changeAllColor()" name="othercolor" value="#ff0000">
                 <br><br><br>
                 <p>Comments:</p>
                 <label id="currentthing"></label>
@@ -203,12 +203,12 @@ and open the template in the editor.
         }
         function demStyle(ft){
             return{
-                color:'blue'
+                color:document.getElementById("demcolor").value
             };
         }
         function repStyle(ft){
             return{
-                color:'red'
+                color:document.getElementById("repcolor").value
             };
         }
         function ghostStyle(ft){
@@ -265,6 +265,27 @@ and open the template in the editor.
                 }
             }
         }
+        function changeAllColor(){
+            precSubLayers=precLayer._layers;
+            for(i in precSubLayers){
+                testLayer=precSubLayers[i];
+                feat=testLayer.feature;
+                changeFeatColor(feat,testLayer);
+            }
+        }
+        function changeFeatColor(ft,tLayer){
+            if(ft.properties.G18GOVDRAI ==0 && ft.properties.G18GOVRFUN == 0){
+                tLayer.setStyle(ghostStyle(tLayer));
+            }
+            else{
+                if(ft.properties.G18GOVDRAI>ft.properties.G18GOVRFUN){
+                    tLayer.setStyle(demStyle(tLayer));
+                }
+                if(ft.properties.G18GOVDRAI<=ft.properties.G18GOVRFUN){
+                    tLayer.setStyle(repStyle(tLayer));
+                }
+            }
+        }
         function precinctDataRandomizer(){
             var num = Math.floor(Math.random() * 51 + 50);
             var num2 = Math.floor(Math.random() * 51 + 50);
@@ -291,15 +312,7 @@ and open the template in the editor.
                 mouseover: setNPS,
                 mouseout: setOPS
             });
-            if(feature.properties.G18GOVDRAI>feature.properties.G18GOVRFUN){
-                layer.setStyle(demStyle(layer));
-            }
-            if(feature.properties.G18GOVDRAI<=feature.properties.G18GOVRFUN && feature.properties.G18GOVDRAI!=0 && feature.properties.G18GOVDFUN !=0){
-                layer.setStyle(repStyle(layer));
-            }
-            else{
-                if(feature.properties.G18GOVDRAI==0) layer.setStyle(ghostStyle(layer));
-            }
+            changeFeatColor(feature,layer);
         }
         function loadPrecincts(feature, layer){
             var addedPrecinct = document.createElement("option");
