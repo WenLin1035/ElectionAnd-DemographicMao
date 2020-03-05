@@ -84,9 +84,10 @@ and open the template in the editor.
                 <br>
                 <button onclick="document.getElementById('changepopup').style.display='block'" style="width:auto;margin:5px;">Change Log</button>
                 <button onclick="document.getElementById('errorpopup').style.display='block'" style ='width:auto;'>Errors</button>
-                <p>sources:</p>
-                <p>https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/UBKYRU</p>
-                <p>https://catalog.data.gov/dataset/tiger-line-shapefile-2017-nation-u-s-current-state-and-equivalent-national</p>
+                <br/>
+                <div>Sources:</div>
+                <a href="https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/UBKYRU" style="text-decoration: none" target="_blank">Harvard Dataverse</a><br/>
+                <a href="https://catalog.data.gov/dataset/tiger-line-shapefile-2017-nation-u-s-current-state-and-equivalent-national" style="text-decoration: none">US Census Bureau</a>
             </div>
         </div>
         <!-- right side of the page -->
@@ -160,7 +161,9 @@ and open the template in the editor.
             accessToken: 'pk.eyJ1IjoiZTE1MzEwODgiLCJhIjoiY2s3NzdjOWl3MDRzdTNmcWtqdDNlamxhNiJ9.aN5tSOOA7nNJA0KCnOITBA'}).addTo(mymap);
         function changecomment(){
             var x = document.getElementById("currentthing");
-            x.innerHTML = document.getElementById("comment").value;
+            var today = new Date();
+            var dateTime = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate()+" "+today.getHours() + ":" + today.getMinutes()+":"+today.getSeconds();
+            x.innerHTML += "["+dateTime+"] >>"+document.getElementById("comment").value+"<br/>";
             document.getElementById("comment").value="";
         }
         function zoomout(){
