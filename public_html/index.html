@@ -87,7 +87,7 @@ and open the template in the editor.
                 <br/>
                 <div>Sources:</div>
                 <a href="https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/UBKYRU" style="text-decoration: none" target="_blank">Harvard Dataverse</a><br/>
-                <a href="https://catalog.data.gov/dataset/tiger-line-shapefile-2017-nation-u-s-current-state-and-equivalent-national" style="text-decoration: none">US Census Bureau</a>
+                <a href="https://catalog.data.gov/dataset/tiger-line-shapefile-2017-nation-u-s-current-state-and-equivalent-national" style="text-decoration: none"  target="_blank">US Census Bureau</a>
             </div>
         </div>
         <!-- right side of the page -->
@@ -305,8 +305,16 @@ and open the template in the editor.
         }
         function onClick(e){
             precinctDataRandomizer();
-            dropdown.value = e.target.feature.properties.NAME;
+            feat=e.target.feature;
+            dropdown.value = feat.properties.NAME;
             clickCoords=e.target.feature.geometry.coordinates;
+            demnum=feat.properties.G18GOVDRAI;
+            repnum=feat.properties.G18GOVRFUN;
+            document.getElementById("pplnum").innerHTML=demnum+repnum;
+            if(demnum==0)document.getElementById("demonum").innerHTML = 0;
+            else document.getElementById("demonum").innerHTML = Math.round(100*(demnum/(demnum+repnum)));
+            if(repnum==0) document.getElementById("repnum").innerHTML = 0;
+            else document.getElementById("repnum").innerHTML = Math.round(100*(repnum/(demnum+repnum)));
             findCoordForPrec(clickCoords);
         }
         //test
