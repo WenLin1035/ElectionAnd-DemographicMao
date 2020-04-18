@@ -402,7 +402,6 @@ and open the template in the editor.
             } 
         }
         function precMenuChange(){
-            precinctDataRandomizer();
             selectedValue=document.getElementById("Precincts").value;
             precSubLayers=precLayer._layers;
             for(i in precSubLayers){
@@ -444,14 +443,7 @@ and open the template in the editor.
                 }
             }
         }
-        function precinctDataRandomizer(){
-            var num = Math.floor(Math.random() * 51 + 50);
-            var num2 = Math.floor(Math.random() * 51 + 50);
-            document.getElementById("whitenum").innerHTML = num2;
-            document.getElementById("nonnum").innerHTML = 100 - num2;
-        }
         function onClick(e){
-            precinctDataRandomizer();
             feat=e.target.feature;
             dropdown.value = feat.properties.NAME;
             clickCoords=e.target.feature.geometry.coordinates;
