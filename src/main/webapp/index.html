@@ -35,7 +35,7 @@ and open the template in the editor.
     <body>
         <div class="split left">
             <div class="centered">
-                <h1>Information</h1>
+                <h3>Information</h3>
                 <!--<label for="time">Year</label>
                 <select id="time">
                     <option value="2018">2018</option>
@@ -59,18 +59,27 @@ and open the template in the editor.
                 <h4>Population:</h4>
                 <label id="pplnum"> </label>
                 <label> people</label><br><br> <!-- needs to be replaced by DB data -->
-                <label for="demographics">Data Type:</label>
-                <select id="demographics" onchange="showmap()" style="width: 100px">
-                    <option id="uno" value="Parties">Election</option>
-                    <option id="dos" value="race">Demographic</option>
-                </select>
-                <br><br>
-                <label for="year">Election Type:</label>
-                <select id="year" onchange="changeyear()" style="width: 100px">
-                    <option id="2016" value="2016">Congressional 2016</option>
-                    <option id="2018" value="2018">Congressional 2018</option>
-                    <option id="2020" value="2020">Presidential 2016</option>
-                </select>
+                <table cellpadding="0">
+                    <tr>
+                        <td><label for="demographics">Data Type:</label></td>
+                        <td>
+                            <select id="demographics" onchange="showmap()" style="">
+                                <option id="uno" value="Parties">Election</option>
+                                <option id="dos" value="race">Demographic</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label for="year">Election Type:</label></td>
+                        <td>
+                            <select id="year" onchange="changeyear()" style="">
+                                <option id="2016" value="2016">Congressional 2016</option>
+                                <option id="2018" value="2018">Congressional 2018</option>
+                                <option id="2020" value="2020">Presidential 2016</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
                 <br><br>
                 <div id="partymap">
                     <label>Democratic: </label><label id="demonum">X</label><label>%</label><br/> <!-- needs to be replaced by DB data -->
@@ -85,13 +94,12 @@ and open the template in the editor.
                     <label>Hispanic: </label><label id="hisnum">Y</label><label>%</label><br/> <!-- needs to be replaced by DB data -->
                     <label>Other: </label><label id="restnum" style="padding-left: 20px">Y</label><label>%</label><br/> <!-- needs to be replaced by DB data -->
                 </div>
-                
-                <br>
-                <p>Error Type:</p>
+
+                <h3>Error Type:</h3>
                 <label id="currentthing"></label>
                 <br>
                 <label for="comment">Comments:</label><br>
-                <textarea id="comment" name="comment" rows="5" cols="20"></textarea>
+                <textarea id="comment" name="comment" rows="2" cols="20"></textarea>
                 <br>
                 <button onclick="changecomment()">Submit</button><!-- need to add func that saves comments into precinct comment string var in database -->
                 <br>
@@ -328,7 +336,7 @@ and open the template in the editor.
         function stateStyle(ft){
             return{
                 fillColor:'none',
-                weight:5,
+                weight:3,
                 color:'black'
             };
         }
@@ -339,7 +347,8 @@ and open the template in the editor.
         }
         function oldPrecStyle(ft){
             return{
-                fillOpacity: 0.2
+                fillOpacity: 0.2,
+                weight:3
             };
         }
         function demStyle(ft){

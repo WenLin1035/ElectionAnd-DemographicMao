@@ -8,13 +8,6 @@ and open the template in the editor.
     Author     : Wen Lin
 */
 
-            .split {
-                height: 100%;
-                width: 20%;
-                position: relative;
-                top: 0;
-                overflow-x: hidden;
-            }
             .left{
                 position: fixed;
                 top: 0;
