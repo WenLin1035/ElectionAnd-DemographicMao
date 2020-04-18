@@ -1,0 +1,5 @@
+server\Application.class
+server\HelloController.class
+server\PrecinctController.class
+server\PrecinctRepo.class
+server\Precinct.class
