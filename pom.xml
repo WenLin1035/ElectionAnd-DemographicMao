@@ -59,6 +59,6 @@
             </plugin>
         </plugins>
     </build>
-
+    <name>StateElectionAndDemographicData</name>
 </project>
 
