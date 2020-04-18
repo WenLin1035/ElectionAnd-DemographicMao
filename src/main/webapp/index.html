@@ -7,7 +7,7 @@ and open the template in the editor.
 -->
 <html>
     <head>
-        <title>GUI</title>
+        <title>State Election and Demographic Data</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="newcss.css">
@@ -54,12 +54,6 @@ and open the template in the editor.
                     <option value="precinct">Precinct</option>
                 </select>
                 <br>
-                <form>
-                    <input type ="checkbox" id="congressional" value="congression">
-                    <label for="congressional">Congressional Data</label>
-                    <input type ="checkbox" id="nationalpark" value="national">
-                    <label for="congressional">National Park Data</label>
-                </form>
                 </div>
                 
                 <h4>Population:</h4>
@@ -79,47 +73,38 @@ and open the template in the editor.
                 </select>
                 <br><br>
                 <div id="partymap">
-                    <label>Democratic: </label><label id="demonum">X</label><label>%</label> <!-- needs to be replaced by DB data -->
-                    <input type="color" onchange="changeAllColor();" id="demcolor" name="repcolor" value="#0066ff"><br>
-                    <label>Republican: </label><label id="repnum">Y</label><label>%</label> <!-- needs to be replaced by DB data -->
-                    <input type="color" id="repcolor" onchange="changeAllColor()" name="repcolor" value="#ff0000"><br>
-                    <label style="padding-right: 43px">Other:</label><label id="othernum">Z</label><label>%</label> <!-- needs to be replaced by DB data -->
-                    <input type="color" id="othecolor" onchange="changeAllColor()" name="othecolor" value="#33cc33"><br>
+                    <label>Democratic: </label><label id="demonum">X</label><label>%</label><br/> <!-- needs to be replaced by DB data -->
+                    <label>Republican: </label><label id="repnum">Y</label><label>%</label><br/> <!-- needs to be replaced by DB data -->
+                    <label style="padding-right: 43px">Other:</label><label id="othernum">Z</label><label>%</label><br/> <!-- needs to be replaced by DB data -->
                     <br>
                 </div>
                 <div id="racemap">
-                    <label>White: </label><label id="whitenum" style="padding-left: 20px">X</label><label>%</label> <!-- needs to be replaced by DB data -->
-                    <input type="color" id="whitecolor" onchange="changeAllColor()" name="whitecolor" value="#0066ff"><br>
-                    <label>Black: </label><label id="blacknum" style="padding-left: 20px">Y</label><label>%</label> <!-- needs to be replaced by DB data -->
-                    <input type="color" id="blackcolor" onchange="changeAllColor()" name="blackcolor" value="#ff0000"><br>
-                    <label>Asian: </label><label id="asiannum" style="padding-left: 20px">Y</label><label>%</label> <!-- needs to be replaced by DB data -->
-                    <input type="color" id="asiancolor" onchange="changeAllColor()" name="asiancolor" value="#cc99ff"><br>
-                    <label>Hispanic: </label><label id="hisnum">Y</label><label>%</label> <!-- needs to be replaced by DB data -->
-                    <input type="color" id="hiscolor" onchange="changeAllColor()" name="hiscolor" value="#ffcc99"><br>
-                    <label>Other: </label><label id="restnum" style="padding-left: 20px">Y</label><label>%</label> <!-- needs to be replaced by DB data -->
-                    <input type="color" id="restcolor" onchange="changeAllColor()" name="restcolor" value="#ffbf00"><br>
+                    <label>White: </label><label id="whitenum" style="padding-left: 20px">X</label><label>%</label><br/> <!-- needs to be replaced by DB data -->
+                    <label>Black: </label><label id="blacknum" style="padding-left: 20px">Y</label><label>%</label><br/> <!-- needs to be replaced by DB data -->
+                    <label>Asian: </label><label id="asiannum" style="padding-left: 20px">Y</label><label>%</label><br/> <!-- needs to be replaced by DB data -->
+                    <label>Hispanic: </label><label id="hisnum">Y</label><label>%</label><br/> <!-- needs to be replaced by DB data -->
+                    <label>Other: </label><label id="restnum" style="padding-left: 20px">Y</label><label>%</label><br/> <!-- needs to be replaced by DB data -->
                 </div>
                 
-                <br><br><br>
+                <br>
                 <p>Error Type:</p>
                 <label id="currentthing"></label>
                 <br>
                 <label for="comment">Comments:</label><br>
-                <textarea id="comment" name="comment" rows="5" cols="40"></textarea>
+                <textarea id="comment" name="comment" rows="5" cols="20"></textarea>
                 <br>
                 <button onclick="changecomment()">Submit</button><!-- need to add func that saves comments into precinct comment string var in database -->
                 <br>
                 <p>Options:</p>
                 <div id="options">
-                <button onclick="openchange()" style="width:auto;margin-right: 50px">Change Data</button>
+                <button onclick="openchange()" style="width:auto;margin-right: 25px">Change Data</button>
                 <button onclick="document.getElementById('borderpopup').style.display='block'" style="width:auto;">Fix Borders</button>
                 <br>
                 </div>
                 <br>
                 <br>
                 <button onclick="document.getElementById('changepopup').style.display='block'" style="width:50px;height: 40px;"><img src="ee.png" alt="Error Log" style="width: 30px;height: 30px;"></button>
-                <br>
-                <br/>
+                <button onclick="document.getElementById('settingspopup').style.display='block'" style="width:50px; height:40px"><img src="cog.png" alt="Settings" style="width: 30px; height:30px;"></button>
                 <div>Sources:</div>
                 <a href="https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/UBKYRU" style="text-decoration: none" target="_blank">Harvard Dataverse</a><br/>
                 <a href="https://catalog.data.gov/dataset/tiger-line-shapefile-2017-nation-u-s-current-state-and-equivalent-national" style="text-decoration: none"  target="_blank">US Census Bureau</a>
@@ -218,10 +203,59 @@ and open the template in the editor.
                 <button onclick="document.getElementById('changepopup').style.display='none'" style="float:right;">X</button>
                 <h4>Error Log</h4>
                 <br><br>
-                <center><button style="bottom: 0px;">Close</button></center>
             </div>
         </div>
 
+        <div id="settingspopup" class="modal">
+            <div class="modal-content">
+                <button onclick="document.getElementById('settingspopup').style.display='none'" style="float:right;">X</button>
+                <h4>Settings</h4>
+                <br>
+                <div>Map View Filter</div>
+                <form>
+                    <input type ="checkbox" id="congressional" value="congression">
+                    <label for="congressional">Congressional Data</label><br/>
+                    <input type ="checkbox" id="nationalpark" value="national">
+                    <label for="congressional">National Park Data</label>
+                </form>
+                <br/><br/>
+                <table>
+                    <tr> <td colspan="2">Election Data Color Change </td></tr>
+                <tr>
+                    <td><label>Democrat: </label></td>
+                    <td><input type="color" onchange="changeAllColor();" id="demcolor" name="demcolor" value="#0066ff"></td>
+                </tr>
+                <tr>
+                    <td><label>Republican: </label></td>
+                    <td><input type="color" id="repcolor" onchange="changeAllColor()" name="repcolor" value="#ff0000"></td>
+                </tr>
+                <tr>
+                    <td><label>Other: </label></td>
+                    <td><input type="color" id="othecolor" onchange="changeAllColor()" name="othecolor" value="#33cc33"></td>
+                </tr>
+                <tr><td colspan="2"><br/>Demographic Data Color Change </td></tr>
+                <tr>
+                    <td><label>White: </label></td>
+                    <td><input type="color" id="whitecolor" onchange="changeAllColor()" name="whitecolor" value="#0066ff"></td>
+                </tr>
+                <tr> 
+                    <td><label>Black: </label></td>
+                    <td><input type="color" id="blackcolor" onchange="changeAllColor()" name="blackcolor" value="#ff0000"></td>
+                </tr>
+                <tr> 
+                    <td><label>Asian: </label></td>
+                    <td><input type="color" id="asiancolor" onchange="changeAllColor()" name="asiancolor" value="#cc99ff"></td>
+                </tr>
+                <tr> 
+                    <td><label>Hispanic: </label></td>
+                    <td><input type="color" id="hiscolor" onchange="changeAllColor()" name="hiscolor" value="#ffcc99"></td>
+                </tr>
+                <tr> 
+                    <td><label>Other: </label></td>
+                    <td><input type="color" id="restcolor" onchange="changeAllColor()" name="restcolor" value="#ffbf00"></td>
+                </table>
+            </div>
+        </div>
         <div id="errorpopup" class="modal">
             <div class="modal-content">
                 <button onclick="document.getElementById('errorpopup').style.display='none'" style="float:right;">X</button>
