@@ -36,67 +36,89 @@ and open the template in the editor.
         <div class="split left">
             <div class="centered">
                 <h1>Information</h1>
-                <label for="time">Year</label>
+                <!--<label for="time">Year</label>
                 <select id="time">
                     <option value="2018">2018</option>
-                </select><br>
-                <label for="States">State:</label>
-                <select id="States"> <!-- needs to be replaced by data from DB -->
+                </select><br>-->
+                <div>
+                    <label for="States" style="font-size: 20px;padding-right: 26px">State:</label>
+                <select id="States" style="width: 120px"> <!-- needs to be replaced by data from DB -->
                     <option value="State" onclick="zoomout()">State</option>
                     <option value ="Arizona" onclick="zoomout()">Arizona</option>
                     <option value="Rhode Island" onclick="zoomin()">Rhode Island</option>
                     <option value="North Carolina" onclick="zoomout()">North Carolina</option>
                 </select>
-                <br>
-                <br>
-                <label for="Precincts">Precinct:</label>
-                <select id="Precincts" onchange="precMenuChange()"> <!-- needs to be replaced by DB data -->
+                    <br>
+                <label for="Precincts" style="font-size: 20px;">Precinct:</label>
+                <select id="Precincts" onchange="precMenuChange()" style="width: 120px"> <!-- needs to be replaced by DB data -->
                     <option value="precinct">Precinct</option>
                 </select>
+                <br>
                 <form>
                     <input type ="checkbox" id="congressional" value="congression">
                     <label for="congressional">Congressional Data</label>
                     <input type ="checkbox" id="nationalpark" value="national">
                     <label for="congressional">National Park Data</label>
                 </form>
+                </div>
+                
                 <h4>Population:</h4>
-                <label id="pplnum">X</label>
-                <label> people</label><br> <!-- needs to be replaced by DB data -->
-                <label for="demographics">Demographics:</label>
-                <select id="demographics" onchange="showmap()">
-                    <option id="uno" value="Parties">Party</option>
-                    <option id="dos" value="race">Race</option>
+                <label id="pplnum"> </label>
+                <label> people</label><br><br> <!-- needs to be replaced by DB data -->
+                <label for="demographics">Data Type:</label>
+                <select id="demographics" onchange="showmap()" style="width: 100px">
+                    <option id="uno" value="Parties">Election</option>
+                    <option id="dos" value="race">Demographic</option>
                 </select>
-                <br>
+                <br><br>
+                <label for="year">Election Type:</label>
+                <select id="year" onchange="changeyear()" style="width: 100px">
+                    <option id="2016" value="2016">Congressional 2016</option>
+                    <option id="2018" value="2018">Congressional 2018</option>
+                    <option id="2020" value="2020">Presidential 2016</option>
+                </select>
+                <br><br>
                 <div id="partymap">
                     <label>Democratic: </label><label id="demonum">X</label><label>%</label> <!-- needs to be replaced by DB data -->
                     <input type="color" onchange="changeAllColor();" id="demcolor" name="repcolor" value="#0066ff"><br>
                     <label>Republican: </label><label id="repnum">Y</label><label>%</label> <!-- needs to be replaced by DB data -->
                     <input type="color" id="repcolor" onchange="changeAllColor()" name="repcolor" value="#ff0000"><br>
+                    <label style="padding-right: 43px">Other:</label><label id="othernum">Z</label><label>%</label> <!-- needs to be replaced by DB data -->
+                    <input type="color" id="othecolor" onchange="changeAllColor()" name="othecolor" value="#33cc33"><br>
                     <br>
                 </div>
                 <div id="racemap">
                     <label>White: </label><label id="whitenum">X</label><label>%</label> <!-- needs to be replaced by DB data -->
                     <input type="color" id="whitecolor" onchange="changeAllColor()" name="whitecolor" value="#0066ff"><br>
-                    <label>Non-White: </label><label id="nonnum">Y</label><label>%</label> <!-- needs to be replaced by DB data -->
-                    <input type="color" id="othercolor" onchange="changeAllColor()" name="othercolor" value="#ff0000">
+                    <label>Black: </label><label id="blacknum">Y</label><label>%</label> <!-- needs to be replaced by DB data -->
+                    <input type="color" id="blackcolor" onchange="changeAllColor()" name="blackcolor" value="#ff0000"><br>
+                    <label>Asian: </label><label id="asiannum">Y</label><label>%</label> <!-- needs to be replaced by DB data -->
+                    <input type="color" id="asiancolor" onchange="changeAllColor()" name="asiancolor" value="#cc99ff"><br>
+                    <label>Hispanic: </label><label id="hisnum">Y</label><label>%</label> <!-- needs to be replaced by DB data -->
+                    <input type="color" id="hiscolor" onchange="changeAllColor()" name="hiscolor" value="#ffcc99"><br>
+                    <label>Other: </label><label id="restnum">Y</label><label>%</label> <!-- needs to be replaced by DB data -->
+                    <input type="color" id="restcolor" onchange="changeAllColor()" name="restcolor" value="#ffbf00"><br>
                 </div>
                 
                 <br><br><br>
-                <p>Comments:</p>
+                <p>Error Type:</p>
                 <label id="currentthing"></label>
-                <br><br><br>
-                <label for="comment">New Comments:</label><br>
+                <br>
+                <label for="comment">Comments:</label><br>
                 <textarea id="comment" name="comment" rows="5" cols="40"></textarea>
                 <br>
                 <button onclick="changecomment()">Submit</button><!-- need to add func that saves comments into precinct comment string var in database -->
                 <br>
-                <button onclick="openchange()" style="width:auto;">Change Data</button>
+                <p>Options:</p>
+                <div id="options">
+                <button onclick="openchange()" style="width:auto;margin-right: 50px">Change Data</button>
                 <button onclick="document.getElementById('borderpopup').style.display='block'" style="width:auto;">Fix Borders</button>
                 <br>
-                <button onclick="document.getElementById('changepopup').style.display='block'" style="width:auto;text-align: center">Change Log</button>
+                </div>
                 <br>
-                <button onclick="document.getElementById('errorpopup').style.display='block'" style ='width:auto;'>Errors</button>
+                <br>
+                <button onclick="document.getElementById('changepopup').style.display='block'" style="width:50px;height: 40px;"><img src="ee.png" alt="Error Log" style="width: 30px;height: 30px;"></button>
+                <br>
                 <br/>
                 <div>Sources:</div>
                 <a href="https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/UBKYRU" style="text-decoration: none" target="_blank">Harvard Dataverse</a><br/>
@@ -112,14 +134,61 @@ and open the template in the editor.
         <div id="datapopup" class="modal">
             <div class="modal-content">
                 <button onclick="document.getElementById('datapopup').style.display='none'" style="float:right;">X</button>
-                <p><b>Changes</b></p>
-                <label for="statename">Name:</label>
+                <p style="text-align: center"><b>Changes</b></p>
+                <label for="statename" style="margin-left: 180px">Name:</label>
                 <input type="text" id="statename" name="statename"><br>
-                <p>How many people voted for which party:</p>
-                <label for="demo">Democrats:</label>
-                <input type="text" id="demo" name="demo"><br><br>
-                <label for="demo">Republicans:</label>
-                <input type="text" id="repub" name="repub"><br><br>
+                <table>
+                    <tr>
+                        <td style="padding-right: 30px;">
+                            <p><b>2016 Presidential Election:</b></p>
+                            <label for="demo1">Democrats:</label>
+                            <input type="text" id="demo1" name="demo1"><br><br>
+                            <label for="repub1">Republicans:</label>
+                            <input type="text" id="repub1" name="repub1"><br><br>
+                            <label for="other1">Other:</label>
+                            <input type="text" id="other1" name="other1"><br><br>
+                            <p><b>2016 Congressional Election:</b></p>
+                            <label for="demo2">Democrats:</label>
+                            <input type="text" id="demo2" name="demo2"><br><br>
+                            <label for="repub2">Republicans:</label>
+                            <input type="text" id="repub2" name="repub2"><br><br>
+                            <label for="other2">Other:</label>
+                            <input type="text" id="other2" name="other2"><br><br>
+                            <p><b>2018 Congressional Election:</b></p>
+                            <label for="demo3">Democrats:</label>
+                            <input type="text" id="demo3" name="demo3"><br><br>
+                            <label for="repub3">Republicans:</label>
+                            <input type="text" id="repub3" name="repub3"><br><br>
+                            <label for="other3">Other:</label>
+                            <input type="text" id="other3" name="other3"><br><br>
+                        </td>
+                        <td>
+                            <p><b>2016 Demographic Data:</b></p>
+                            <label for="white1">White:</label>
+                            <input type="text" id="white1" name="white1"><br><br>
+                            <label for="black1">Black:</label>
+                            <input type="text" id="black1" name="black1"><br><br>
+                            <label for="asian1">Asian:</label>
+                            <input type="text" id="asian1" name="asian1"><br><br>
+                            <label for="his1">Hispanic:</label>
+                            <input type="text" id="his1" name="his1"><br><br>
+                            <label for="oth1">Other:</label>
+                            <input type="text" id="oth1" name="oth1"><br><br>
+                            <p><b>2018 Demographic Data:</b></p>
+                            <label for="white2">White:</label>
+                            <input type="text" id="white2" name="white2"><br><br>
+                            <label for="black2">Black:</label>
+                            <input type="text" id="black2" name="black2"><br><br>
+                            <label for="asian2">Asian:</label>
+                            <input type="text" id="asian2" name="asian2"><br><br>
+                            <label for="his2">Hispanic:</label>
+                            <input type="text" id="his2" name="his2"><br><br>
+                            <label for="oth2">Other:</label>
+                            <input type="text" id="oth2" name="oth2"><br><br>
+                        </td>
+                    </tr>
+                </table>
+                
                 <center><button>Save</button></center>
             </div>
         </div>
@@ -147,9 +216,9 @@ and open the template in the editor.
         <div id="changepopup" class="modal">
             <div class="modal-content">
                 <button onclick="document.getElementById('changepopup').style.display='none'" style="float:right;">X</button>
-                <h4>Log</h4>
+                <h4>Error Log</h4>
                 <br><br>
-                <center><button style="bottom: 0px;">Save</button></center>
+                <center><button style="bottom: 0px;">Close</button></center>
             </div>
         </div>
 
@@ -182,9 +251,14 @@ and open the template in the editor.
         function openchange(){
             document.getElementById('datapopup').style.display='block';
             document.getElementById('statename').value = document.getElementById("Precincts").value;
-            document.getElementById('demo').value = ; //number of votes democrats
-            document.getElementById('repub').value = ; // number of votes republicans
+            //document.getElementById('demo').value = ; //number of votes democrats
+            //document.getElementById('repub').value = ; // number of votes republicans
         }
+        
+        //IMPORTANT
+        //change years for election type
+        //changeyear(){}
+        
         //demographics
             function showmap(){
                 if(document.getElementById("demographics").value == "Parties"){

@@ -42,7 +42,8 @@ and open the template in the editor.
             }
             .centered{
                 position: relative;
-                text-align: center;
+                margin-left: 50px;
+                text-align: left;
             }
             .btns{
                 position: relative;
@@ -71,7 +72,7 @@ and open the template in the editor.
             /* Modal Content */
             .modal-content {
             background-color: #fefefe;
-            text-align: center;
+            text-align: left;
             margin: auto;
             padding: 20px;
             border: 1px solid #888;
