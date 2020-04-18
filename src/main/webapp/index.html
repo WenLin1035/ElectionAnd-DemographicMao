@@ -17,7 +17,7 @@ and open the template in the editor.
         <script language="javascript" type="text/javascript" src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
                 integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="crossorigin="">
             //zoom in
-            function afunction(){
+            function afunction()j{
             document.getElementById("formap").style.backgroundImage = "url('cencus.png')";
             document.getElementById("formap").style.backgroundSize = "100% 100%";
             document.getElementById("formap").style.backgroundRepeat = "no-repeat";
@@ -280,12 +280,12 @@ and open the template in the editor.
             mymap.setView(new L.LatLng(0,0),10.5);
             mymap.setView(new L.LatLng(b,a),10.5);
         }
-        $.getJSON("https://raw.githubusercontent.com/Team-Icicles/GUI/master/public_html/ri_state.json")
+        $.getJSON("https://raw.githubusercontent.com/Team-Icicles/StateElectionAndDemographicData/master/src/main/webapp/ri_state.json")
             .done(function( ri_state_data ) {
                 L.geoJSON(ri_state_data,{style:stateStyle}).addTo(mymap);
         });
         precLayer=L.geoJSON(null,{onEachFeature: onEachFeature}).addTo(mymap);
-        $.getJSON("https://raw.githubusercontent.com/Team-Icicles/GUI/master/public_html/ri_2018.json")
+        $.getJSON("https://raw.githubusercontent.com/Team-Icicles/StateElectionAndDemographicData/master/src/main/webapp/ri_2018.json")
             .done(function( ri_prec_data ) {
                 precLayer.addData(ri_prec_data);
         });
