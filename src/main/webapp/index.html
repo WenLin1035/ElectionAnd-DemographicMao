@@ -16,20 +16,6 @@ and open the template in the editor.
         <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
         <script language="javascript" type="text/javascript" src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
                 integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="crossorigin="">
-            //zoom in
-            function afunction()j{
-            document.getElementById("formap").style.backgroundImage = "url('cencus.png')";
-            document.getElementById("formap").style.backgroundSize = "100% 100%";
-            document.getElementById("formap").style.backgroundRepeat = "no-repeat";
-            }
-            //zoom out
-            function bfunction(){
-            document.getElementById("formap").style.backgroundImage = "url('map.png')";
-            document.getElementById("formap").style.backgroundSize = "100% 100%";
-            document.getElementById("formap").style.backgroundRepeat = "no-repeat";
-            }
-            
-            //change comment
         </script>
     </head>
     <body>
@@ -326,17 +312,9 @@ and open the template in the editor.
             mymap.setView(new L.LatLng(0,0),10.5);
             mymap.setView(new L.LatLng(b,a),10.5);
         }
-        /**$.getJSON("https://raw.githubusercontent.com/Team-Icicles/StateElectionAndDemographicData/master/src/main/webapp/ri_state.json")
-            .done(function( ri_state_data ) {
-                L.geoJSON(ri_state_data,{style:setShapeColor(this,"STATE_STYLE")}).addTo(mymap);
-        });
-        $.getJSON("https://raw.githubusercontent.com/Team-Icicles/StateElectionAndDemographicData/master/src/main/webapp/ri_2018.json")
-            .done(function( ri_prec_data ) {
-                precLayer.addData(ri_prec_data);
-        });**/
         precLayer=L.geoJSON(null,{onEachFeature: onEachFeature}).addTo(mymap);
         function initLoad(){
-            console.log("hi");
+            console.log("Hello, World!");
             xhr_ri_prec=new XMLHttpRequest();
             xhr_ri_prec.open('GET','http://localhost:8080/json_ri_prec');
             xhr_ri_prec.onload=function(){
@@ -353,12 +331,6 @@ and open the template in the editor.
             xhr_ri_state.send();
         }
         initLoad();
-//        var dummyDonutPolygon=[
-//            [41.160046141686905,-71.60614013671875],
-//            [41.160046141686905,-71.53266906738281],
-//            [41.204489413961504,-71.53266906738281],
-//            [41.204489413961504,-71.60614013671875],
-//            [41.160046141686905,-71.60614013671875]];
         function setShapeColor(ft,shapeStyle){
             switch(shapeStyle){
                 case "STATE_STYLE": 
@@ -415,7 +387,6 @@ and open the template in the editor.
             centerCoords=[0,0];
             centerCoords[0]=minCoords[0]+((maxCoords[0]-minCoords[0])/2);
             centerCoords[1]=minCoords[1]+((maxCoords[1]-minCoords[1])/2);
-            console.log(centerCoords);
             return centerCoords;
         }
         function findCoordForPrec(b){
@@ -436,11 +407,13 @@ and open the template in the editor.
             if(selectedValue==undefined){
                 selectedValue=document.getElementById("Precincts").value;
             }
+            console.log(selectedValue);
             precSubLayers=precLayer._layers;
             for(i in precSubLayers){
                 testLayer=precSubLayers[i];
                 feat=testLayer.feature;
                 if(feat.properties.NAME==selectedValue){
+                    console.log(testLayer);
                     menuChangeCoords=feat.geometry.coordinates;
                     findCoordForPrec(menuChangeCoords);
                     testLayer.openPopup();
@@ -456,13 +429,17 @@ and open the template in the editor.
                     if(feat.properties.G18GOVDRAI ==0 && feat.properties.G18GOVRFUN == 0 && testLayer.options.color=="orange"){
                         showError(layer,"GHOST");
                     }
-                    else showError(layer);
+                    else{
+                        if(feat.properties.NAME=="New Shoreham 1" && layer.options.color=="orange"){
+                            showError(layer,"DONUT");
+                        }
+                        else{
+                            showError(layer);
+                        }
+                    }
                     break;
                 }
             }
-        }
-        function clickViaErrorLog(feature){
-            
         }
         function changeAllColor(){
             precSubLayers=precLayer._layers;
@@ -483,10 +460,14 @@ and open the template in the editor.
                 if(ft.properties.G18GOVDRAI<=ft.properties.G18GOVRFUN){
                     tLayer.setStyle(setShapeColor(tLayer,"REP_STYLE"));
                 }
+                if(ft.properties.NAME=="New Shoreham 1" && ft.geometry.type=="MultiPolygon"){
+                    tLayer.setStyle(setShapeColor(tLayer,"ERROR_STYLE"));
+                }
             }
         }
         function onClick(e){
             layer=e.target;
+            console.log(layer);
             feat=layer.feature;
             var dropdown = document.getElementById("Precincts");
             dropdown.value = feat.properties.NAME;
@@ -502,10 +483,40 @@ and open the template in the editor.
             if(feat.properties.G18GOVDRAI ==0 && feat.properties.G18GOVRFUN == 0 && layer.options.color=="orange"){
                 showError(layer,"GHOST");
             }
-            else showError(layer);
+            else{
+                if(feat.properties.NAME=="New Shoreham 1" && layer.options.color=="orange"){
+                    showError(layer,"DONUT");
+                }
+                else{
+                    showError(layer);
+                }
+            }
         }
         function setGhostPrecinct(layer){
+            element=document.getElementById(layer.feature.properties.NAME+"_error");
+            element.parentNode.removeChild(element);
             layer.setStyle(setShapeColor(layer,"GHOST_STYLE"));
+            errorDiv.innerHTML="";
+        }
+        function mergePrecincts(layer){
+            feature=layer.feature;
+            element=document.getElementById(feature.properties.NAME+"_error");
+            element.parentNode.removeChild(element);
+            console.log(feature);
+            newPrecinct={"type":"Feature",
+                "properties":feature.properties,
+                "geometry":{
+                    "type":"Polygon",
+                    "coordinates":feature.geometry.coordinates[0]
+                }
+            };
+            var dropdown = document.getElementById("Precincts");
+            dropdown.remove(dropdown.selectedIndex);
+            layer.remove();
+            precLayer.removeLayer(layer);
+            console.log(precLayer._layers);
+            console.log(newPrecinct);
+            precLayer.addData(newPrecinct);
             errorDiv.innerHTML="";
         }
         function showError(layer,errorType){
@@ -515,6 +526,10 @@ and open the template in the editor.
                     errorDiv.innerHTML="Ghost Precinct? <br>\n\
                         <button onclick='setGhostPrecinct(layer)'>Yes</button>\n\
                         <button onclick='openchange();errorDiv.innerHTML=\"\"'>No</button>";
+                    break;
+                case "DONUT":
+                    errorDiv.innerHTML="Merge Precinct<br>\n\
+                        <button onclick='mergePrecincts(layer)'>Yes</button>";
                     break;
                 default:
                     errorDiv.innerHTML="";
@@ -542,18 +557,21 @@ and open the template in the editor.
         }
         //test
         function onEachFeature(feature,layer){
-            layer.bindPopup('<h1>' + feature.properties.NAME + '</h1>');
+            featureLayer=layer;
+            featureLayer.bindPopup('<h1>' + feature.properties.NAME + '</h1>');
             loadPrecincts(feature, layer);
-            layer.on({
+            featureLayer.on({
                 click: onClick,
                 mouseover: setNPS,
                 mouseout: setOPS
             });
-            orange="#3388ff";
-            if(feature.properties.G18GOVDRAI ==0 && feature.properties.G18GOVRFUN == 0 && layer.options.color==orange){
-               document.getElementById("errorLog").innerHTML+="<button onclick='document.getElementById(\"changepopup\").style.display=\"none\";precMenuChange(\""+feature.properties.NAME+"\");'>Ghost Precinct Found ["+feature.properties.NAME+"](Requires Verification)</button><br>";
+            if(feature.properties.G18GOVDRAI ==0 && feature.properties.G18GOVRFUN == 0 && featureLayer.options.color=="#3388ff"){
+               document.getElementById("errorLog").innerHTML+="<div id=\""+feature.properties.NAME+"_error\"><button onclick='document.getElementById(\"changepopup\").style.display=\"none\";precMenuChange(\""+feature.properties.NAME+"\");'>Ghost Precinct Found ["+feature.properties.NAME+"](Requires Verification)</button></div>";
             }
-            changeFeatColor(feature,layer);
+            if(feature.properties.NAME=="New Shoreham 1" && feature.geometry.type=="MultiPolygon"){
+               document.getElementById("errorLog").innerHTML+="<div id=\""+feature.properties.NAME+"_error\"><button onclick='document.getElementById(\"changepopup\").style.display=\"none\";precMenuChange(\""+feature.properties.NAME+"\");'>Donut Precinct Found ["+feature.properties.NAME+"](Requires Modification)</button></div>";
+            }
+            changeFeatColor(feature,featureLayer);
         }
         function loadPrecincts(feature, layer){
             var dropdown = document.getElementById("Precincts");
