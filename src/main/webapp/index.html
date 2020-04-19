@@ -59,9 +59,9 @@ and open the template in the editor.
                         <td><label for="year">Election Type:</label></td>
                         <td>
                             <select id="year" onchange="changeyear()" style="">
-                                <option id="2016" value="2016">Congressional 2016</option>
-                                <option id="2018" value="2018">Congressional 2018</option>
-                                <option id="2020" value="2020">Presidential 2016</option>
+                                <option id="pred_16" value="pred_16">Presidential 2016</option>
+                                <option id="cog_16" value="cog_16">Congressional 2016</option>
+                                <option id="cog_18" value="cog_18">Congressional 2018</option>
                             </select>
                         </td>
                     </tr>
@@ -390,7 +390,8 @@ and open the template in the editor.
             return centerCoords;
         }
         function findCoordForPrec(b){
-            if(b.length>1){
+            console.log(b);
+            if(b[0].length>1){
                centerCoordList=[];
                 for(i in b){
                     centerCoordList[i]=findCenter(b[i][0]);
@@ -412,25 +413,25 @@ and open the template in the editor.
             for(i in precSubLayers){
                 testLayer=precSubLayers[i];
                 feat=testLayer.feature;
-                if(feat.properties.NAME==selectedValue){
+                if(feat.properties.PRENAME==selectedValue){
                     console.log(testLayer);
                     menuChangeCoords=feat.geometry.coordinates;
-                    findCoordForPrec(menuChangeCoords);
+                    //findCoordForPrec(menuChangeCoords);
                     testLayer.openPopup();
                     
-                    demnum=feat.properties.G18GOVDRAI;
-                    repnum=feat.properties.G18GOVRFUN;
+                    demnum=feat.properties.PRES16D;
+                    repnum=feat.properties.PRES16R;
                     document.getElementById("pplnum").innerHTML=demnum+repnum;
                     if(demnum==0)document.getElementById("demonum").innerHTML = 0;
                     else document.getElementById("demonum").innerHTML = demnum+ " people ["+Math.round(100*(demnum/(demnum+repnum))) +"%]";
                     if(repnum==0) document.getElementById("repnum").innerHTML = 0;
                     else document.getElementById("repnum").innerHTML = repnum+ " people ["+Math.round(100*(repnum/(demnum+repnum))) +"%]";
                     layer=testLayer;
-                    if(feat.properties.G18GOVDRAI ==0 && feat.properties.G18GOVRFUN == 0 && testLayer.options.color=="orange"){
+                    if(feat.properties.PRES16D ==0 && feat.properties.PRES16R == 0 && testLayer.options.color=="orange"){
                         showError(layer,"GHOST");
                     }
                     else{
-                        if(feat.properties.NAME=="New Shoreham 1" && layer.options.color=="orange"){
+                        if(feat.properties.PRENAME=="Burrillville 0302" && layer.options.color=="orange"){
                             showError(layer,"DONUT");
                         }
                         else{
@@ -450,17 +451,17 @@ and open the template in the editor.
             }
         }
         function changeFeatColor(ft,tLayer){
-            if(ft.properties.G18GOVDRAI ==0 && ft.properties.G18GOVRFUN == 0){
+            if(ft.properties.PRES16D ==0 && ft.properties.PRES16R == 0){
                 tLayer.setStyle(setShapeColor(tLayer,"ERROR_STYLE"));
             }
             else{
-                if(ft.properties.G18GOVDRAI>ft.properties.G18GOVRFUN){
+                if(ft.properties.PRES16D>ft.properties.PRES16R){
                     tLayer.setStyle(setShapeColor(tLayer,"DEM_STYLE"));
                 }
-                if(ft.properties.G18GOVDRAI<=ft.properties.G18GOVRFUN){
+                if(ft.properties.PRES16D<=ft.properties.PRES16R){
                     tLayer.setStyle(setShapeColor(tLayer,"REP_STYLE"));
                 }
-                if(ft.properties.NAME=="New Shoreham 1" && ft.geometry.type=="MultiPolygon"){
+                if(ft.properties.PRENAME=="Burrillville 0302" && ft.geometry.type=="MultiPolygon"){
                     tLayer.setStyle(setShapeColor(tLayer,"ERROR_STYLE"));
                 }
             }
@@ -470,21 +471,21 @@ and open the template in the editor.
             console.log(layer);
             feat=layer.feature;
             var dropdown = document.getElementById("Precincts");
-            dropdown.value = feat.properties.NAME;
+            dropdown.value = feat.properties.PRENAME;
             clickCoords=feat.geometry.coordinates;
-            demnum=feat.properties.G18GOVDRAI;
-            repnum=feat.properties.G18GOVRFUN;
+            demnum=feat.properties.PRES16D;
+            repnum=feat.properties.PRES16R;
             document.getElementById("pplnum").innerHTML=demnum+repnum;
             if(demnum==0)document.getElementById("demonum").innerHTML = 0;
             else document.getElementById("demonum").innerHTML = demnum+ " people ["+Math.round(100*(demnum/(demnum+repnum))) +"%]";
             if(repnum==0) document.getElementById("repnum").innerHTML = 0;
             else document.getElementById("repnum").innerHTML = repnum + " people ["+Math.round(100*(repnum/(demnum+repnum)))+"%]";
-            findCoordForPrec(clickCoords);
-            if(feat.properties.G18GOVDRAI ==0 && feat.properties.G18GOVRFUN == 0 && layer.options.color=="orange"){
+            //findCoordForPrec(clickCoords);
+            if(feat.properties.PRES16D ==0 && feat.properties.PRES16R == 0 && layer.options.color=="orange"){
                 showError(layer,"GHOST");
             }
             else{
-                if(feat.properties.NAME=="New Shoreham 1" && layer.options.color=="orange"){
+                if(feat.properties.PRENAME=="Burrillville 0302" && layer.options.color=="orange"){
                     showError(layer,"DONUT");
                 }
                 else{
@@ -494,18 +495,18 @@ and open the template in the editor.
         }
         function setGhostPrecinct(layer){
             oldFeature=layer.feature;
-            element=document.getElementById(layer.feature.properties.NAME+"_error");
+            element=document.getElementById(layer.feature.properties.PRENAME+"_error");
             element.parentNode.removeChild(element);
             layer.setStyle(setShapeColor(layer,"GHOST_STYLE"));
             errorDiv.innerHTML="";
             //changes the type of error
             newFeature=layer.feature;
             updatePrecinct(oldFeature,newFeature);
-            deleteError(newFeature.properties.NAME);
+            deleteError(newFeature.properties.PRENAME);
         }
         function updatePrecinct(precinct,newData){
             var xhr=new XMLHttpRequest();
-            xhr.open('PUT','http://localhost:8080/precincts/'+precinct.properties.NAME);
+            xhr.open('PUT','http://localhost:8080/precincts/'+precinct.properties.PRENAME);
             if(precinct){
                 xhr.setRequestHeader('Content-Type','application/json');
             }
@@ -520,7 +521,7 @@ and open the template in the editor.
         }
         function mergePrecincts(layer){
             feature=layer.feature;
-            element=document.getElementById(feature.properties.NAME+"_error");
+            element=document.getElementById(feature.properties.PRENAME+"_error");
             element.parentNode.removeChild(element);
             console.log(feature);
             newPrecinct={"type":"Feature",
@@ -539,7 +540,7 @@ and open the template in the editor.
             precLayer.addData(newPrecinct);
             errorDiv.innerHTML="";
             updatePrecinct(feature,newPrecinct);
-            deleteError(newPrecinct.properties.NAME);
+            deleteError(newPrecinct.properties.PRENAME);
         }
         function showError(layer,errorType){
             errorDiv=document.getElementById("currentError");
@@ -565,10 +566,10 @@ and open the template in the editor.
             for(i in precSubLayers){
                 testLayer=precSubLayers[i];
                 feat=testLayer.feature;
-                if(feat.properties.NAME==selectedValue){
+                if(feat.properties.PRENAME==selectedValue){
                     changePrecinctVotingData(testLayer,dem,rep);
-                    if(feat.properties.NAME=="Voting Districts Not Defined" || feat.properties.NAME=="Craston 29"){
-                        deleteError(feat.properties.NAME);
+                    if(feat.properties.PRENAME=="Voting Districts Not Defined" || feat.properties.PRENAME=="Craston 29"){
+                        deleteError(feat.properties.PRENAME);
                     }
                     break;
                 }
@@ -576,33 +577,33 @@ and open the template in the editor.
             document.getElementById('datapopup').style.display='none';
         }
         function changePrecinctVotingData(layer,dem,rep){
-            layer.feature.properties.G18GOVDRAI=parseInt(dem);
-            layer.feature.properties.G18GOVRFUN=parseInt(rep);
+            layer.feature.properties.PRES16D=parseInt(dem);
+            layer.feature.properties.PRES16R=parseInt(rep);
             precMenuChange();
             changeFeatColor(layer.feature,layer);
         }
         //test
         function onEachFeature(feature,layer){
             featureLayer=layer;
-            featureLayer.bindPopup('<h1>' + feature.properties.NAME + '</h1>');
+            featureLayer.bindPopup('<h1>' + feature.properties.PRENAME + '</h1>');
             loadPrecincts(feature, layer);
             featureLayer.on({
                 click: onClick,
                 mouseover: setNPS,
                 mouseout: setOPS
             });
-            if(feature.properties.G18GOVDRAI ==0 && feature.properties.G18GOVRFUN == 0 && featureLayer.options.color=="#3388ff"){
-               document.getElementById("errorLog").innerHTML+="<div id=\""+feature.properties.NAME+"_error\"><button onclick='document.getElementById(\"changepopup\").style.display=\"none\";precMenuChange(\""+feature.properties.NAME+"\");'>Ghost Precinct Found ["+feature.properties.NAME+"](Requires Verification)</button></div>";
+            if(feature.properties.PRES16D ==0 && feature.properties.PRES16R == 0 && featureLayer.options.color=="#3388ff"){
+               document.getElementById("errorLog").innerHTML+="<div id=\""+feature.properties.PRENAME+"_error\"><button onclick='document.getElementById(\"changepopup\").style.display=\"none\";precMenuChange(\""+feature.properties.PRENAME+"\");'>Ghost Precinct Found ["+feature.properties.PRENAME+"](Requires Verification)</button></div>";
             }
-            if(feature.properties.NAME=="New Shoreham 1" && feature.geometry.type=="MultiPolygon"){
-               document.getElementById("errorLog").innerHTML+="<div id=\""+feature.properties.NAME+"_error\"><button onclick='document.getElementById(\"changepopup\").style.display=\"none\";precMenuChange(\""+feature.properties.NAME+"\");'>Donut Precinct Found ["+feature.properties.NAME+"](Requires Modification)</button></div>";
+            if(feature.properties.PRENAME=="Burrillville 0302" && feature.geometry.type=="MultiPolygon"){
+               document.getElementById("errorLog").innerHTML+="<div id=\""+feature.properties.PRENAME+"_error\"><button onclick='document.getElementById(\"changepopup\").style.display=\"none\";precMenuChange(\""+feature.properties.PRENAME+"\");'>Donut Precinct Found ["+feature.properties.PRENAME+"](Requires Modification)</button></div>";
             }
             changeFeatColor(feature,featureLayer);
         }
         function loadPrecincts(feature, layer){
             var dropdown = document.getElementById("Precincts");
             var addedPrecinct = document.createElement("option");
-            var precinctName = feature.properties.NAME;
+            var precinctName = feature.properties.PRENAME;
             addedPrecinct.text = precinctName;
             addedPrecinct.value = precinctName;
             dropdown.options.add(addedPrecinct);
