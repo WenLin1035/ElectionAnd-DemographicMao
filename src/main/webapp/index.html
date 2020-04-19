@@ -211,6 +211,7 @@ and open the template in the editor.
                 <button onclick="document.getElementById('changepopup').style.display='none'" style="float:right;">X</button>
                 <h4>Error Log</h4>
                 <br><br>
+                <div id="errorLog"></div>
             </div>
         </div>
 
@@ -264,14 +265,14 @@ and open the template in the editor.
                 </table>
             </div>
         </div>
-        <div id="errorpopup" class="modal">
+        <!--<div id="errorpopup" class="modal">
             <div class="modal-content">
                 <button onclick="document.getElementById('errorpopup').style.display='none'" style="float:right;">X</button>
                 <h4>Error</h4>
                 <br><br>
                 <div id="errorLog"></div>
             </div>
-        </div>
+        </div>-->
     </body>
     <script>
         var mymap = L.map('formap').setView([39.436192999314095, -98.26171875], 4);
@@ -329,18 +330,18 @@ and open the template in the editor.
             .done(function( ri_state_data ) {
                 L.geoJSON(ri_state_data,{style:setShapeColor(this,"STATE_STYLE")}).addTo(mymap);
         });
-        precLayer=L.geoJSON(null,{onEachFeature: onEachFeature}).addTo(mymap);
         $.getJSON("https://raw.githubusercontent.com/Team-Icicles/StateElectionAndDemographicData/master/src/main/webapp/ri_2018.json")
             .done(function( ri_prec_data ) {
                 precLayer.addData(ri_prec_data);
         });**/
+        precLayer=L.geoJSON(null,{onEachFeature: onEachFeature}).addTo(mymap);
         function initLoad(){
             console.log("hi");
             xhr_ri_prec=new XMLHttpRequest();
             xhr_ri_prec.open('GET','http://localhost:8080/json_ri_prec');
             xhr_ri_prec.onload=function(){
                 data=JSON.parse(xhr_ri_prec.response);
-                L.geoJSON(data,{onEachFeature: onEachFeature}).addTo(mymap);
+                precLayer.addData(data);
             };
             xhr_ri_prec.send();
             xhr_ri_state=new XMLHttpRequest();
@@ -358,7 +359,6 @@ and open the template in the editor.
 //            [41.204489413961504,-71.53266906738281],
 //            [41.204489413961504,-71.60614013671875],
 //            [41.160046141686905,-71.60614013671875]];
-        var dropdown = document.getElementById("Precincts");
         function setShapeColor(ft,shapeStyle){
             switch(shapeStyle){
                 case "STATE_STYLE": 
@@ -432,8 +432,10 @@ and open the template in the editor.
                 precZoom(centerCoords[0],centerCoords[1]);
             } 
         }
-        function precMenuChange(){
-            selectedValue=document.getElementById("Precincts").value;
+        function precMenuChange(selectedValue){
+            if(selectedValue==undefined){
+                selectedValue=document.getElementById("Precincts").value;
+            }
             precSubLayers=precLayer._layers;
             for(i in precSubLayers){
                 testLayer=precSubLayers[i];
@@ -450,9 +452,17 @@ and open the template in the editor.
                     else document.getElementById("demonum").innerHTML = demnum+ " people ["+Math.round(100*(demnum/(demnum+repnum))) +"%]";
                     if(repnum==0) document.getElementById("repnum").innerHTML = 0;
                     else document.getElementById("repnum").innerHTML = repnum+ " people ["+Math.round(100*(repnum/(demnum+repnum))) +"%]";
+                    layer=testLayer;
+                    if(feat.properties.G18GOVDRAI ==0 && feat.properties.G18GOVRFUN == 0 && testLayer.options.color=="orange"){
+                        showError(layer,"GHOST");
+                    }
+                    else showError(layer);
                     break;
                 }
             }
+        }
+        function clickViaErrorLog(feature){
+            
         }
         function changeAllColor(){
             precSubLayers=precLayer._layers;
@@ -478,6 +488,7 @@ and open the template in the editor.
         function onClick(e){
             layer=e.target;
             feat=layer.feature;
+            var dropdown = document.getElementById("Precincts");
             dropdown.value = feat.properties.NAME;
             clickCoords=feat.geometry.coordinates;
             demnum=feat.properties.G18GOVDRAI;
@@ -493,12 +504,16 @@ and open the template in the editor.
             }
             else showError(layer);
         }
+        function setGhostPrecinct(layer){
+            layer.setStyle(setShapeColor(layer,"GHOST_STYLE"));
+            errorDiv.innerHTML="";
+        }
         function showError(layer,errorType){
             errorDiv=document.getElementById("currentError");
             switch(errorType){
                 case "GHOST":
                     errorDiv.innerHTML="Ghost Precinct? <br>\n\
-                        <button onclick='layer.setStyle(setShapeColor(layer,\"GHOST_STYLE\"));errorDiv.innerHTML=\"\"'>Yes</button> \n\
+                        <button onclick='setGhostPrecinct(layer)'>Yes</button>\n\
                         <button onclick='openchange();errorDiv.innerHTML=\"\"'>No</button>";
                     break;
                 default:
@@ -528,19 +543,20 @@ and open the template in the editor.
         //test
         function onEachFeature(feature,layer){
             layer.bindPopup('<h1>' + feature.properties.NAME + '</h1>');
-
             loadPrecincts(feature, layer);
             layer.on({
                 click: onClick,
                 mouseover: setNPS,
                 mouseout: setOPS
             });
-            if(feature.properties.G18GOVDRAI ==0 && feature.properties.G18GOVRFUN == 0 && layer.options.color=="orange"){
-               document.getElementById("errorLog").innerHTML+="<button onclick=''>Ghost Precinct Found (Requires Verification)</button><br>";
+            orange="#3388ff";
+            if(feature.properties.G18GOVDRAI ==0 && feature.properties.G18GOVRFUN == 0 && layer.options.color==orange){
+               document.getElementById("errorLog").innerHTML+="<button onclick='document.getElementById(\"changepopup\").style.display=\"none\";precMenuChange(\""+feature.properties.NAME+"\");'>Ghost Precinct Found ["+feature.properties.NAME+"](Requires Verification)</button><br>";
             }
             changeFeatColor(feature,layer);
         }
         function loadPrecincts(feature, layer){
+            var dropdown = document.getElementById("Precincts");
             var addedPrecinct = document.createElement("option");
             var precinctName = feature.properties.NAME;
             addedPrecinct.text = precinctName;
