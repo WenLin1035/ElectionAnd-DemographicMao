@@ -422,9 +422,9 @@ and open the template in the editor.
                     demnum=feat.properties.PRES16D;
                     repnum=feat.properties.PRES16R;
                     document.getElementById("pplnum").innerHTML=demnum+repnum;
-                    if(demnum==0)document.getElementById("demonum").innerHTML = 0;
+                    if(demnum==0)document.getElementById("demonum").innerHTML = 0 + "people [0%]";
                     else document.getElementById("demonum").innerHTML = demnum+ " people ["+Math.round(100*(demnum/(demnum+repnum))) +"%]";
-                    if(repnum==0) document.getElementById("repnum").innerHTML = 0;
+                    if(repnum==0) document.getElementById("repnum").innerHTML = 0 + "people [0%]";
                     else document.getElementById("repnum").innerHTML = repnum+ " people ["+Math.round(100*(repnum/(demnum+repnum))) +"%]";
                     layer=testLayer;
                     if(feat.properties.PRES16D ==0 && feat.properties.PRES16R == 0 && testLayer.options.color=="orange"){
@@ -566,6 +566,7 @@ and open the template in the editor.
             for(i in precSubLayers){
                 testLayer=precSubLayers[i];
                 feat=testLayer.feature;
+                oldFeat=feat;
                 if(feat.properties.PRENAME==selectedValue){
                     changePrecinctVotingData(testLayer,dem,rep);
                     if(feat.properties.PRENAME=="Ghost Precinct"){
@@ -575,6 +576,7 @@ and open the template in the editor.
                 }
             }
             document.getElementById('datapopup').style.display='none';
+            updatePrecinct(oldFeat,feat);
         }
         function changePrecinctVotingData(layer,dem,rep){
             layer.feature.properties.PRES16D=parseInt(dem);
