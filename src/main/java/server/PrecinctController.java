@@ -34,17 +34,29 @@ public class PrecinctController {
         return service.findAll();
     }
     
-    
-    @GetMapping("/jsonnow")
-    public String checkJSON(){
+    @GetMapping("/json_ri_prec")
+    public String returnRIPrec(){
         try {
-            File file= new File("./src/main/java/server/ri_2018.json");
+            File file= new File("./src/main/webapp/ri_2018.json");
             Scanner sc = new Scanner(file);
-            
-            while (sc.hasNextLine())
-                System.out.println(sc.nextLine());
-                System.out.println("hi");
-                
+            sc.useDelimiter("\\Z");
+            String result=sc.next();
+            return result;
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(PrecinctController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return "";
+        
+    }
+    
+    @GetMapping("/json_ri_state")
+    public String returnRIState(){
+        try {
+            File file= new File("./src/main/webapp/ri_state.json");
+            Scanner sc = new Scanner(file);
+            sc.useDelimiter("\\Z");
+            String result=sc.next();
+            return result;
         } catch (FileNotFoundException ex) {
             Logger.getLogger(PrecinctController.class.getName()).log(Level.SEVERE, null, ex);
         }

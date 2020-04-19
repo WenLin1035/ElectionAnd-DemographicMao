@@ -325,7 +325,7 @@ and open the template in the editor.
             mymap.setView(new L.LatLng(0,0),10.5);
             mymap.setView(new L.LatLng(b,a),10.5);
         }
-        $.getJSON("https://raw.githubusercontent.com/Team-Icicles/StateElectionAndDemographicData/master/src/main/webapp/ri_state.json")
+        /**$.getJSON("https://raw.githubusercontent.com/Team-Icicles/StateElectionAndDemographicData/master/src/main/webapp/ri_state.json")
             .done(function( ri_state_data ) {
                 L.geoJSON(ri_state_data,{style:setShapeColor(this,"STATE_STYLE")}).addTo(mymap);
         });
@@ -333,7 +333,25 @@ and open the template in the editor.
         $.getJSON("https://raw.githubusercontent.com/Team-Icicles/StateElectionAndDemographicData/master/src/main/webapp/ri_2018.json")
             .done(function( ri_prec_data ) {
                 precLayer.addData(ri_prec_data);
-        });
+        });**/
+        function initLoad(){
+            console.log("hi");
+            xhr_ri_prec=new XMLHttpRequest();
+            xhr_ri_prec.open('GET','http://localhost:8080/json_ri_prec');
+            xhr_ri_prec.onload=function(){
+                data=JSON.parse(xhr_ri_prec.response);
+                L.geoJSON(data,{onEachFeature: onEachFeature}).addTo(mymap);
+            };
+            xhr_ri_prec.send();
+            xhr_ri_state=new XMLHttpRequest();
+            xhr_ri_state.open('GET','http://localhost:8080/json_ri_state');
+            xhr_ri_state.onload=function(){
+                data=JSON.parse(xhr_ri_state.response);
+                L.geoJSON(data,{style:setShapeColor(this,"STATE_STYLE")}).addTo(mymap);
+            };
+            xhr_ri_state.send();
+        }
+        initLoad();
 //        var dummyDonutPolygon=[
 //            [41.160046141686905,-71.60614013671875],
 //            [41.160046141686905,-71.53266906738281],
