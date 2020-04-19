@@ -37,13 +37,14 @@ public class PrecinctController {
     
     @GetMapping("/jsonnow")
     public String checkJSON(){
-        System.out.println("hi");
         try {
-            File file= new File("ri_2018.json");
+            File file= new File("./src/main/java/server/ri_2018.json");
             Scanner sc = new Scanner(file);
             
             while (sc.hasNextLine())
                 System.out.println(sc.nextLine());
+                System.out.println("hi");
+                
         } catch (FileNotFoundException ex) {
             Logger.getLogger(PrecinctController.class.getName()).log(Level.SEVERE, null, ex);
         }
