@@ -135,54 +135,54 @@ and open the template in the editor.
                         <td style="padding-right: 30px;">
                             <p><b>2016 Presidential Election:</b></p>
                             <label for="demo1" style="padding-right: 10px">Democrats:</label>
-                            <input type="text" id="demo1" name="demo1"><br><br>
+                            <input type="number" id="demo1" name="demo1" value="0"><br><br>
                             <label for="repub1">Republicans:</label>
-                            <input type="text" id="repub1" name="repub1"><br><br>
+                            <input type="number" id="repub1" name="repub1" value="0"><br><br>
                             <label for="other1" style="padding-right: 43px">Other:</label>
-                            <input type="text" id="other1" name="other1"><br><br>
+                            <input type="number" id="other1" name="other1" value="0"><br><br>
                             <p><b>2016 Congressional Election:</b></p>
                             <label for="demo2" style="padding-right: 10px">Democrats:</label>
-                            <input type="text" id="demo2" name="demo2"><br><br>
+                            <input type="number" id="demo2" name="demo2" value="0"><br><br>
                             <label for="repub2">Republicans:</label>
-                            <input type="text" id="repub2" name="repub2"><br><br>
+                            <input type="number" id="repub2" name="repub2" value="0"><br><br>
                             <label for="other2" style="padding-right: 43px">Other:</label>
-                            <input type="text" id="other2" name="other2"><br><br>
+                            <input type="number" id="other2" name="other2" value="0"><br><br>
                             <p><b>2018 Congressional Election:</b></p>
                             <label for="demo3" style="padding-right: 10px">Democrats:</label>
-                            <input type="text" id="demo3" name="demo3"><br><br>
+                            <input type="number" id="demo3" name="demo3" value="0"><br><br>
                             <label for="repub3">Republicans:</label>
-                            <input type="text" id="repub3" name="repub3"><br><br>
+                            <input type="number" id="repub3" name="repub3" value="0"><br><br>
                             <label for="other3" style="padding-right: 43px">Other:</label>
-                            <input type="text" id="other3" name="other3"><br><br>
+                            <input type="number" id="other3" name="other3" value="0"><br><br>
                         </td>
                         <td>
                             <p><b>2016 Demographic Data:</b></p>
                             <label for="white1" style="padding-right: 20px">White:</label>
-                            <input type="text" id="white1" name="white1"><br><br>
+                            <input type="number" id="white1" name="white1" value="0"><br><br>
                             <label for="black1" style="padding-right: 20px">Black:</label>
-                            <input type="text" id="black1" name="black1"><br><br>
+                            <input type="number" id="black1" name="black1" value="0"><br><br>
                             <label for="asian1" style="padding-right: 20px">Asian:</label>
-                            <input type="text" id="asian1" name="asian1"><br><br>
+                            <input type="number" id="asian1" name="asian1" value="0"><br><br>
                             <label for="his1">Hispanic:</label>
-                            <input type="text" id="his1" name="his1"><br><br>
+                            <input type="number" id="his1" name="his1" value="0"><br><br>
                             <label for="oth1" style="padding-right: 20px">Other:</label>
-                            <input type="text" id="oth1" name="oth1"><br><br>
+                            <input type="number" id="oth1" name="oth1" value="0"><br><br>
                             <p><b>2018 Demographic Data:</b></p>
                             <label for="white2" style="padding-right: 20px">White:</label>
-                            <input type="text" id="white2" name="white2"><br><br>
+                            <input type="number" id="white2" name="white2" value="0"><br><br>
                             <label for="black2" style="padding-right: 20px">Black:</label>
-                            <input type="text" id="black2" name="black2"><br><br>
+                            <input type="number" id="black2" name="black2" value="0"><br><br>
                             <label for="asian2" style="padding-right: 20px">Asian:</label>
-                            <input type="text" id="asian2" name="asian2"><br><br>
+                            <input type="number" id="asian2" name="asian2" value="0"><br><br>
                             <label for="his2">Hispanic:</label>
-                            <input type="text" id="his2" name="his2"><br><br>
+                            <input type="number" id="his2" name="his2" value="0"><br><br>
                             <label for="oth2" style="padding-right: 20px">Other:</label>
-                            <input type="text" id="oth2" name="oth2"><br><br>
+                            <input type="number" id="oth2" name="oth2" value="0"><br><br>
                         </td>
                     </tr>
                 </table>
                 
-                <center><button>Save</button></center>
+                <center><button onclick="changePrecinctData()">Save</button></center>
             </div>
         </div>
         <!-- this is popup window for changing border -->
@@ -291,8 +291,11 @@ and open the template in the editor.
         }
         //change button
         function openchange(){
-            document.getElementById('datapopup').style.display='block';
-            document.getElementById('statename').value = document.getElementById("Precincts").value;
+            value=document.getElementById("Precincts").value;
+            document.getElementById('statename').value = value;
+            if(value!="precinct"){
+                document.getElementById('datapopup').style.display='block';
+            }
             //document.getElementById('demo').value = ; //number of votes democrats
             //document.getElementById('repub').value = ; // number of votes republicans
         }
@@ -331,7 +334,12 @@ and open the template in the editor.
             .done(function( ri_prec_data ) {
                 precLayer.addData(ri_prec_data);
         });
-
+//        var dummyDonutPolygon=[
+//            [41.160046141686905,-71.60614013671875],
+//            [41.160046141686905,-71.53266906738281],
+//            [41.204489413961504,-71.53266906738281],
+//            [41.204489413961504,-71.60614013671875],
+//            [41.160046141686905,-71.60614013671875]];
         var dropdown = document.getElementById("Precincts");
         function setShapeColor(ft,shapeStyle){
             switch(shapeStyle){
@@ -424,6 +432,7 @@ and open the template in the editor.
                     else document.getElementById("demonum").innerHTML = demnum+ " people ["+Math.round(100*(demnum/(demnum+repnum))) +"%]";
                     if(repnum==0) document.getElementById("repnum").innerHTML = 0;
                     else document.getElementById("repnum").innerHTML = repnum+ " people ["+Math.round(100*(repnum/(demnum+repnum))) +"%]";
+                    break;
                 }
             }
         }
@@ -472,15 +481,29 @@ and open the template in the editor.
                 case "GHOST":
                     errorDiv.innerHTML="Ghost Precinct? <br>\n\
                         <button onclick='layer.setStyle(setShapeColor(layer,\"GHOST_STYLE\"));errorDiv.innerHTML=\"\"'>Yes</button> \n\
-                        <button onclick='changePrecinctVotingData(layer,1,1);errorDiv.innerHTML=\"\"'>No</button>";
+                        <button onclick='openchange();errorDiv.innerHTML=\"\"'>No</button>";
                     break;
                 default:
                     errorDiv.innerHTML="";
             }
         }
+        function changePrecinctData(){
+            dem=document.getElementById("demo1").value;
+            rep=document.getElementById("repub1").value;
+            selectedValue=document.getElementById("Precincts").value;
+            precSubLayers=precLayer._layers;
+            for(i in precSubLayers){
+                testLayer=precSubLayers[i];
+                feat=testLayer.feature;
+                if(feat.properties.NAME==selectedValue){
+                    changePrecinctVotingData(testLayer,dem,rep);
+                    break;
+                }
+            }
+        }
         function changePrecinctVotingData(layer,dem,rep){
-            layer.feature.properties.G18GOVDRAI=dem;
-            layer.feature.properties.G18GOVRFUN=rep;
+            layer.feature.properties.G18GOVDRAI=parseInt(dem);
+            layer.feature.properties.G18GOVRFUN=parseInt(rep);
             precMenuChange();
             changeFeatColor(layer.feature,layer);
         }
