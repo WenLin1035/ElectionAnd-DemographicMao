@@ -17,6 +17,7 @@ import java.util.logging.Logger;
  
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.http.*;
+import org.springframework.transaction.annotation.Transactional;
  
 import org.springframework.web.bind.annotation.*;
  
@@ -73,18 +74,30 @@ public class PrecinctController {
     }
     
     // RESTful API method for Update operation
-    @PutMapping("/precincts/{id}")
-    public ResponseEntity<?> update(@RequestBody Precinct precinct, @PathVariable Integer id) {
+    @PutMapping("/precincts/{name}")
+    public ResponseEntity<?> update(@RequestBody Precinct precinct, @PathVariable String name) {
         try {
-            Precinct existPrecinct = service.findById(id).get();
-            precinct.setId(id);
-            service.save(precinct);
+            Precinct existPrecinct = service.findByNamelegal(name);
+            precinct.setNamelegal(name);
+            //service.save(precinct);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (NoSuchElementException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }      
     }
-     
+    
+    @Transactional
+    @PutMapping("/merge/{name1}/{name2}")
+    public ResponseEntity<?> merge(@RequestBody List<Precinct> precinctList, @PathVariable String name1, @PathVariable String name2){
+        //TO-DO
+        try {
+            Precinct precinct1 = service.findByNamelegal(name1);
+            return new ResponseEntity<>(HttpStatus.OK);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }  
+    }
+    
     // RESTful API method for Delete operation
     @DeleteMapping("/precincts/{id}")
     public void delete(@PathVariable Integer id) {

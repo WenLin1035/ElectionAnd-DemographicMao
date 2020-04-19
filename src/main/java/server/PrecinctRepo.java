@@ -15,6 +15,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
  
+
 public interface PrecinctRepo extends JpaRepository<Precinct, Integer> {
-    
+     Precinct findByNamelegal(String name);
 }

@@ -493,10 +493,30 @@ and open the template in the editor.
             }
         }
         function setGhostPrecinct(layer){
+            oldFeature=layer.feature;
             element=document.getElementById(layer.feature.properties.NAME+"_error");
             element.parentNode.removeChild(element);
             layer.setStyle(setShapeColor(layer,"GHOST_STYLE"));
             errorDiv.innerHTML="";
+            //changes the type of error
+            newFeature=layer.feature;
+            updatePrecinct(oldFeature,newFeature);
+            deleteError(newFeature.properties.NAME);
+        }
+        function updatePrecinct(precinct,newData){
+            var xhr=new XMLHttpRequest();
+            xhr.open('PUT','http://localhost:8080/precincts/'+precinct.properties.NAME);
+            if(precinct){
+                xhr.setRequestHeader('Content-Type','application/json');
+            }
+            var data=JSON.stringify(newData);
+            console.log(data);
+            xhr.send(data);
+        }
+        function deleteError(precinctName){
+            var xhr=new XMLHttpRequest();
+            xhr.open('DELETE','http://localhost:8080/errors/'+precinctName);
+            xhr.send();
         }
         function mergePrecincts(layer){
             feature=layer.feature;
@@ -518,6 +538,8 @@ and open the template in the editor.
             console.log(newPrecinct);
             precLayer.addData(newPrecinct);
             errorDiv.innerHTML="";
+            updatePrecinct(feature,newPrecinct);
+            deleteError(newPrecinct.properties.NAME);
         }
         function showError(layer,errorType){
             errorDiv=document.getElementById("currentError");
@@ -545,9 +567,13 @@ and open the template in the editor.
                 feat=testLayer.feature;
                 if(feat.properties.NAME==selectedValue){
                     changePrecinctVotingData(testLayer,dem,rep);
+                    if(feat.properties.NAME=="Voting Districts Not Defined" || feat.properties.NAME=="Craston 29"){
+                        deleteError(feat.properties.NAME);
+                    }
                     break;
                 }
             }
+            document.getElementById('datapopup').style.display='none';
         }
         function changePrecinctVotingData(layer,dem,rep){
             layer.feature.properties.G18GOVDRAI=parseInt(dem);
