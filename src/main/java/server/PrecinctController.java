@@ -38,7 +38,7 @@ public class PrecinctController {
     @GetMapping("/json_ri_prec")
     public String returnRIPrec(){
         try {
-            File file= new File("./src/main/webapp/RI_precincts.json");
+            File file= new File("./src/main/webapp/RI_precincts_1.json");
             Scanner sc = new Scanner(file);
             sc.useDelimiter("\\Z");
             String result=sc.next();

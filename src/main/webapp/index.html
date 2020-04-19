@@ -568,7 +568,7 @@ and open the template in the editor.
                 feat=testLayer.feature;
                 if(feat.properties.PRENAME==selectedValue){
                     changePrecinctVotingData(testLayer,dem,rep);
-                    if(feat.properties.PRENAME=="Voting Districts Not Defined" || feat.properties.PRENAME=="Craston 29"){
+                    if(feat.properties.PRENAME=="Ghost Precinct"){
                         deleteError(feat.properties.PRENAME);
                     }
                     break;
