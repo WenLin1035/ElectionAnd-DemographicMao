@@ -82,21 +82,21 @@ and open the template in the editor.
                 </table>
                 <br><br>
                 <div id="partymap">
-                    <label>Democratic: </label><label id="demonum">X</label><label>%</label><br/> <!-- needs to be replaced by DB data -->
-                    <label>Republican: </label><label id="repnum">Y</label><label>%</label><br/> <!-- needs to be replaced by DB data -->
-                    <label style="padding-right: 43px">Other:</label><label id="othernum">Z</label><label>%</label><br/> <!-- needs to be replaced by DB data -->
+                    <label>Democratic: </label><label id="demonum">X people [X%]</label><br/> <!-- needs to be replaced by DB data -->
+                    <label>Republican: </label><label id="repnum">Y people [Y%]</label><br/> <!-- needs to be replaced by DB data -->
+                    <label style="padding-right: 43px">Other:</label><label id="othernum">Z people [Z%]</label><br/> <!-- needs to be replaced by DB data -->
                     <br>
                 </div>
                 <div id="racemap">
-                    <label>White: </label><label id="whitenum" style="padding-left: 20px">X</label><label>%</label><br/> <!-- needs to be replaced by DB data -->
-                    <label>Black: </label><label id="blacknum" style="padding-left: 20px">Y</label><label>%</label><br/> <!-- needs to be replaced by DB data -->
-                    <label>Asian: </label><label id="asiannum" style="padding-left: 20px">Y</label><label>%</label><br/> <!-- needs to be replaced by DB data -->
-                    <label>Hispanic: </label><label id="hisnum">Y</label><label>%</label><br/> <!-- needs to be replaced by DB data -->
-                    <label>Other: </label><label id="restnum" style="padding-left: 20px">Y</label><label>%</label><br/> <!-- needs to be replaced by DB data -->
+                    <label>White: </label><label id="whitenum" style="padding-left: 20px">X people [X%]</label><br/> <!-- needs to be replaced by DB data -->
+                    <label>Black: </label><label id="blacknum" style="padding-left: 20px">Y people [Y%]</label><br/> <!-- needs to be replaced by DB data -->
+                    <label>Asian: </label><label id="asiannum" style="padding-left: 20px">Y people [Y%]</label><br/> <!-- needs to be replaced by DB data -->
+                    <label>Hispanic: </label><label id="hisnum">Y people [Y%]</label><br/> <!-- needs to be replaced by DB data -->
+                    <label>Other: </label><label id="restnum" style="padding-left: 20px">Y people [Y%]</label><br/> <!-- needs to be replaced by DB data -->
                 </div>
 
                 <h3>Error Type:</h3>
-                <label id="currentthing"></label>
+                <div id="currentError"></div>
                 <br>
                 <label for="comment">Comments:</label><br>
                 <textarea id="comment" name="comment" rows="2" cols="20"></textarea>
@@ -269,7 +269,7 @@ and open the template in the editor.
                 <button onclick="document.getElementById('errorpopup').style.display='none'" style="float:right;">X</button>
                 <h4>Error</h4>
                 <br><br>
-                <p>1 ghost precinct found.</p>
+                <div id="errorLog"></div>
             </div>
         </div>
     </body>
@@ -324,7 +324,7 @@ and open the template in the editor.
         }
         $.getJSON("https://raw.githubusercontent.com/Team-Icicles/StateElectionAndDemographicData/master/src/main/webapp/ri_state.json")
             .done(function( ri_state_data ) {
-                L.geoJSON(ri_state_data,{style:stateStyle}).addTo(mymap);
+                L.geoJSON(ri_state_data,{style:setShapeColor(this,"STATE_STYLE")}).addTo(mymap);
         });
         precLayer=L.geoJSON(null,{onEachFeature: onEachFeature}).addTo(mymap);
         $.getJSON("https://raw.githubusercontent.com/Team-Icicles/StateElectionAndDemographicData/master/src/main/webapp/ri_2018.json")
@@ -333,44 +333,49 @@ and open the template in the editor.
         });
 
         var dropdown = document.getElementById("Precincts");
-        function stateStyle(ft){
-            return{
-                fillColor:'none',
-                weight:3,
-                color:'black'
-            };
-        }
-        function newPrecStyle(ft){
-            return{
-                fillOpacity: 0.8
-            };
-        }
-        function oldPrecStyle(ft){
-            return{
-                fillOpacity: 0.2,
-                weight:3
-            };
-        }
-        function demStyle(ft){
-            return{
-                color:document.getElementById("demcolor").value
-            };
-        }
-        function repStyle(ft){
-            return{
-                color:document.getElementById("repcolor").value
-            };
-        }
-        function ghostStyle(ft){
-            return{
-                color:'gray'
-            };
+        function setShapeColor(ft,shapeStyle){
+            switch(shapeStyle){
+                case "STATE_STYLE": 
+                    return{
+                        fillColor:'none',
+                        weight:3,
+                        color:'black'
+                    };
+                case "NEW_PREC_STYLE":
+                    return{
+                        fillOpacity: 0.8
+                    };
+                case "OLD_PREC_STYLE":
+                    return{
+                        fillOpacity: 0.2,
+                        weight:3
+                    };
+                case "DEM_STYLE":
+                    return{
+                        color:document.getElementById("demcolor").value
+                    };
+                case "REP_STYLE":
+                    return{
+                        color:document.getElementById("repcolor").value
+                    };
+                case "GHOST_STYLE":
+                    return{
+                        color:'gray'
+                    };
+                case "ERROR_STYLE":
+                    return{
+                        color:'orange'
+                    }
+                default:
+                    console.log(ft);
+                    console.log("un-intended");
+            }
         }
         function setNPS(e){
-            this.setStyle(newPrecStyle(this));
+            this.setStyle(setShapeColor(this,"NEW_PREC_STYLE"));
         }
         function setOPS(e){
-            this.setStyle(oldPrecStyle(this));
+            this.setStyle(setShapeColor(this,"OLD_PREC_STYLE"));
         }
         function findCenter(a){
             minCoords=[a[0][0],a[0][1]];
@@ -416,9 +421,9 @@ and open the template in the editor.
                     repnum=feat.properties.G18GOVRFUN;
                     document.getElementById("pplnum").innerHTML=demnum+repnum;
                     if(demnum==0)document.getElementById("demonum").innerHTML = 0;
-                    else document.getElementById("demonum").innerHTML = Math.round(100*(demnum/(demnum+repnum)));
+                    else document.getElementById("demonum").innerHTML = demnum+ " people ["+Math.round(100*(demnum/(demnum+repnum))) +"%]";
                     if(repnum==0) document.getElementById("repnum").innerHTML = 0;
-                    else document.getElementById("repnum").innerHTML = Math.round(100*(repnum/(demnum+repnum)));
+                    else document.getElementById("repnum").innerHTML = repnum+ " people ["+Math.round(100*(repnum/(demnum+repnum))) +"%]";
                 }
             }
         }
@@ -432,41 +437,66 @@ and open the template in the editor.
         }
         function changeFeatColor(ft,tLayer){
             if(ft.properties.G18GOVDRAI ==0 && ft.properties.G18GOVRFUN == 0){
-                tLayer.setStyle(ghostStyle(tLayer));
+                tLayer.setStyle(setShapeColor(tLayer,"ERROR_STYLE"));
             }
             else{
                 if(ft.properties.G18GOVDRAI>ft.properties.G18GOVRFUN){
-                    tLayer.setStyle(demStyle(tLayer));
+                    tLayer.setStyle(setShapeColor(tLayer,"DEM_STYLE"));
                 }
                 if(ft.properties.G18GOVDRAI<=ft.properties.G18GOVRFUN){
-                    tLayer.setStyle(repStyle(tLayer));
+                    tLayer.setStyle(setShapeColor(tLayer,"REP_STYLE"));
                 }
             }
         }
         function onClick(e){
-            feat=e.target.feature;
+            layer=e.target;
+            feat=layer.feature;
             dropdown.value = feat.properties.NAME;
-            clickCoords=e.target.feature.geometry.coordinates;
+            clickCoords=feat.geometry.coordinates;
             demnum=feat.properties.G18GOVDRAI;
             repnum=feat.properties.G18GOVRFUN;
             document.getElementById("pplnum").innerHTML=demnum+repnum;
             if(demnum==0)document.getElementById("demonum").innerHTML = 0;
-            else document.getElementById("demonum").innerHTML = Math.round(100*(demnum/(demnum+repnum)));
+            else document.getElementById("demonum").innerHTML = demnum+ " people ["+Math.round(100*(demnum/(demnum+repnum))) +"%]";
             if(repnum==0) document.getElementById("repnum").innerHTML = 0;
-            else document.getElementById("repnum").innerHTML = Math.round(100*(repnum/(demnum+repnum)));
+            else document.getElementById("repnum").innerHTML = repnum + " people ["+Math.round(100*(repnum/(demnum+repnum)))+"%]";
             findCoordForPrec(clickCoords);
+            if(feat.properties.G18GOVDRAI ==0 && feat.properties.G18GOVRFUN == 0 && layer.options.color=="orange"){
+                showError(layer,"GHOST");
+            }
+            else showError(layer);
+        }
+        function showError(layer,errorType){
+            errorDiv=document.getElementById("currentError");
+            switch(errorType){
+                case "GHOST":
+                    errorDiv.innerHTML="Ghost Precinct? <br>\n\
+                        <button onclick='layer.setStyle(setShapeColor(layer,\"GHOST_STYLE\"));errorDiv.innerHTML=\"\"'>Yes</button> \n\
+                        <button onclick='changePrecinctVotingData(layer,1,1);errorDiv.innerHTML=\"\"'>No</button>";
+                    break;
+                default:
+                    errorDiv.innerHTML="";
+            }
+        }
+        function changePrecinctVotingData(layer,dem,rep){
+            layer.feature.properties.G18GOVDRAI=dem;
+            layer.feature.properties.G18GOVRFUN=rep;
+            precMenuChange();
+            changeFeatColor(layer.feature,layer);
         }
         //test
         function onEachFeature(feature,layer){
-            layer.bindPopup('<h1>' + feature.properties.NAME + '</h1><br>' +
-            "Democratic Votes: " + '<b>' + feature.properties.G18GOVDRAI + '</b>' + '<br>' + 
-            "Republican Votes: " + '<b>' + feature.properties.G18GOVRFUN) + '<b>';
+            layer.bindPopup('<h1>' + feature.properties.NAME + '</h1>');
+
             loadPrecincts(feature, layer);
             layer.on({
                 click: onClick,
                 mouseover: setNPS,
                 mouseout: setOPS
             });
+            if(feature.properties.G18GOVDRAI ==0 && feature.properties.G18GOVRFUN == 0 && layer.options.color=="orange"){
+               document.getElementById("errorLog").innerHTML+="<button onclick=''>Ghost Precinct Found (Requires Verification)</button><br>";
+            }
             changeFeatColor(feature,layer);
         }
         function loadPrecincts(feature, layer){
