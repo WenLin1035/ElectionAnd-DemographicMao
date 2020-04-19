@@ -9,7 +9,11 @@ package server;
  *
  * @author webst
  */
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
  
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.http.*;
@@ -28,6 +32,23 @@ public class PrecinctController {
     public List<Precinct> list() {
         System.out.println(service.findAll());
         return service.findAll();
+    }
+    
+    
+    @GetMapping("/jsonnow")
+    public String checkJSON(){
+        System.out.println("hi");
+        try {
+            File file= new File("ri_2018.json");
+            Scanner sc = new Scanner(file);
+            
+            while (sc.hasNextLine())
+                System.out.println(sc.nextLine());
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(PrecinctController.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return "";
+        
     }
     
     // RESTful API method for Create operation
