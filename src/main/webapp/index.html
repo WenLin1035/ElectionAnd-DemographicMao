@@ -74,11 +74,11 @@ and open the template in the editor.
                     <br>
                 </div>
                 <div id="racemap">
-                    <label>White: </label><label id="whitenum" style="padding-left: 20px">X people [X%]</label><br/> <!-- needs to be replaced by DB data -->
-                    <label>Black: </label><label id="blacknum" style="padding-left: 20px">Y people [Y%]</label><br/> <!-- needs to be replaced by DB data -->
-                    <label>Asian: </label><label id="asiannum" style="padding-left: 20px">Y people [Y%]</label><br/> <!-- needs to be replaced by DB data -->
-                    <label>Hispanic: </label><label id="hisnum">Y people [Y%]</label><br/> <!-- needs to be replaced by DB data -->
-                    <label>Other: </label><label id="restnum" style="padding-left: 20px">Y people [Y%]</label><br/> <!-- needs to be replaced by DB data -->
+                    <label>White: </label><label id="whitenum" style="padding-left: 20px">X people</label><br/> <!-- needs to be replaced by DB data -->
+                    <label>Black: </label><label id="blacknum" style="padding-left: 20px">Y people</label><br/> <!-- needs to be replaced by DB data -->
+                    <label>Asian: </label><label id="asiannum" style="padding-left: 20px">Y people</label><br/> <!-- needs to be replaced by DB data -->
+                    <label>Hispanic: </label><label id="hisnum">Y people</label><br/> <!-- needs to be replaced by DB data -->
+                    <label>Other: </label><label id="restnum" style="padding-left: 20px">Y people</label><br/> <!-- needs to be replaced by DB data -->
                 </div>
 
                 <h3>Error Type:</h3>
@@ -89,6 +89,7 @@ and open the template in the editor.
                 <br>
                 <button onclick="changecomment()">Submit</button><!-- need to add func that saves comments into precinct comment string var in database -->
                 <br>
+                <div id="currentthing"></div>
                 <p>Options:</p>
                 <div id="options">
                 <button onclick="openchange()" style="width:auto;margin-right: 25px">Change Data</button>
@@ -404,6 +405,35 @@ and open the template in the editor.
                 precZoom(centerCoords[0],centerCoords[1]);
             } 
         }
+        function changeyear(){
+            demnum=feat.properties.PRES16D;
+            repnum=feat.properties.PRES16R;
+
+            //Modify these lines to correspond to correct data attributes later, these are placeholders
+            cdnum16=feat.properties.GOV18D;
+            crnum16=feat.properties.GOV18R;
+            cdnum18=feat.properties.SEN18D;
+            crnum18=feat.properties.SEN18R;
+
+            var dropdownyear = document.getElementById("year");
+            if(dropdownyear.options[dropdownyear.selectedIndex].value == "pred_16"){
+                document.getElementById("pplnum").innerHTML=demnum+repnum;
+                if(demnum==0)document.getElementById("demonum").innerHTML = 0 + "people [0%]";
+                else document.getElementById("demonum").innerHTML = demnum+ " people ["+Math.round(100*(demnum/(demnum+repnum))) +"%]";
+                if(repnum==0) document.getElementById("repnum").innerHTML = 0 + "people [0%]";
+                else document.getElementById("repnum").innerHTML = repnum+ " people ["+Math.round(100*(repnum/(demnum+repnum))) +"%]";
+            }
+            else if(dropdownyear.options[dropdownyear.selectedIndex].value == "cog_16"){
+                document.getElementById("demonum").innerHTML = cdnum16;
+                document.getElementById("repnum").innerHTML = crnum16;
+                
+            }
+            else{
+                document.getElementById("demonum").innerHTML = cdnum18;
+                document.getElementById("repnum").innerHTML = crnum18;
+                
+            }
+        }
         function precMenuChange(selectedValue){
             if(selectedValue==undefined){
                 selectedValue=document.getElementById("Precincts").value;
@@ -417,15 +447,34 @@ and open the template in the editor.
                     console.log(testLayer);
                     menuChangeCoords=feat.geometry.coordinates;
                     //findCoordForPrec(menuChangeCoords);
-                    testLayer.openPopup();
+                    //testLayer.openPopup();
                     
                     demnum=feat.properties.PRES16D;
                     repnum=feat.properties.PRES16R;
-                    document.getElementById("pplnum").innerHTML=demnum+repnum;
-                    if(demnum==0)document.getElementById("demonum").innerHTML = 0 + "people [0%]";
-                    else document.getElementById("demonum").innerHTML = demnum+ " people ["+Math.round(100*(demnum/(demnum+repnum))) +"%]";
-                    if(repnum==0) document.getElementById("repnum").innerHTML = 0 + "people [0%]";
-                    else document.getElementById("repnum").innerHTML = repnum+ " people ["+Math.round(100*(repnum/(demnum+repnum))) +"%]";
+                    
+                    whitenum=feat.properties.WVAP;
+                    blacknum=feat.properties.BVAP;
+                    asiannum=feat.properties.ASIANVAP;
+                    hispanicnum=feat.properties.HVAP;
+                    othernum=feat.properties.OTHERVAP;
+                    totpopnum=feat.properties.TOTPOP;
+                    
+                    //Modify these lines to correspond to correct data attributes later, these are placeholders
+                    cdnum16=feat.properties.GOV18D;
+                    crnum16=feat.properties.GOV18R;
+                    cdnum18=feat.properties.SEN18D;
+                    crnum18=feat.properties.SEN18R;
+                    
+                    
+                    
+                    document.getElementById("pplnum").innerHTML=Math.floor(totpopnum);
+                    document.getElementById("whitenum").innerHTML=Math.floor(whitenum);
+                    document.getElementById("blacknum").innerHTML=Math.floor(blacknum);
+                    document.getElementById("asiannum").innerHTML=Math.floor(asiannum);
+                    document.getElementById("hisnum").innerHTML=Math.floor(hispanicnum);
+                    document.getElementById("restnum").innerHTML=Math.floor(othernum);
+                    
+                    changeyear();
                     layer=testLayer;
                     if(feat.properties.PRES16D ==0 && feat.properties.PRES16R == 0 && testLayer.options.color=="orange"){
                         showError(layer,"GHOST");
@@ -475,23 +524,24 @@ and open the template in the editor.
             clickCoords=feat.geometry.coordinates;
             demnum=feat.properties.PRES16D;
             repnum=feat.properties.PRES16R;
-            document.getElementById("pplnum").innerHTML=demnum+repnum;
-            if(demnum==0)document.getElementById("demonum").innerHTML = 0;
-            else document.getElementById("demonum").innerHTML = demnum+ " people ["+Math.round(100*(demnum/(demnum+repnum))) +"%]";
-            if(repnum==0) document.getElementById("repnum").innerHTML = 0;
-            else document.getElementById("repnum").innerHTML = repnum + " people ["+Math.round(100*(repnum/(demnum+repnum)))+"%]";
-            //findCoordForPrec(clickCoords);
-            if(feat.properties.PRES16D ==0 && feat.properties.PRES16R == 0 && layer.options.color=="orange"){
-                showError(layer,"GHOST");
-            }
-            else{
-                if(feat.properties.PRENAME=="Burrillville 0302" && layer.options.color=="orange"){
-                    showError(layer,"DONUT");
-                }
-                else{
-                    showError(layer);
-                }
-            }
+            
+            whitenum=feat.properties.WVAP;
+            blacknum=feat.properties.BVAP;
+            asiannum=feat.properties.ASIANVAP;
+            hispanicnum=feat.properties.HVAP;
+            othernum=feat.properties.OTHERVAP;
+
+            totpopnum=feat.properties.TOTPOP;
+
+            document.getElementById("pplnum").innerHTML=Math.floor(totpopnum);
+            document.getElementById("whitenum").innerHTML=Math.floor(whitenum);
+            document.getElementById("blacknum").innerHTML=Math.floor(blacknum);
+            document.getElementById("asiannum").innerHTML=Math.floor(asiannum);
+            document.getElementById("hisnum").innerHTML=Math.floor(hispanicnum);
+            document.getElementById("restnum").innerHTML=Math.floor(othernum);
+            
+            
+            changeyear();
         }
         function setGhostPrecinct(layer){
             oldFeature=layer.feature;
@@ -528,7 +578,7 @@ and open the template in the editor.
                 "properties":feature.properties,
                 "geometry":{
                     "type":"Polygon",
-                    "coordinates":feature.geometry.coordinates[0]
+                    "coordinates":[feature.geometry.coordinates[0][0]]
                 }
             };
             var dropdown = document.getElementById("Precincts");
@@ -587,7 +637,7 @@ and open the template in the editor.
         //test
         function onEachFeature(feature,layer){
             featureLayer=layer;
-            featureLayer.bindPopup('<h1>' + feature.properties.PRENAME + '</h1>');
+            //featureLayer.bindPopup('<h1>' + feature.properties.PRENAME + '</h1>');
             loadPrecincts(feature, layer);
             featureLayer.on({
                 click: onClick,
