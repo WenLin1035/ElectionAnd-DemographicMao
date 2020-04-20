@@ -143,18 +143,7 @@ and open the template in the editor.
                             <input type="number" id="other3" name="other3" value="0"><br><br>
                         </td>
                         <td>
-                            <p><b>2016 Demographic Data:</b></p>
-                            <label for="white1" style="padding-right: 20px">White:</label>
-                            <input type="number" id="white1" name="white1" value="0"><br><br>
-                            <label for="black1" style="padding-right: 20px">Black:</label>
-                            <input type="number" id="black1" name="black1" value="0"><br><br>
-                            <label for="asian1" style="padding-right: 20px">Asian:</label>
-                            <input type="number" id="asian1" name="asian1" value="0"><br><br>
-                            <label for="his1">Hispanic:</label>
-                            <input type="number" id="his1" name="his1" value="0"><br><br>
-                            <label for="oth1" style="padding-right: 20px">Other:</label>
-                            <input type="number" id="oth1" name="oth1" value="0"><br><br>
-                            <p><b>2018 Demographic Data:</b></p>
+                            <p><b>Demographic Data:</b></p>
                             <label for="white2" style="padding-right: 20px">White:</label>
                             <input type="number" id="white2" name="white2" value="0"><br><br>
                             <label for="black2" style="padding-right: 20px">Black:</label>
@@ -309,11 +298,6 @@ and open the template in the editor.
                     document.getElementById("repub2").value=feat.properties.GOV18R;
                     document.getElementById("demo3").value=feat.properties.SEN18D;
                     document.getElementById("repub3").value=feat.properties.SEN18R;
-                    document.getElementById("white1").value=Math.floor(feat.properties.WVAP);
-                    document.getElementById("black1").value=Math.floor(feat.properties.BVAP);
-                    document.getElementById("asian1").value=Math.floor(feat.properties.ASIANVAP);
-                    document.getElementById("his1").value=Math.floor(feat.properties.HVAP);
-                    document.getElementById("oth1").value=Math.floor(feat.properties.OTHERVAP);
                     document.getElementById("white2").value=Math.floor(feat.properties.WVAP);
                     document.getElementById("black2").value=Math.floor(feat.properties.BVAP);
                     document.getElementById("asian2").value=Math.floor(feat.properties.ASIANVAP);
@@ -666,11 +650,6 @@ and open the template in the editor.
             repub2=document.getElementById("repub2").value;
             demo3=document.getElementById("demo3").value;
             repub3=document.getElementById("repub3").value;
-            white1=document.getElementById("white1").value;
-            black1=document.getElementById("black1").value;
-            asian1=document.getElementById("asian1").value;
-            his1=document.getElementById("his1").value;
-            oth1=document.getElementById("oth1").value;
             white2=document.getElementById("white2").value;
             black2=document.getElementById("black2").value;
             asian2=document.getElementById("asian2").value;
@@ -684,7 +663,7 @@ and open the template in the editor.
                 oldFeat=feat;
                 if(feat.properties.PRENAME==selectedValue){
                     changePrecinctVotingData(testLayer,demo1,repub1,demo2,repub2,demo3,repub3);
-                    changePrecinctDemographicData(layer,white1,black1,asian1,his1,oth1,white2,black2,asian2,his2,oth2);
+                    changePrecinctDemographicData(layer,white2,black2,asian2,his2,oth2);
                     precMenuChange();
                     changeFeatColor(testLayer.feature,testLayer);
                     if(feat.properties.PRENAME=="Ghost Precinct"){
@@ -696,12 +675,7 @@ and open the template in the editor.
             document.getElementById('datapopup').style.display='none';
             updatePrecinct(oldFeat,feat);
         }
-	function changePrecinctDemographicData(layer,white1,black1,asian1,his1,oth1,white2,black2,asian2,his2,oth2){
-            layer.feature.properties.WVAP=parseInt(white1);
-            layer.feature.properties.BVAP=parseInt(black1);
-            layer.feature.properties.ASIANVAP=parseInt(asian1);
-            layer.feature.properties.HVAP=parseInt(his1);
-            layer.feature.properties.OTHERVAP=parseInt(oth1);
+	function changePrecinctDemographicData(layer,white2,black2,asian2,his2,oth2){
             layer.feature.properties.WVAP=parseInt(white2);
             layer.feature.properties.BVAP=parseInt(black2);
             layer.feature.properties.ASIANVAP=parseInt(asian2);
