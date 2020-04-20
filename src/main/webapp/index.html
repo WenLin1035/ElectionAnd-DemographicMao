@@ -430,7 +430,7 @@ and open the template in the editor.
                 precZoom(centerCoords[0],centerCoords[1]);
             }
             else{
-                centerCoords=findCenter(b[0]);
+                centerCoords=findCenter(b[0][0]);
                 precZoom(centerCoords[0],centerCoords[1]);
             } 
         }
@@ -476,7 +476,8 @@ and open the template in the editor.
                     console.log(testLayer);
                     menuChangeCoords=feat.geometry.coordinates;
                     //findCoordForPrec(menuChangeCoords);
-                    //testLayer.openPopup();
+                    mymap.setView(new L.LatLng(41.5801, -71.4774), 10.5);
+                    testLayer.openPopup();
                     
                     demnum=feat.properties.PRES16D;
                     repnum=feat.properties.PRES16R;
@@ -718,7 +719,7 @@ and open the template in the editor.
         //test
         function onEachFeature(feature,layer){
             featureLayer=layer;
-            //featureLayer.bindPopup('<h1>' + feature.properties.PRENAME + '</h1>');
+            featureLayer.bindPopup('<h1>' + feature.properties.PRENAME + '</h1>');
             loadPrecincts(feature, layer);
             featureLayer.on({
                 click: onClick,
