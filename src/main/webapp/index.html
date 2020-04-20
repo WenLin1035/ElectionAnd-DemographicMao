@@ -286,6 +286,7 @@ and open the template in the editor.
             if(value!="precinct"){
                 document.getElementById('datapopup').style.display='block';
             }
+            fillChangeData();
             //document.getElementById('demo').value = ; //number of votes democrats
             //document.getElementById('repub').value = ; // number of votes republicans
         }
@@ -295,6 +296,32 @@ and open the template in the editor.
         //changeyear(){}
         
         //demographics
+        function fillChangeData(){
+            selectedValue=document.getElementById("Precincts").value;
+            precSubLayers=precLayer._layers;
+            for(i in precSubLayers){
+                testLayer=precSubLayers[i];
+                feat=testLayer.feature;
+                if(feat.properties.PRENAME==selectedValue){
+                    document.getElementById("demo1").value=feat.properties.PRES16D;
+                    document.getElementById("repub1").value=feat.properties.PRES16R;
+                    document.getElementById("demo2").value=feat.properties.GOV18D;
+                    document.getElementById("repub2").value=feat.properties.GOV18R;
+                    document.getElementById("demo3").value=feat.properties.SEN18D;
+                    document.getElementById("repub3").value=feat.properties.SEN18R;
+                    document.getElementById("white1").value=Math.floor(feat.properties.WVAP);
+                    document.getElementById("black1").value=Math.floor(feat.properties.BVAP);
+                    document.getElementById("asian1").value=Math.floor(feat.properties.ASIANVAP);
+                    document.getElementById("his1").value=Math.floor(feat.properties.HVAP);
+                    document.getElementById("oth1").value=Math.floor(feat.properties.OTHERVAP);
+                    document.getElementById("white2").value=Math.floor(feat.properties.WVAP);
+                    document.getElementById("black2").value=Math.floor(feat.properties.BVAP);
+                    document.getElementById("asian2").value=Math.floor(feat.properties.ASIANVAP);
+                    document.getElementById("his2").value=Math.floor(feat.properties.HVAP);
+                    document.getElementById("oth2").value=Math.floor(feat.properties.OTHERVAP);
+                }
+            }
+        }
             function showmap(){
                 if(document.getElementById("demographics").value == "Parties"){
                     document.getElementById('partymap').style.display = "block";
@@ -632,8 +659,22 @@ and open the template in the editor.
             }
         }
         function changePrecinctData(){
-            dem=document.getElementById("demo1").value;
-            rep=document.getElementById("repub1").value;
+            demo1=document.getElementById("demo1").value;
+            repub1=document.getElementById("repub1").value;
+            demo2=document.getElementById("demo2").value;
+            repub2=document.getElementById("repub2").value;
+            demo3=document.getElementById("demo3").value;
+            repub3=document.getElementById("repub3").value;
+            white1=document.getElementById("white1").value;
+            black1=document.getElementById("black1").value;
+            asian1=document.getElementById("asian1").value;
+            his1=document.getElementById("his1").value;
+            oth1=document.getElementById("oth1").value;
+            white2=document.getElementById("white2").value;
+            black2=document.getElementById("black2").value;
+            asian2=document.getElementById("asian2").value;
+            his2=document.getElementById("his2").value;
+            oth2=document.getElementById("oth2").value;
             selectedValue=document.getElementById("Precincts").value;
             precSubLayers=precLayer._layers;
             for(i in precSubLayers){
@@ -641,7 +682,10 @@ and open the template in the editor.
                 feat=testLayer.feature;
                 oldFeat=feat;
                 if(feat.properties.PRENAME==selectedValue){
-                    changePrecinctVotingData(testLayer,dem,rep);
+                    changePrecinctVotingData(testLayer,demo1,repub1,demo2,repub2,demo3,repub3);
+                    changePrecinctDemographicData(layer,white1,black1,asian1,his1,oth1,white2,black2,asian2,his2,oth2);
+                    precMenuChange();
+                    changeFeatColor(testLayer.feature,testLayer);
                     if(feat.properties.PRENAME=="Ghost Precinct"){
                         deleteError(feat.properties.PRENAME);
                     }
@@ -651,11 +695,25 @@ and open the template in the editor.
             document.getElementById('datapopup').style.display='none';
             updatePrecinct(oldFeat,feat);
         }
-        function changePrecinctVotingData(layer,dem,rep){
-            layer.feature.properties.PRES16D=parseInt(dem);
-            layer.feature.properties.PRES16R=parseInt(rep);
-            precMenuChange();
-            changeFeatColor(layer.feature,layer);
+	function changePrecinctDemographicData(layer,white1,black1,asian1,his1,oth1,white2,black2,asian2,his2,oth2){
+            layer.feature.properties.WVAP=parseInt(white1);
+            layer.feature.properties.BVAP=parseInt(black1);
+            layer.feature.properties.ASIANVAP=parseInt(asian1);
+            layer.feature.properties.HVAP=parseInt(his1);
+            layer.feature.properties.OTHERVAP=parseInt(oth1);
+            layer.feature.properties.WVAP=parseInt(white2);
+            layer.feature.properties.BVAP=parseInt(black2);
+            layer.feature.properties.ASIANVAP=parseInt(asian2);
+            layer.feature.properties.HVAP=parseInt(his2);
+            layer.feature.properties.OTHERVAP=parseInt(oth2);
+	}
+        function changePrecinctVotingData(layer,demo1,repub1,demo2,repub2,demo3,repub3){
+            layer.feature.properties.PRES16D=parseInt(demo1);
+            layer.feature.properties.PRES16R=parseInt(repub1);
+            layer.feature.properties.GOV18D=parseInt(demo2);
+            layer.feature.properties.GOV18R=parseInt(repub2);
+            layer.feature.properties.SEN18D=parseInt(demo3);
+            layer.feature.properties.SEN18R=parseInt(repub3);
         }
         //test
         function onEachFeature(feature,layer){
