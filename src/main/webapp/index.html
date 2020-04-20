@@ -274,8 +274,10 @@ and open the template in the editor.
             var x = document.getElementById("currentthing");
             var today = new Date();
             var dateTime = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate()+" "+today.getHours() + ":" + today.getMinutes()+":"+today.getSeconds();
-            x.innerHTML += "["+dateTime+"] >>"+document.getElementById("comment").value+"<br/>";
+            var result="["+dateTime+"] >>"+document.getElementById("comment").value+"<br/>";
+            x.innerHTML += result;
             document.getElementById("comment").value="";
+            addError({"dateTime":dateTime,"comment":document.getElementById("comment").value});
         }
         //change button
         function openchange(){
@@ -476,7 +478,8 @@ and open the template in the editor.
                     
                     changeyear();
                     layer=testLayer;
-                    if(feat.properties.PRES16D ==0 && feat.properties.PRES16R == 0 && testLayer.options.color=="orange"){
+                    console.log(feat.properties.PRES16D+ " "+feat.properties.PRES16R+" "+layer.options.color);
+                    if(feat.properties.PRES16D ==0 && feat.properties.PRES16R == 0 && layer.options.color=="orange"){
                         showError(layer,"GHOST");
                     }
                     else{
@@ -540,8 +543,28 @@ and open the template in the editor.
             document.getElementById("hisnum").innerHTML=Math.floor(hispanicnum);
             document.getElementById("restnum").innerHTML=Math.floor(othernum);
             
+            if(feat.properties.PRES16D ==0 && feat.properties.PRES16R == 0 && layer.options.color=="orange"){
+                showError(layer,"GHOST");
+            }
+            else{
+                if(feat.properties.PRENAME=="Burrillville 0302" && layer.options.color=="orange"){
+                    showError(layer,"DONUT");
+                }
+                else{
+                    showError(layer);
+                }
+            }
             
             changeyear();
+        }
+        function addError(data){
+            var xhr=new XMLHttpRequest();
+            xhr.open('POST','http://localhost:8080/precincts');
+            if(data){
+                xhr.setRequestHeader('Content-Type','application/json');
+            }
+            data=JSON.stringify(data);
+            xhr.send(data);
         }
         function setGhostPrecinct(layer){
             oldFeature=layer.feature;
