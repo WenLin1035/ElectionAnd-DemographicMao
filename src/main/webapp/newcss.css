@@ -24,7 +24,7 @@ and open the template in the editor.
                 width:80%;
                 height:100%;
             }
-            #formap{
+            #forMap{
                 position: absolute;
                 top:0;
                 left:0;
@@ -71,9 +71,9 @@ and open the template in the editor.
             border: 1px solid #888;
             width: 30%;
             }
-            #partymap{
+            #electionSection{
                 display:block;
             }
-            #racemap{
+            #demographicSection{
                 display:none;
             }
