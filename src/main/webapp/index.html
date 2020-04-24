@@ -513,18 +513,17 @@ and open the template in the editor.
             xhr.send(data);
         }
         function setGhostPrecinct(layer){
-            let oldFeature=layer.feature;
-            let buttonToBeDeleted=document.getElementById(layer.feature.properties.PRENAME+"_error");
+            let feature=layer.feature;
+            let buttonToBeDeleted=document.getElementById(feature.properties.PRENAME+"_error");
             buttonToBeDeleted.parentNode.removeChild(buttonToBeDeleted);
             let errorDiv=document.getElementById("currentError");
             layer.setStyle(setShapeColor(layer,"GHOST_STYLE"));
             errorDiv.innerHTML="";
             document.getElementById("errorSection").style.display="none";
             //changes the type of error
-            let newFeature=layer.feature;
-            updatePrecinct(oldFeature,newFeature);
-            deleteError(newFeature.properties.PRENAME);
-            addResolvedError(newFeature.properties.PRENAME);
+            updatePrecinct(feature.properties.PRENAME,feature);
+            deleteError(feature.properties.PRENAME);
+            addResolvedError(feature.properties.PRENAME);
         }
         function updatePrecinct(selectedName,newData){
             let xhr=new XMLHttpRequest();
@@ -563,7 +562,7 @@ and open the template in the editor.
             precLayer.removeLayer(layer);
             precLayer.addData(newPrecinct);
             
-            updatePrecinct(feature,newPrecinct);
+            updatePrecinct(feature.properties.PRENAME,newPrecinct);
             deleteError(newPrecinct.properties.PRENAME);
             addResolvedError(newFeature.properties.PRENAME);
         }
