@@ -76,16 +76,13 @@ and open the template in the editor.
                     <label>Hispanic: </label><label id="hispanicNum">Y people</label><br/> <!-- needs to be replaced by DB data -->
                     <label>Other: </label><label id="otherNum" style="padding-left: 20px">Y people</label><br/> <!-- needs to be replaced by DB data -->
                 </div>
-
-                <h3>Error Type:</h3>
-                <div id="currentError"></div>
-                <br>
-                <label for="commentArea">Comments:</label><br>
-                <textarea id="commentArea" name="commentArea" rows="2" cols="20"></textarea>
-                <br>
-                <button onclick="addComment()">Submit</button><!-- need to add func that saves comments into precinct comment string var in database -->
-                <br>
-                <div id="commentSection"></div>
+                <div id="errorSection" style="display:none">
+                    <h3>Error Type:</h3>
+                    <div id="currentError"></div>
+                    <br>
+                    <label for="commentArea">Comments:</label><br>
+                    <textarea placeholder="Type your comment for the resolved error" id="commentArea" name="commentArea" rows="2" cols="20"></textarea>
+                </div>
                 <p>Options:</p>
                 <div id="optionSection">
                     <button onclick="openChangeDataSection()" style="width:auto;margin-right: 25px">Change Data</button>
@@ -241,14 +238,13 @@ and open the template in the editor.
         </div>
     </body>
     <script>
-        function addComment(){
-            let commentSection = document.getElementById("commentSection");
+        function addResolvedError(precinctName){
             let today = new Date();
             let dateTime = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate()+" "+today.getHours() + ":" + today.getMinutes()+":"+today.getSeconds();
             let comment="["+dateTime+"] >>"+document.getElementById("commentArea").value+"<br/>";
-            commentSection.innerHTML += comment;
             document.getElementById("commentArea").value="";
             addError({"dateTime":dateTime,"comment":document.getElementById("commentArea").value});
+            document.getElementById("errorLog").innerHTML+="<div style=\'border-style:solid\'>Error Resolved on: "+precinctName+" from ERROR. <br/> Optional Comment: "+comment+"</div><br/>";
         }
         //change button
         function openChangeDataSection(){
@@ -523,10 +519,12 @@ and open the template in the editor.
             let errorDiv=document.getElementById("currentError");
             layer.setStyle(setShapeColor(layer,"GHOST_STYLE"));
             errorDiv.innerHTML="";
+            document.getElementById("errorSection").style.display="none";
             //changes the type of error
             let newFeature=layer.feature;
             updatePrecinct(oldFeature,newFeature);
             deleteError(newFeature.properties.PRENAME);
+            addResolvedError(newFeature.properties.PRENAME);
         }
         function updatePrecinct(selectedName,newData){
             let xhr=new XMLHttpRequest();
@@ -549,6 +547,7 @@ and open the template in the editor.
             buttonToBeDeleted.parentNode.removeChild(buttonToBeDeleted);
             let errorDiv=document.getElementById("currentError");
             errorDiv.innerHTML="";
+            document.getElementById("errorSection").style.display="none";
             
             console.log(feature);
             let newPrecinct={"type":"Feature",
@@ -566,21 +565,25 @@ and open the template in the editor.
             
             updatePrecinct(feature,newPrecinct);
             deleteError(newPrecinct.properties.PRENAME);
+            addResolvedError(newFeature.properties.PRENAME);
         }
         function showError(layer,errorType){
             let featureName=layer.feature.properties.PRENAME;
             let errorDiv=document.getElementById("currentError");
             switch(errorType){
                 case "GHOST":
+                    document.getElementById("errorSection").style.display="block";
                     errorDiv.innerHTML="Ghost Precinct? <br>\n\
                         <button onclick='setGhostPrecinct(precinctLayers[\""+featureName+"\"])'>Yes</button>\n\
                         <button onclick='openChangeDataSection();errorDiv.innerHTML=\"\"'>No</button>";
                     break;
                 case "DONUT":
+                    document.getElementById("errorSection").style.display="block";
                     errorDiv.innerHTML="Merge Precinct<br>\n\
                         <button onclick='mergePrecincts(precinctLayers[\""+featureName+"\"])'>Yes</button>";
                     break;
                 default:
+                    document.getElementById("errorSection").style.display="none";
                     errorDiv.innerHTML="";
             }
         }
@@ -625,11 +628,13 @@ and open the template in the editor.
             changeFeatColor(selectedLayer.feature,selectedLayer);
             if(selectedFeature.properties.PRENAME=="Ghost Precinct" && document.getElementById("pred16Dem").value!=0){
                 deleteError(selectedFeature.properties.PRENAME);
+                addResolvedError(newFeature.properties.PRENAME);
             }
             let selectedError=document.getElementById(selectedValue+"_error");
             if(selectedError!=undefined){
                 selectedError.parentNode.removeChild(selectedError);
                 document.getElementById("currentError").innerHTML="";
+                document.getElementById("errorSection").style.display="none";
             }
             document.getElementById('changeDataSection').style.display='none';
             updatePrecinct(selectedValue,selectedFeature);
