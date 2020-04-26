@@ -18,4 +18,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface PrecinctRepo extends JpaRepository<Precinct, Integer> {
      Precinct findByName(String name);
+     Precinct findByOgrFID(Integer id);
 }

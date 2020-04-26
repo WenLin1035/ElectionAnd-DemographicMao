@@ -262,17 +262,17 @@ and open the template in the editor.
             if(selectedValue=="precinct") return;
             let selectedLayer=precinctLayers[selectedValue];
             let selectedFeature=selectedLayer.feature;
-            document.getElementById("pred16Dem").value=selectedFeature.properties.PRES16D;
-            document.getElementById("pred16Rep").value=selectedFeature.properties.PRES16R;
-            document.getElementById("cong16Dem").value=selectedFeature.properties.GOV18D;
-            document.getElementById("cong16Rep").value=selectedFeature.properties.GOV18R;
-            document.getElementById("cong18Dem").value=selectedFeature.properties.SEN18D;
-            document.getElementById("cong18Rep").value=selectedFeature.properties.SEN18R;
-            document.getElementById("whiteVotePop").value=Math.floor(selectedFeature.properties.WVAP);
-            document.getElementById("blackVotePop").value=Math.floor(selectedFeature.properties.BVAP);
-            document.getElementById("asianVotePop").value=Math.floor(selectedFeature.properties.ASIANVAP);
-            document.getElementById("hispanicVotePop").value=Math.floor(selectedFeature.properties.HVAP);
-            document.getElementById("otherVotePop").value=Math.floor(selectedFeature.properties.OTHERVAP);
+            document.getElementById("pred16Dem").value=selectedFeature.properties.demvotpres;
+            document.getElementById("pred16Rep").value=selectedFeature.properties.repvotpres;
+            document.getElementById("cong16Dem").value=selectedFeature.properties.demvot16;
+            document.getElementById("cong16Rep").value=selectedFeature.properties.repvot16;
+            document.getElementById("cong18Dem").value=selectedFeature.properties.demvot18;
+            document.getElementById("cong18Rep").value=selectedFeature.properties.repvot18;
+            document.getElementById("whiteVotePop").value=Math.floor(selectedFeature.properties.whiteov18);
+            document.getElementById("blackVotePop").value=Math.floor(selectedFeature.properties.blackov18);
+            document.getElementById("asianVotePop").value=Math.floor(selectedFeature.properties.asianov18);
+            document.getElementById("hispanicVotePop").value=Math.floor(selectedFeature.properties.hisov18);
+            document.getElementById("otherVotePop").value=Math.floor(selectedFeature.properties.otherov18);
         }
         function switchDataSection(){
             if(document.getElementById("dataSection").value == "election"){
@@ -312,18 +312,53 @@ and open the template in the editor.
             precLayer=L.geoJSON(null,{onEachFeature: onEachFeature}).addTo(mymap);
             
             console.log("Hello, World!");
-            let xhr_ri_prec=new XMLHttpRequest();
+            /**let xhr_ri_prec=new XMLHttpRequest();
             xhr_ri_prec.open('GET','http://localhost:8080/json_ri_prec');
             xhr_ri_prec.onload=function(){
-                data=JSON.parse(xhr_ri_prec.response);
                 precLayer.addData(data);
                 loadPrecinctDictionary();
             };
-            xhr_ri_prec.send();
+            xhr_ri_prec.send();**/
+            xhr_precinct_data=new XMLHttpRequest();
+            xhr_precinct_data.open('GET','http://localhost:8080/precincts');
+            xhr_precinct_data.onload=function() {
+                let precinct_data=JSON.parse(xhr_precinct_data.response);
+                for(i=0;i<precinct_data.length;i++){
+                    let jsonObj=JSON.parse(precinct_data[i]["shape_geojson"]);
+                    let newjsonObj={};
+                    newjsonObj["type"]="Feature";
+                    newjsonObj["properties"]={};
+                    newjsonObj.properties["aminov18"]=precinct_data[i]["aminov18"];
+                    newjsonObj.properties["asianov18"]=precinct_data[i]["asianov18"];
+                    newjsonObj.properties["blackov18"]=precinct_data[i]["blackov18"];
+                    newjsonObj.properties["demvot16"]=precinct_data[i]["demvot16"];
+                    newjsonObj.properties["demvot18"]=precinct_data[i]["demvot18"];
+                    newjsonObj.properties["demvotpres"]=precinct_data[i]["demvotpres"];
+                    newjsonObj.properties["hawov18"]=precinct_data[i]["hawov18"];
+                    newjsonObj.properties["hisov18"]=precinct_data[i]["hisov18"];
+                    newjsonObj.properties["name"]=precinct_data[i]["name"];
+                    newjsonObj.properties["otherov18"]=precinct_data[i]["otherov18"];
+                    newjsonObj.properties["othvot16"]=precinct_data[i]["othvot16"];
+                    newjsonObj.properties["othvot18"]=precinct_data[i]["othvot18"];
+                    newjsonObj.properties["othvotpres"]=precinct_data[i]["othvotpres"];
+                    newjsonObj.properties["pop100"]=precinct_data[i]["pop100"];
+                    newjsonObj.properties["repvot16"]=precinct_data[i]["repvot16"];
+                    newjsonObj.properties["repvot18"]=precinct_data[i]["repvot18"];
+                    newjsonObj.properties["repvotpres"]=precinct_data[i]["repvotpres"];
+                    newjsonObj.properties["whiteov18"]=precinct_data[i]["whiteov18"];
+                    newjsonObj.properties["ogrFID"]=precinct_data[i]["ogrFID"];
+                    newjsonObj["geometry"]={};
+                    newjsonObj.geometry["type"]=jsonObj["type"];
+                    newjsonObj.geometry["coordinates"]=jsonObj["coordinates"];
+                    precLayer.addData(newjsonObj);
+                }
+                loadPrecinctDictionary();
+            }
+            xhr_precinct_data.send();
             let xhr_ri_state=new XMLHttpRequest();
             xhr_ri_state.open('GET','http://localhost:8080/json_ri_state');
             xhr_ri_state.onload=function(){
-                data=JSON.parse(xhr_ri_state.response);
+                let data=JSON.parse(xhr_ri_state.response);
                 L.geoJSON(data,{style:setShapeColor(this,"STATE_STYLE")}).addTo(mymap);
             };
             xhr_ri_state.send();
@@ -335,7 +370,7 @@ and open the template in the editor.
             for (i in precLayers){
                 let singleLayer=precLayers[i];
                 let feature=singleLayer.feature;
-                precinctLayers[feature.properties.PRENAME]=singleLayer;
+                precinctLayers[feature.properties.name]=singleLayer;
             }
         }
         function setShapeColor(ft,shapeStyle){
@@ -398,12 +433,12 @@ and open the template in the editor.
             mymap.setView(new L.LatLng(centerCoords[1],centerCoords[0]),precinctZoomLevel);
         }
         function setDemographicSection(feat){
-            let whiteVotePop=feat.properties.WVAP;
-            let blackVotePop=feat.properties.BVAP;
-            let asianVotePop=feat.properties.ASIANVAP;
-            let hispanicVotePop=feat.properties.HVAP;
-            let otherVotePop=feat.properties.OTHERVAP;
-            let totVotePop=feat.properties.TOTPOP;
+            let whiteVotePop=feat.properties.whiteov18;
+            let blackVotePop=feat.properties.blackov18;
+            let asianVotePop=feat.properties.asianov18;
+            let hispanicVotePop=feat.properties.hisov18;
+            let otherVotePop=feat.properties.otherov18;
+            let totVotePop=feat.properties.pop100;
 
             document.getElementById("whiteNum").innerHTML=Math.floor(whiteVotePop);
             document.getElementById("blackNum").innerHTML=Math.floor(blackVotePop);
@@ -417,12 +452,12 @@ and open the template in the editor.
             if(dropdownValue=="precinct") return;
             let selectedLayer=precinctLayers[dropdownValue];
             let selectedFeature=selectedLayer.feature;
-            let pred16D=selectedFeature.properties.PRES16D;
-            let pred16R=selectedFeature.properties.PRES16R;
-            let cong16D=selectedFeature.properties.GOV18D;
-            let cong16R=selectedFeature.properties.GOV18R;
-            let cong18D=selectedFeature.properties.SEN18D;
-            let cong18R=selectedFeature.properties.SEN18R;
+            let pred16D=selectedFeature.properties.demvotpres;
+            let pred16R=selectedFeature.properties.repvotpres;
+            let cong16D=selectedFeature.properties.demvot16;
+            let cong16R=selectedFeature.properties.repvot16;
+            let cong18D=selectedFeature.properties.demvot18;
+            let cong18R=selectedFeature.properties.repvot18;
 
             let dropdownYear = document.getElementById("year");
             if(dropdownYear.options[dropdownYear.selectedIndex].value == "pred16"){
@@ -454,7 +489,7 @@ and open the template in the editor.
         }
         function showPrecinctOnClick(selectedLayer,selectedFeature){
             precinctZoom(turf.centroid(selectedFeature),turf.area(selectedFeature));
-            selectedLayer.bindPopup('<h1>' + selectedFeature.properties.PRENAME + '</h1>');
+            selectedLayer.bindPopup('<h1>' + selectedFeature.properties.name + '</h1>');
 
             setDemographicSection(selectedFeature);
             setElectionSection(selectedFeature);
@@ -468,17 +503,17 @@ and open the template in the editor.
             }
         }
         function changeFeatColor(ft,tLayer){
-            if(ft.properties.PRES16D ==0 && ft.properties.PRES16R == 0){
+            if(ft.properties.demvotpres ==0 && ft.properties.repvotpres == 0){
                 tLayer.setStyle(setShapeColor(tLayer,"ERROR_STYLE"));
             }
             else{
-                if(ft.properties.PRES16D>ft.properties.PRES16R){
+                if(ft.properties.demvotpres>ft.properties.repvotpres){
                     tLayer.setStyle(setShapeColor(tLayer,"DEM_STYLE"));
                 }
-                if(ft.properties.PRES16D<=ft.properties.PRES16R){
+                if(ft.properties.demvotpres<=ft.properties.repvotpres){
                     tLayer.setStyle(setShapeColor(tLayer,"REP_STYLE"));
                 }
-                if(ft.properties.PRENAME=="Burrillville 0302" && ft.geometry.type=="MultiPolygon"){
+                if(ft.properties.name=="Burrillville 0302" && ft.geometry.type=="MultiPolygon"){
                     tLayer.setStyle(setShapeColor(tLayer,"ERROR_STYLE"));
                 }
             }
@@ -487,15 +522,15 @@ and open the template in the editor.
             let selectedLayer=e.target;
             let featInLayer=selectedLayer.feature;
             let dropdown = document.getElementById("Precincts");
-            dropdown.value = featInLayer.properties.PRENAME;
+            dropdown.value = featInLayer.properties.name;
             showPrecinctOnClick(selectedLayer,featInLayer);
         }
         function useErrorType(feat,layer){
-            if(feat.properties.PRES16D ==0 && feat.properties.PRES16R == 0 && layer.options.color=="orange"){
+            if(feat.properties.demvotepres ==0 && feat.properties.repvotpres == 0 && layer.options.color=="orange"){
                 showError(layer,"GHOST");
             }
             else{
-                if(feat.properties.PRENAME=="Burrillville 0302" && layer.options.color=="orange"){
+                if(feat.properties.name=="Burrillville 0302" && layer.options.color=="orange"){
                     showError(layer,"DONUT");
                 }
                 else{
@@ -514,26 +549,48 @@ and open the template in the editor.
         }
         function setGhostPrecinct(layer){
             let feature=layer.feature;
-            let buttonToBeDeleted=document.getElementById(feature.properties.PRENAME+"_error");
+            let buttonToBeDeleted=document.getElementById(feature.properties.name+"_error");
             buttonToBeDeleted.parentNode.removeChild(buttonToBeDeleted);
             let errorDiv=document.getElementById("currentError");
             layer.setStyle(setShapeColor(layer,"GHOST_STYLE"));
             errorDiv.innerHTML="";
             document.getElementById("errorSection").style.display="none";
             //changes the type of error
-            updatePrecinct(feature.properties.PRENAME,feature);
-            deleteError(feature.properties.PRENAME);
-            addResolvedError(feature.properties.PRENAME);
+            updatePrecinct(feature.properties.name,feature);
+            deleteError(feature.properties.name);
+            addResolvedError(feature.properties.name);
         }
-        function updatePrecinct(selectedName,newData){
+        function updatePrecinct(selectedID,newData){
             let xhr=new XMLHttpRequest();
-            xhr.open('PUT','http://localhost:8080/precincts/'+selectedName);
-            if(selectedName){
+            xhr.open('PUT','http://localhost:8080/precincts/'+selectedID);
+            if(newData){
                 xhr.setRequestHeader('Content-Type','application/json');
             }
-            data=JSON.stringify(newData);
+            let data=JSON.stringify(newData);
             console.log(data);
             xhr.send(data);
+        }
+        function prepareFeatureToSend(feature){
+            let jsonObj={};
+            jsonObj["aminov18"]=feature.properties.aminov18;
+            jsonObj["asianov18"]=feature.properties.asianov18;
+            jsonObj["blackov18"]=feature.properties.blackov18;
+            jsonObj["demvot16"]=feature.properties.demvot16;
+            jsonObj["demvot18"]=feature.properties.demvot18;
+            jsonObj["demvotpres"]=feature.properties.demvotpres;
+            jsonObj["hawov18"]=feature.properties.hawov18;
+            jsonObj["hisov18"]=feature.properties.hisov18;
+            jsonObj["name"]=feature.properties.name;
+            jsonObj["otherov18"]=feature.properties.otherov18;
+            jsonObj["othvot16"]=feature.properties.othvot16;
+            jsonObj["othvot18"]=feature.properties.othvot18;
+            jsonObj["othvotpres"]=feature.properties.othvotpres;
+            jsonObj["pop100"]=feature.properties.pop100;
+            jsonObj["repvot16"]=feature.properties.repvot16;
+            jsonObj["repvot18"]=feature.properties.repvot18;
+            jsonObj["repvotpres"]=feature.properties.repvotpres;
+            jsonObj["shape_geojson"]=JSON.stringify(feature.geometry);
+            return jsonObj;
         }
         function deleteError(precinctName){
             let xhr=new XMLHttpRequest();
@@ -542,7 +599,7 @@ and open the template in the editor.
         }
         function mergePrecincts(layer){
             let feature=layer.feature;
-            let buttonToBeDeleted=document.getElementById(feature.properties.PRENAME+"_error");
+            let buttonToBeDeleted=document.getElementById(feature.properties.name+"_error");
             buttonToBeDeleted.parentNode.removeChild(buttonToBeDeleted);
             let errorDiv=document.getElementById("currentError");
             errorDiv.innerHTML="";
@@ -562,12 +619,12 @@ and open the template in the editor.
             precLayer.removeLayer(layer);
             precLayer.addData(newPrecinct);
             
-            updatePrecinct(feature.properties.PRENAME,newPrecinct);
-            deleteError(newPrecinct.properties.PRENAME);
-            addResolvedError(newFeature.properties.PRENAME);
+            updatePrecinct(feature.properties.name,newPrecinct);
+            deleteError(newPrecinct.properties.name);
+            addResolvedError(newFeature.properties.name);
         }
         function showError(layer,errorType){
-            let featureName=layer.feature.properties.PRENAME;
+            let featureName=layer.feature.properties.name;
             let errorDiv=document.getElementById("currentError");
             switch(errorType){
                 case "GHOST":
@@ -602,22 +659,22 @@ and open the template in the editor.
             let selectedValue=document.getElementById("Precincts").value;
             let selectedLayer=precinctLayers[selectedValue];
             let selectedFeature=selectedLayer.feature;
-            
+            let selectedID=selectedFeature.properties.ogrFID;
             changePrecinctVotingData(selectedFeature,pred16Dem,pred16Rep,cong16Dem,cong16Rep,cong18Dem,cong18Rep);
             changePrecinctDemographicData(selectedFeature,whiteVotePop,blackVotePop,asianVotePop,hispanicVotePop,otherVotePop);
             
             //changes the name of the feature, removes the name off the dropdown, and adds the new name in
             selectedLayer.closePopup();
             if(selectedValue!=document.getElementById("precinctName").value){
-                selectedFeature.properties.PRENAME=document.getElementById("precinctName").value;
-                precinctLayers[selectedFeature.properties.PRENAME]=precinctLayers[selectedValue];
+                selectedFeature.properties.name=document.getElementById("precinctName").value;
+                precinctLayers[selectedFeature.properties.name]=precinctLayers[selectedValue];
                 delete precinctLayers[selectedValue];
                 let dropdown = document.getElementById("Precincts");
                 dropdown.remove(dropdown.selectedIndex);
                 let option = document.createElement("option");
-                option.text = selectedFeature.properties.PRENAME;
+                option.text = selectedFeature.properties.name;
                 dropdown.add(option);
-                dropdown.value=selectedFeature.properties.PRENAME;
+                dropdown.value=selectedFeature.properties.name;
                 console.log(dropdown.value);
                 console.log(selectedFeature);
             }
@@ -625,9 +682,9 @@ and open the template in the editor.
             selectedLayer.openPopup();
             
             changeFeatColor(selectedLayer.feature,selectedLayer);
-            if(selectedFeature.properties.PRENAME=="Ghost Precinct" && document.getElementById("pred16Dem").value!=0){
-                deleteError(selectedFeature.properties.PRENAME);
-                addResolvedError(newFeature.properties.PRENAME);
+            if(selectedFeature.properties.name=="Voting Districts Not Defined" && document.getElementById("pred16Dem").value!=0){
+                deleteError(selectedFeature.properties.name);
+                addResolvedError(newFeature.properties.name);
             }
             let selectedError=document.getElementById(selectedValue+"_error");
             if(selectedError!=undefined){
@@ -636,43 +693,44 @@ and open the template in the editor.
                 document.getElementById("errorSection").style.display="none";
             }
             document.getElementById('changeDataSection').style.display='none';
-            updatePrecinct(selectedValue,selectedFeature);
+            updatePrecinct(selectedID,prepareFeatureToSend(selectedFeature));
         }
 	function changePrecinctDemographicData(feature,whiteVotePop,blackVotePop,asianVotePop,hispanicVotePop,otherVotePop){
-            feature.properties.WVAP=parseInt(whiteVotePop);
-            feature.properties.BVAP=parseInt(blackVotePop);
-            feature.properties.ASIANVAP=parseInt(asianVotePop);
-            feature.properties.HVAP=parseInt(hispanicVotePop);
-            feature.properties.OTHERVAP=parseInt(otherVotePop);
+            feature.properties.whiteov18=parseInt(whiteVotePop);
+            feature.properties.blackov18=parseInt(blackVotePop);
+            feature.properties.asianov18=parseInt(asianVotePop);
+            feature.properties.hisov18=parseInt(hispanicVotePop);
+            feature.properties.otherov18=parseInt(otherVotePop);
 	}
         function changePrecinctVotingData(feature,pred16Dem,pred16Rep,cong16Dem,cong16Rep,cong18Dem,cong18Rep){
-            feature.properties.PRES16D=parseInt(pred16Dem);
-            feature.properties.PRES16R=parseInt(pred16Rep);
-            feature.properties.GOV18D=parseInt(cong16Dem);
-            feature.properties.GOV18R=parseInt(cong16Rep);
-            feature.properties.SEN18D=parseInt(cong18Dem);
-            feature.properties.SEN18R=parseInt(cong18Rep);
+            feature.properties.demvotpres=parseInt(pred16Dem);
+            feature.properties.repvotpres=parseInt(pred16Rep);
+            feature.properties.demvot16=parseInt(cong16Dem);
+            feature.properties.repvot16=parseInt(cong16Rep);
+            feature.properties.demvot18=parseInt(cong18Dem);
+            feature.properties.repvot18=parseInt(cong18Rep);
         }
         function onEachFeature(feature,layer){
-            layer.bindPopup('<h1>' + feature.properties.PRENAME + '</h1>');
+            layer.bindPopup('<h1>' + feature.properties.name + '</h1>');
             loadPrecincts(feature, layer);
             layer.on({
                 click: onClick,
                 mouseover: setNPS,
                 mouseout: setOPS
             });
-            if(feature.properties.PRES16D ==0 && feature.properties.PRES16R == 0 && layer.options.color=="#3388ff"){
-               document.getElementById("errorLog").innerHTML+="<div id=\""+feature.properties.PRENAME+"_error\"><button onclick='document.getElementById(\"errorPopup\").style.display=\"none\";precMenuChange(\""+feature.properties.PRENAME+"\");'>Ghost Precinct Found ["+feature.properties.PRENAME+"](Requires Verification)</button></div>";
+            if(feature.properties.demvotpres ==0 && feature.properties.repvotpres == 0 && layer.options.color=="#3388ff"){
+               document.getElementById("errorLog").innerHTML+="<div id=\""+feature.properties.name+"_error\"><button onclick='document.getElementById(\"errorPopup\").style.display=\"none\";precMenuChange(\""+feature.properties.name+"\");'>Ghost Precinct Found ["+feature.properties.name+"](Requires Verification)</button></div>";
             }
-            if(feature.properties.PRENAME=="Burrillville 0302" && feature.geometry.type=="MultiPolygon"){
-               document.getElementById("errorLog").innerHTML+="<div id=\""+feature.properties.PRENAME+"_error\"><button onclick='document.getElementById(\"errorPopup\").style.display=\"none\";precMenuChange(\""+feature.properties.PRENAME+"\");'>Donut Precinct Found ["+feature.properties.PRENAME+"](Requires Modification)</button></div>";
+            if(feature.properties.name=="Burrillville 0302" && feature.geometry.type=="MultiPolygon"){
+               document.getElementById("errorLog").innerHTML+="<div id=\""+feature.properties.name+"_error\"><button onclick='document.getElementById(\"errorPopup\").style.display=\"none\";precMenuChange(\""+feature.properties.name+"\");'>Donut Precinct Found ["+feature.properties.name
+                       +"](Requires Modification)</button></div>";
             }
             changeFeatColor(feature,layer);
         }
         function loadPrecincts(feature, layer){
             let dropdown = document.getElementById("Precincts");
             let addedPrecinct = document.createElement("option");
-            let precinctName = feature.properties.PRENAME;
+            let precinctName = feature.properties.name;
             addedPrecinct.text = precinctName;
             addedPrecinct.value = precinctName;
             dropdown.options.add(addedPrecinct);

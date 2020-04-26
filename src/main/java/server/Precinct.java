@@ -16,6 +16,8 @@ import org.hibernate.annotations.GenericGenerator;
 @Table(name="PRECINCT")
 public class Precinct {
     
+    private Integer ogrFID;
+    private String shape_geojson;
     private String vtdst;
     private String name;
     private Integer demvotpres;
@@ -43,7 +45,8 @@ public class Precinct {
         super();
     }
     
-    public Precinct(String vtdst, String name, Integer demvotpres, Integer repvotpres, Integer othvotpres, Integer totvotpres, Integer demvot16, Integer repvot16, Integer totvot16, Integer othvot16, Integer demvot18, Integer repvot18, Integer othvot18, Integer totvot18, Integer aminov18, Integer asianov18, Integer blackov18, Integer hawov18, Integer hisov18, Integer whiteov18, Integer otherov18, Integer pop100) {
+    public Precinct(String shape_geojson,String vtdst, String name, Integer demvotpres, Integer repvotpres, Integer othvotpres, Integer totvotpres, Integer demvot16, Integer repvot16, Integer totvot16, Integer othvot16, Integer demvot18, Integer repvot18, Integer othvot18, Integer totvot18, Integer aminov18, Integer asianov18, Integer blackov18, Integer hawov18, Integer hisov18, Integer whiteov18, Integer otherov18, Integer pop100) {
+        this.shape_geojson=shape_geojson;
         this.vtdst=vtdst;
         this.name=name;
         this.demvotpres=demvotpres;
@@ -69,112 +72,123 @@ public class Precinct {
     }
 
     @Id
-    @Column(name="VTDST")
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @Column(name="OGR_FID")
+    public Integer getOgrFID(){
+        return ogrFID;
+    }
+    
+    @Column(name="vtdst")
     public String getVtdst() {
         return vtdst;
     }
 
-    @Column(name="NAME")
+    @Column(name="shape_geojson")
+    public String getShape_geojson() {
+        return shape_geojson;
+    }
+    
+    @Column(name="name")
     public String getName() {
         return name;
     }
 
-    @Column(name="DEMVOTPRES")
+    @Column(name="demvotpres")
     public Integer getDemvotpres() {
         return demvotpres;
     }
 
-    @Column(name="REPVOTPRES")
+    @Column(name="repvotpres")
     public Integer getRepvotpres() {
         return repvotpres;
     }
 
-    @Column(name="OTHVOTPRES")
+    @Column(name="othvotpres")
     public Integer getOthvotpres() {
         return othvotpres;
     }
 
-    @Column(name="TOTVOTPRES")
+    @Column(name="totvotpres")
     public Integer getTotvotpres() {
         return totvotpres;
     }
 
-    @Column(name="DEMVOT16")
+    @Column(name="demvot16")
     public Integer getDemvot16() {
         return demvot16;
     }
 
-    @Column(name="REPVOT16")
+    @Column(name="repvot16")
     public Integer getRepvot16() {
         return repvot16;
     }
 
-    @Column(name="TOTVOT16")
+    @Column(name="totvot16")
     public Integer getTotvot16() {
         return totvot16;
     }
 
-    @Column(name="OTHVOT16")
+    @Column(name="othvot16")
     public Integer getOthvot16() {
         return othvot16;
     }
 
-    @Column(name="DEMVOT18")
+    @Column(name="demvot18")
     public Integer getDemvot18() {
         return demvot18;
     }
 
-    @Column(name="REPVOT18")
+    @Column(name="repvot18")
     public Integer getRepvot18() {
         return repvot18;
     }
 
-    @Column(name="OTHVOT18")
+    @Column(name="othvot18")
     public Integer getOthvot18() {
         return othvot18;
     }
 
-    @Column(name="TOTVOT18")
+    @Column(name="totvot18")
     public Integer getTotvot18() {
         return totvot18;
     }
 
-    @Column(name="AMINOV18")
+    @Column(name="aminov18")
     public Integer getAminov18() {
         return aminov18;
     }
 
-    @Column(name="ASIANNOV18")
+    @Column(name="asianov18")
     public Integer getAsianov18() {
         return asianov18;
     }
 
-    @Column(name="BLACKOV18")
+    @Column(name="blackov18")
     public Integer getBlackov18() {
         return blackov18;
     }
 
-    @Column(name="HAWOV18")
+    @Column(name="hawov18")
     public Integer getHawov18() {
         return hawov18;
     }
 
-    @Column(name="HISOV18")
+    @Column(name="hisov18")
     public Integer getHisov18() {
         return hisov18;
     }
 
-    @Column(name="WHITEOV18")
+    @Column(name="whiteov18")
     public Integer getWhiteov18() {
         return whiteov18;
     }
 
-    @Column(name="OTHEROV18")
+    @Column(name="otherov18")
     public Integer getOtherov18() {
         return otherov18;
     }
 
-    @Column(name="POP100")
+    @Column(name="pop100")
     public Integer getPop100() {
         return pop100;
     }
@@ -266,8 +280,12 @@ public class Precinct {
     public void setPop100(Integer pop100) {
         this.pop100 = pop100;
     }
-    
-    
 
+    public void setShape_geojson(String shape_geojson) {
+        this.shape_geojson = shape_geojson;
+    }
     
+    public void setOgrFID(Integer ogrFID){
+        this.ogrFID=ogrFID;
+    }
 }

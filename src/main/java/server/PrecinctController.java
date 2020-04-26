@@ -31,14 +31,13 @@ public class PrecinctController {
     // RESTful API methods for Retrieval operations
     @GetMapping("/precincts")
     public List<Precinct> list() {
-        System.out.println(service.findAll());
         return service.findAll();
     }
     
     @GetMapping("/json_ri_prec")
     public String returnRIPrec(){
         try {
-            File file= new File("./src/main/webapp/RI_precincts_1.json");
+            File file= new File("./src/main/webapp/RI_PRECINCT.json");
             Scanner sc = new Scanner(file);
             sc.useDelimiter("\\Z");
             String result=sc.next();
@@ -74,12 +73,12 @@ public class PrecinctController {
     }
     
     // RESTful API method for Update operation
-    @PutMapping("/precincts/{name}")
-    public ResponseEntity<?> update(@RequestBody Precinct precinct, @PathVariable String name) {
+    @PutMapping("/precincts/{id}")
+    public ResponseEntity<?> update(@RequestBody Precinct precinct, @PathVariable String id) {
         try {
-            Precinct existPrecinct = service.findByName(name);
-            precinct.setName(name);
-            //service.save(precinct);
+            Precinct existPrecinct = service.findByOgrFID(Integer.parseInt(id));
+            precinct.setOgrFID(Integer.parseInt(id));
+            service.save(precinct);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (NoSuchElementException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
