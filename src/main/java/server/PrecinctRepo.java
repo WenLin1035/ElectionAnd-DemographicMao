@@ -17,5 +17,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
  
 
 public interface PrecinctRepo extends JpaRepository<Precinct, Integer> {
-     Precinct findByNamelegal(String name);
+     Precinct findByName(String name);
 }

@@ -26,7 +26,7 @@ public class PrecinctController {
  
     @Autowired
     private PrecinctRepo service;
-    
+   
     
     // RESTful API methods for Retrieval operations
     @GetMapping("/precincts")
@@ -77,8 +77,8 @@ public class PrecinctController {
     @PutMapping("/precincts/{name}")
     public ResponseEntity<?> update(@RequestBody Precinct precinct, @PathVariable String name) {
         try {
-            Precinct existPrecinct = service.findByNamelegal(name);
-            precinct.setNamelegal(name);
+            Precinct existPrecinct = service.findByName(name);
+            precinct.setName(name);
             //service.save(precinct);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (NoSuchElementException e) {
@@ -91,7 +91,7 @@ public class PrecinctController {
     public ResponseEntity<?> merge(@RequestBody List<Precinct> precinctList, @PathVariable String name1, @PathVariable String name2){
         //TO-DO
         try {
-            Precinct precinct1 = service.findByNamelegal(name1);
+            Precinct precinct1 = service.findByName(name1);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (NoSuchElementException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
