@@ -40,12 +40,14 @@ public class Precinct {
     private Integer whiteov18;
     private Integer otherov18;
     private Integer pop100;
+    private String statefp;
  
     public Precinct(){
         super();
     }
     
-    public Precinct(String shape_geojson,String vtdst, String name, Integer demvotpres, Integer repvotpres, Integer othvotpres, Integer totvotpres, Integer demvot16, Integer repvot16, Integer totvot16, Integer othvot16, Integer demvot18, Integer repvot18, Integer othvot18, Integer totvot18, Integer aminov18, Integer asianov18, Integer blackov18, Integer hawov18, Integer hisov18, Integer whiteov18, Integer otherov18, Integer pop100) {
+    public Precinct(String statefp,String shape_geojson,String vtdst, String name, Integer demvotpres, Integer repvotpres, Integer othvotpres, Integer totvotpres, Integer demvot16, Integer repvot16, Integer totvot16, Integer othvot16, Integer demvot18, Integer repvot18, Integer othvot18, Integer totvot18, Integer aminov18, Integer asianov18, Integer blackov18, Integer hawov18, Integer hisov18, Integer whiteov18, Integer otherov18, Integer pop100) {
+        this.statefp=statefp;
         this.shape_geojson=shape_geojson;
         this.vtdst=vtdst;
         this.name=name;
@@ -76,6 +78,11 @@ public class Precinct {
     @Column(name="OGR_FID")
     public Integer getOgrFID(){
         return ogrFID;
+    }
+    
+    @Column(name="statefp")
+    public String getStatefp(){
+        return statefp;
     }
     
     @Column(name="vtdst")
@@ -193,6 +200,10 @@ public class Precinct {
         return pop100;
     }
 
+    public void setStatefp(String statefp){
+        this.statefp=statefp;
+    }
+    
     public void setVtdst(String vtdst) {
         this.vtdst = vtdst;
     }

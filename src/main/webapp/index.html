@@ -23,15 +23,16 @@ and open the template in the editor.
         <div class="split left">
             <div class="centered">
                 <h3>Information</h3>
-                <div>
+                <div style="padding-bottom:10px">
                     <label for="States" style="font-size: 20px;padding-right: 26px">State:</label>
-                    <select id="States" style="width: 120px"> <!-- needs to be replaced by data from DB -->
-                        <option value="State" onclick="zoomOut()">State</option>
-                        <option value ="Arizona" onclick="zoomState(this.value)">Arizona</option>
-                        <option value="Rhode Island" onclick="zoomState(this.value)">Rhode Island</option>
-                        <option value="North Carolina" onclick="zoomState(this.value)">North Carolina</option>
+                    <select id="States"> <!-- needs to be replaced by data from DB -->
+                        <option value="State" onclick="loadFeature()">State</option>
+                        <option value ="Arizona" onclick="loadFeature(this.value)">Arizona</option>
+                        <option value="Rhode Island" onclick="loadFeature(this.value)">Rhode Island</option>
+                        <option value="North Carolina" onclick="loadFeature(this.value)">North Carolina</option>
                     </select>
-                    <br>
+                </div>
+                <div id="precinctDropdown" style="display:none" >
                     <label for="Precincts" style="font-size: 20px;">Precinct:</label>
                     <select id="Precincts" onchange="precMenuChange()" style="width: 120px"> <!-- needs to be replaced by DB data -->
                         <option value="precinct">Precinct</option>
@@ -289,17 +290,6 @@ and open the template in the editor.
             let usaZoomLevel=4;
             mymap.setView(new L.LatLng(usaCoords[0],usaCoords[1]), usaZoomLevel);
         }
-        function zoomState(stateName){
-            let riCoords=[41.5801,-71.4774];
-            let riZoomLevel=9;
-            switch(stateName){
-                case("Rhode Island"):
-                    mymap.setView(new L.LatLng(riCoords[0],riCoords[1]), riZoomLevel);
-                    break;
-                default:
-                    zoomOut();
-            }
-        }
         function initLoad(){
             mymap = L.map('forMap').setView([39.436192999314095, -98.26171875], 4);
             L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
@@ -312,58 +302,87 @@ and open the template in the editor.
             precLayer=L.geoJSON(null,{onEachFeature: onEachFeature}).addTo(mymap);
             
             console.log("Hello, World!");
-            /**let xhr_ri_prec=new XMLHttpRequest();
-            xhr_ri_prec.open('GET','http://localhost:8080/json_ri_prec');
-            xhr_ri_prec.onload=function(){
-                precLayer.addData(data);
-                loadPrecinctDictionary();
-            };
-            xhr_ri_prec.send();**/
-            xhr_precinct_data=new XMLHttpRequest();
-            xhr_precinct_data.open('GET','http://localhost:8080/precincts');
-            xhr_precinct_data.onload=function() {
-                let precinct_data=JSON.parse(xhr_precinct_data.response);
-                for(i=0;i<precinct_data.length;i++){
-                    let jsonObj=JSON.parse(precinct_data[i]["shape_geojson"]);
-                    let newjsonObj={};
-                    newjsonObj["type"]="Feature";
-                    newjsonObj["properties"]={};
-                    newjsonObj.properties["aminov18"]=precinct_data[i]["aminov18"];
-                    newjsonObj.properties["asianov18"]=precinct_data[i]["asianov18"];
-                    newjsonObj.properties["blackov18"]=precinct_data[i]["blackov18"];
-                    newjsonObj.properties["demvot16"]=precinct_data[i]["demvot16"];
-                    newjsonObj.properties["demvot18"]=precinct_data[i]["demvot18"];
-                    newjsonObj.properties["demvotpres"]=precinct_data[i]["demvotpres"];
-                    newjsonObj.properties["hawov18"]=precinct_data[i]["hawov18"];
-                    newjsonObj.properties["hisov18"]=precinct_data[i]["hisov18"];
-                    newjsonObj.properties["name"]=precinct_data[i]["name"];
-                    newjsonObj.properties["otherov18"]=precinct_data[i]["otherov18"];
-                    newjsonObj.properties["othvot16"]=precinct_data[i]["othvot16"];
-                    newjsonObj.properties["othvot18"]=precinct_data[i]["othvot18"];
-                    newjsonObj.properties["othvotpres"]=precinct_data[i]["othvotpres"];
-                    newjsonObj.properties["pop100"]=precinct_data[i]["pop100"];
-                    newjsonObj.properties["repvot16"]=precinct_data[i]["repvot16"];
-                    newjsonObj.properties["repvot18"]=precinct_data[i]["repvot18"];
-                    newjsonObj.properties["repvotpres"]=precinct_data[i]["repvotpres"];
-                    newjsonObj.properties["whiteov18"]=precinct_data[i]["whiteov18"];
-                    newjsonObj.properties["ogrFID"]=precinct_data[i]["ogrFID"];
-                    newjsonObj["geometry"]={};
-                    newjsonObj.geometry["type"]=jsonObj["type"];
-                    newjsonObj.geometry["coordinates"]=jsonObj["coordinates"];
-                    precLayer.addData(newjsonObj);
-                }
-                loadPrecinctDictionary();
+            loadFeature();
+        }
+        function loadFeature(stateName){
+            console.log(stateName);
+            //0 is rhodeisland,1 is north carolina, 2 is arizona
+            let riCoords=[41.5801,-71.4774];
+            let zoomLevel=[9];
+            let stateID=[44];
+            precLayer.clearLayers();
+            precinctLayers={};
+            clearBothSections();
+            document.getElementById("Precincts").innerHTML="<option value='precinct'>Precinct</option>";
+                    document.getElementById("precinctDropdown").style.display="inline";
+            switch(stateName){
+                case "Rhode Island":
+                    loadPrecinctsforState(stateID[0],riCoords,zoomLevel[0])
+                    break;
+                default:
+                    document.getElementById("precinctDropdown").style.display="none";
+                    loadStateForMap();
+                    zoomOut();
+                    break;
             }
-            xhr_precinct_data.send();
+        }
+        function loadStateForMap(){
             let xhr_ri_state=new XMLHttpRequest();
             xhr_ri_state.open('GET','http://localhost:8080/json_ri_state');
-            xhr_ri_state.onload=function(){
+            xhr_ri_state.onload=()=>{
                 let data=JSON.parse(xhr_ri_state.response);
                 L.geoJSON(data,{style:setShapeColor(this,"STATE_STYLE")}).addTo(mymap);
             };
             xhr_ri_state.send();
         }
+        function loadPrecinctsforState(state_id,riCoords,zoomLevel){
+            mymap.setView(new L.LatLng(riCoords[0],riCoords[1]), zoomLevel);
+            let xhr_precinct_data=new XMLHttpRequest();
+            xhr_precinct_data.open('GET','http://localhost:8080/precincts/'+state_id);
+            xhr_precinct_data.onload=()=> {
+                let precinct_data=JSON.parse(xhr_precinct_data.response);
+                for(i=0;i<precinct_data.length;i++){
+                    precLayer.addData(prepareFeatureToUse(precinct_data));
+                }
+                loadPrecinctDictionary();
+            }
+            xhr_precinct_data.send();
+        }
         initLoad();
+        function prepareFeatureToUse(precinct_data){
+            let jsonObj=JSON.parse(precinct_data[i]["shape_geojson"]);
+            let newjsonObj={};
+            newjsonObj["type"]="Feature";
+            newjsonObj["properties"]={};
+            newjsonObj.properties["aminov18"]=precinct_data[i]["aminov18"];
+            newjsonObj.properties["asianov18"]=precinct_data[i]["asianov18"];
+            newjsonObj.properties["blackov18"]=precinct_data[i]["blackov18"];
+            newjsonObj.properties["demvot16"]=precinct_data[i]["demvot16"];
+            newjsonObj.properties["demvot18"]=precinct_data[i]["demvot18"];
+            newjsonObj.properties["demvotpres"]=precinct_data[i]["demvotpres"];
+            newjsonObj.properties["hawov18"]=precinct_data[i]["hawov18"];
+            newjsonObj.properties["hisov18"]=precinct_data[i]["hisov18"];
+            newjsonObj.properties["name"]=precinct_data[i]["name"];
+            newjsonObj.properties["otherov18"]=precinct_data[i]["otherov18"];
+            newjsonObj.properties["othvot16"]=precinct_data[i]["othvot16"];
+            newjsonObj.properties["othvot18"]=precinct_data[i]["othvot18"];
+            newjsonObj.properties["othvotpres"]=precinct_data[i]["othvotpres"];
+            newjsonObj.properties["pop100"]=precinct_data[i]["pop100"];
+            newjsonObj.properties["repvot16"]=precinct_data[i]["repvot16"];
+            newjsonObj.properties["repvot18"]=precinct_data[i]["repvot18"];
+            newjsonObj.properties["repvotpres"]=precinct_data[i]["repvotpres"];
+            newjsonObj.properties["whiteov18"]=precinct_data[i]["whiteov18"];
+            newjsonObj.properties["ogrFID"]=precinct_data[i]["ogrFID"];
+            newjsonObj.properties["totvotpres"]=precinct_data[i]["totvotpres"];
+            newjsonObj.properties["totvot16"]=precinct_data[i]["totvot16"];
+            newjsonObj.properties["totvot18"]=precinct_data[i]["totvot18"];
+            newjsonObj.properties["statefp"]=precinct_data[i]["statefp"];
+            newjsonObj["geometry"]={};
+            newjsonObj.geometry["type"]=jsonObj["type"];
+            newjsonObj.geometry["coordinates"]=jsonObj["coordinates"];
+            console.log(newjsonObj);
+            return newjsonObj;
+        }
         function loadPrecinctDictionary(){
             precinctLayers={};
             let precLayers=precLayer._layers;
@@ -454,27 +473,45 @@ and open the template in the editor.
             let selectedFeature=selectedLayer.feature;
             let pred16D=selectedFeature.properties.demvotpres;
             let pred16R=selectedFeature.properties.repvotpres;
+            let pred16O=selectedFeature.properties.othvotpres;
             let cong16D=selectedFeature.properties.demvot16;
             let cong16R=selectedFeature.properties.repvot16;
+            let cong16O=selectedFeature.properties.othvot16;
             let cong18D=selectedFeature.properties.demvot18;
             let cong18R=selectedFeature.properties.repvot18;
+            let cong18O=selectedFeature.properties.othvot18;
+            let pred16T=selectedFeature.properties.totvotpres;
+            let cong16T=selectedFeature.properties.totvot16;
+            let cong18T=selectedFeature.properties.totvot18;
 
             let dropdownYear = document.getElementById("year");
             if(dropdownYear.options[dropdownYear.selectedIndex].value == "pred16"){
-                document.getElementById("totVotePop").innerHTML=pred16D+pred16R + " people";
-                if(pred16D==0)document.getElementById("demNum").innerHTML = 0 + " people [0%]";
-                else document.getElementById("demNum").innerHTML = pred16D+ " people ["+Math.round(100*(pred16D/(pred16D+pred16R))) +"%]";
-                if(pred16R==0) document.getElementById("repNum").innerHTML = 0 + " people [0%]";
-                else document.getElementById("repNum").innerHTML = pred16R+ " people ["+Math.round(100*(pred16R/(pred16D+pred16R))) +"%]";
+                document.getElementById("totVotePop").innerHTML=pred16T + " people";
+                if(pred16T==0)document.getElementById("demNum").innerHTML = 0 + " people [0%]";
+                else document.getElementById("demNum").innerHTML = pred16D+ " people ["+Math.round(100*(pred16D/pred16T)) +"%]";
+                if(pred16T==0) document.getElementById("repNum").innerHTML = 0 + " people [0%]";
+                else document.getElementById("repNum").innerHTML = pred16R+ " people ["+Math.round(100*(pred16R/pred16T)) +"%]";
             }
             else if(dropdownYear.options[dropdownYear.selectedIndex].value == "cong16"){
                 document.getElementById("demNum").innerHTML = cong16D;
                 document.getElementById("repNum").innerHTML = cong16R;
+                document.getElementById("totVotePop").innerHTML=cong16T + " people";
             }
             else{
                 document.getElementById("demNum").innerHTML = cong18D;
                 document.getElementById("repNum").innerHTML = cong18R;
+                document.getElementById("totVotePop").innerHTML=cong18T + " people";
             }
+        }
+        function clearBothSections(){
+            document.getElementById("whiteNum").innerHTML="N/A";
+            document.getElementById("blackNum").innerHTML="N/A";
+            document.getElementById("asianNum").innerHTML="N/A";
+            document.getElementById("hispanicNum").innerHTML="N/A";
+            document.getElementById("otherNum").innerHTML="N/A";
+            document.getElementById("totVotePop").innerHTML="N/A";
+            document.getElementById("demNum").innerHTML ="N/A";
+            document.getElementById("repNum").innerHTML ="N/A";
         }
         function precMenuChange(selectedValue){
             if(selectedValue==undefined){
@@ -490,14 +527,13 @@ and open the template in the editor.
         function showPrecinctOnClick(selectedLayer,selectedFeature){
             precinctZoom(turf.centroid(selectedFeature),turf.area(selectedFeature));
             selectedLayer.bindPopup('<h1>' + selectedFeature.properties.name + '</h1>');
-
             setDemographicSection(selectedFeature);
             setElectionSection(selectedFeature);
             useErrorType(selectedFeature,selectedLayer);
         }
         function changeAllColor(){
             for(i in precinctLayers){
-                let singleLayer=precSubLayers[i];
+                let singleLayer=precinctLayers[i];
                 let feature=singleLayer.feature;
                 changeFeatColor(feature,singleLayer);
             }
@@ -526,7 +562,7 @@ and open the template in the editor.
             showPrecinctOnClick(selectedLayer,featInLayer);
         }
         function useErrorType(feat,layer){
-            if(feat.properties.demvotepres ==0 && feat.properties.repvotpres == 0 && layer.options.color=="orange"){
+            if(feat.properties.demvotpres ==0 && feat.properties.repvotpres == 0 && layer.options.color=="orange"){
                 showError(layer,"GHOST");
             }
             else{
@@ -549,6 +585,7 @@ and open the template in the editor.
         }
         function setGhostPrecinct(layer){
             let feature=layer.feature;
+            let featureID=feature.properties.ogrFID;
             let buttonToBeDeleted=document.getElementById(feature.properties.name+"_error");
             buttonToBeDeleted.parentNode.removeChild(buttonToBeDeleted);
             let errorDiv=document.getElementById("currentError");
@@ -556,7 +593,7 @@ and open the template in the editor.
             errorDiv.innerHTML="";
             document.getElementById("errorSection").style.display="none";
             //changes the type of error
-            updatePrecinct(feature.properties.name,feature);
+            updatePrecinct(featureID,prepareFeatureToSend(feature));
             deleteError(feature.properties.name);
             addResolvedError(feature.properties.name);
         }
@@ -586,6 +623,10 @@ and open the template in the editor.
             jsonObj["othvot18"]=feature.properties.othvot18;
             jsonObj["othvotpres"]=feature.properties.othvotpres;
             jsonObj["pop100"]=feature.properties.pop100;
+            jsonObj["statefp"]=feature.properties.statefp;
+            jsonObj["totvotpres"]=feature.properties.totvotpres;
+            jsonObj["totvot16"]=feature.properties.totvot16;
+            jsonObj["totvot18"]=feature.properties.totvot18;
             jsonObj["repvot16"]=feature.properties.repvot16;
             jsonObj["repvot18"]=feature.properties.repvot18;
             jsonObj["repvotpres"]=feature.properties.repvotpres;
@@ -619,7 +660,7 @@ and open the template in the editor.
             precLayer.removeLayer(layer);
             precLayer.addData(newPrecinct);
             
-            updatePrecinct(feature.properties.name,newPrecinct);
+            updatePrecinct(feature.properties.ogrFID,newPrecinct);
             deleteError(newPrecinct.properties.name);
             addResolvedError(newFeature.properties.name);
         }

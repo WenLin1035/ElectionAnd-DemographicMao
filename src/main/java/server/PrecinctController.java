@@ -34,6 +34,16 @@ public class PrecinctController {
         return service.findAll();
     }
     
+    @GetMapping("/precincts/{id}")
+    public List<Precinct> listByStatefp(@PathVariable String id){
+        return service.findByStatefp(id);
+    }
+    
+    @GetMapping("/errors")
+    public List<String> lister(){
+        return service.finder();
+    }
+    
     @GetMapping("/json_ri_prec")
     public String returnRIPrec(){
         try {
@@ -69,7 +79,7 @@ public class PrecinctController {
     public void add(@RequestBody Precinct precinct) {
         System.out.println("hi from java");
         System.out.println(precinct);
-        service.save(precinct);
+        //service.save(precinct);
     }
     
     // RESTful API method for Update operation
