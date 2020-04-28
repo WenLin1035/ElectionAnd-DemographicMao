@@ -5,14 +5,17 @@
  */
 package server;
 
+import java.sql.Timestamp;
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.*;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.*;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 /**
  *
@@ -24,15 +27,24 @@ public class ErrorController {
     private ErrorRepo service;
     
     @GetMapping("/errors/{id}")
-    public List<Error> lister(@PathVariable String id){
+    public List<Error> listById(@PathVariable String id){
         System.out.println(service);
         return service.findByStatefp(id);
     }
-    
     
     @GetMapping("/errors")
     public List<Error> list() {
         return service.findAll();
     }
     
+    @PutMapping("/errors/{id}")
+    public void update(@RequestBody Error error, @PathVariable String id){
+        try {
+            Error existError = service.findByPrecinctID(Integer.parseInt(id));
+            error.setErrorID(existError.getErrorID());
+            error.setCommentTime(new Timestamp(System.currentTimeMillis()));
+            service.save(error);
+        } catch (NoSuchElementException e) {
+        } 
+    }
 }

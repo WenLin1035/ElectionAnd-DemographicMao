@@ -5,6 +5,7 @@
  */
 package server;
 
+import java.sql.Timestamp;
 import javax.persistence.*;
 
 /**
@@ -18,16 +19,18 @@ public class Error {
     private Integer precinctID;
     private String errorType;
     private String comment;
+    private Timestamp commentTime;
     
     public Error(){
         super();
     }
     
-    public Error(Integer errorID, Integer precinctID, String errorType, String comment){
+    public Error(Timestamp commentTime,Integer errorID, Integer precinctID, String errorType, String comment){
         this.errorID=errorID;
         this.precinctID=precinctID;
         this.errorType=errorType;
         this.comment=comment;
+        this.commentTime=commentTime;
     }
 
     @Id
@@ -37,6 +40,11 @@ public class Error {
         return errorID;
     }
 
+    @Column(name="comment_time")
+    public Timestamp getCommentTime(){
+        return commentTime;
+    }
+    
     @Column(name="precinct_id")
     public Integer getPrecinctID() {
         return precinctID;
@@ -68,6 +76,8 @@ public class Error {
         this.comment = comment;
     }
     
-    
+    public void setCommentTime(Timestamp commentTime){
+        this.commentTime=commentTime;
+    }
     
 }

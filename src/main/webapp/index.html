@@ -579,22 +579,25 @@ and open the template in the editor.
             dropdown.value = featInLayer.properties.name;
             showPrecinctOnClick(selectedLayer,featInLayer);
         }
-        function addError(data){
+        function prepareErrorToSend(feature){
+            let today = new Date();
+            let dateTime = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate()+" "+today.getHours() + ":" + today.getMinutes()+":"+today.getSeconds();
+            let comment="["+dateTime+"] >>"+document.getElementById("commentArea").value+"<br/>";
+            jsonObj={};
+            jsonObj["comment"]=document.getElementById("commentArea").value;
+            jsonObj["errorType"]=feature.properties.errorType;
+            document.getElementById("commentArea").value="";
+            document.getElementById("errorLog").innerHTML+="<div style=\'border-style:solid\'>Error Resolved on: "+precinctName+" from ERROR. <br/> Optional Comment: "+comment+"</div><br/>";
+            return jsonObj;
+        }
+        function updateError(id,data){
             let xhr=new XMLHttpRequest();
-            xhr.open('POST','http://localhost:8080/precincts');
+            xhr.open('PUT','http://localhost:8080/errors/'+id);
             if(data){
                 xhr.setRequestHeader('Content-Type','application/json');
             }
             data=JSON.stringify(data);
             xhr.send(data);
-        }
-        function addResolvedError(precinctName){
-            let today = new Date();
-            let dateTime = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate()+" "+today.getHours() + ":" + today.getMinutes()+":"+today.getSeconds();
-            let comment="["+dateTime+"] >>"+document.getElementById("commentArea").value+"<br/>";
-            document.getElementById("commentArea").value="";
-            addError({"dateTime":dateTime,"comment":document.getElementById("commentArea").value});
-            document.getElementById("errorLog").innerHTML+="<div style=\'border-style:solid\'>Error Resolved on: "+precinctName+" from ERROR. <br/> Optional Comment: "+comment+"</div><br/>";
         }
         function setGhostPrecinct(layer){
             let feature=layer.feature;
@@ -607,7 +610,7 @@ and open the template in the editor.
             errorDiv.innerHTML="";
             document.getElementById("errorSection").style.display="none";
             updatePrecinct(featureID,preparePrecinctToSend(feature));
-            //TO-DO Update Error
+            updateError(featureID,prepareErrorToSend(feature))
         }
         function updatePrecinct(selectedID,newData){
             let xhr=new XMLHttpRequest();
@@ -669,7 +672,7 @@ and open the template in the editor.
             precLayer.addData(newPrecinct);
             
             updatePrecinct(feature.properties.ogrFID,newPrecinct);
-            //TO-DO Update Error
+            updateError(feature.properties.ogrFID,prepareErrorToSend(newPrecinct));
         }
         function showError(layer,errorType){
             let featureName=layer.feature.properties.name;
@@ -731,7 +734,7 @@ and open the template in the editor.
             
             if(selectedFeature.properties.errorType=="GHOST" && document.getElementById("pred16Dem").value!=0){
                 selectedFeature.properties.errorType="RESOLVED";
-                //TO-DO Update Error
+                updateError(selectedFeature.properties.ogrFID,prepareErrorToSend(selectedFeature));
             }
             let selectedError=document.getElementById(selectedValue+"_error");
             if(selectedError!=undefined){

@@ -39,6 +39,17 @@ public class PrecinctController {
         return service.findByStatefp(id);
     }
     
+    // RESTful API method for Update operation
+    @PutMapping("/precincts/{id}")
+    public void update(@RequestBody Precinct precinct, @PathVariable String id) {
+        try {
+            Precinct existPrecinct = service.findByOgrFID(Integer.parseInt(id));
+            precinct.setOgrFID(Integer.parseInt(id));
+            service.save(precinct);
+        } catch (NoSuchElementException e) {
+        }      
+    }
+    
     @GetMapping("/json_ri_prec")
     public String returnRIPrec(){
         try {
@@ -75,17 +86,6 @@ public class PrecinctController {
         System.out.println("hi from java");
         System.out.println(precinct);
         //service.save(precinct);
-    }
-    
-    // RESTful API method for Update operation
-    @PutMapping("/precincts/{id}")
-    public void update(@RequestBody Precinct precinct, @PathVariable String id) {
-        try {
-            Precinct existPrecinct = service.findByOgrFID(Integer.parseInt(id));
-            precinct.setOgrFID(Integer.parseInt(id));
-            service.save(precinct);
-        } catch (NoSuchElementException e) {
-        }      
     }
     
     @Transactional

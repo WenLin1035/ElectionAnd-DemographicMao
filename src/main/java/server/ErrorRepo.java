@@ -19,4 +19,5 @@ public interface ErrorRepo extends JpaRepository<Error, Integer> {
     //The : binds the variable stateFP to the param stateFP to dynamically load errors from specific states
     @Query(value="SELECT * FROM error e join precinct p WHERE p.OGR_FID=e.precinct_id AND p.statefp= stateFP",nativeQuery=true)
     List<Error> findByStatefp(@Param("stateFP") String stateFP);
+    Error findByPrecinctID(Integer precinctID);
 }
