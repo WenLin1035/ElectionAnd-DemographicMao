@@ -734,13 +734,13 @@ and open the template in the editor.
             
             if(selectedFeature.properties.errorType=="GHOST" && document.getElementById("pred16Dem").value!=0){
                 selectedFeature.properties.errorType="RESOLVED";
+                let selectedError=document.getElementById(selectedValue+"_error");
+                if(selectedError!=undefined){
+                    selectedError.parentNode.removeChild(selectedError);
+                    document.getElementById("currentError").innerHTML="";
+                    document.getElementById("errorSection").style.display="none";
+                }
                 updateError(selectedFeature.properties.ogrFID,prepareErrorToSend(selectedFeature));
-            }
-            let selectedError=document.getElementById(selectedValue+"_error");
-            if(selectedError!=undefined){
-                selectedError.parentNode.removeChild(selectedError);
-                document.getElementById("currentError").innerHTML="";
-                document.getElementById("errorSection").style.display="none";
             }
             document.getElementById('changeDataSection').style.display='none';
             changeFeatColor(selectedLayer.feature,selectedLayer);
