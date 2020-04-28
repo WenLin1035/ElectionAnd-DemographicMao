@@ -329,7 +329,7 @@ and open the template in the editor.
             }
         }
         function loadErrorsForState(state_id){
-            let xhr_precinct_data=new XMLHttpRequest();
+            let xhr_error_data=new XMLHttpRequest();
             xhr_error_data.open('GET','http://localhost:8080/errors/'+state_id);
             xhr_error_data.onload=()=> {
                 let error_data=JSON.parse(xhr_error_data.response);
