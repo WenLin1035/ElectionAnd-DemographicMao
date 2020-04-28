@@ -583,7 +583,7 @@ and open the template in the editor.
             let today = new Date();
             let dateTime = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate()+" "+today.getHours() + ":" + today.getMinutes()+":"+today.getSeconds();
             let comment="["+dateTime+"] >>"+document.getElementById("commentArea").value+"<br/>";
-            jsonObj={};
+            let jsonObj={};
             jsonObj["comment"]=document.getElementById("commentArea").value;
             jsonObj["errorType"]=feature.properties.errorType;
             document.getElementById("commentArea").value="";
