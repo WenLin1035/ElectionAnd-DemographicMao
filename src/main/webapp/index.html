@@ -239,14 +239,6 @@ and open the template in the editor.
         </div>
     </body>
     <script>
-        function addResolvedError(precinctName){
-            let today = new Date();
-            let dateTime = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate()+" "+today.getHours() + ":" + today.getMinutes()+":"+today.getSeconds();
-            let comment="["+dateTime+"] >>"+document.getElementById("commentArea").value+"<br/>";
-            document.getElementById("commentArea").value="";
-            addError({"dateTime":dateTime,"comment":document.getElementById("commentArea").value});
-            document.getElementById("errorLog").innerHTML+="<div style=\'border-style:solid\'>Error Resolved on: "+precinctName+" from ERROR. <br/> Optional Comment: "+comment+"</div><br/>";
-        }
         //change button
         function openChangeDataSection(){
             let dropdownValue=document.getElementById("Precincts").value;
@@ -313,12 +305,14 @@ and open the template in the editor.
             let stateID=[44];
             precLayer.clearLayers();
             precinctLayers={};
+            errorDictionary={};
             clearBothSections();
+            document.getElementById("errorLog").innerHTML="";
             document.getElementById("Precincts").innerHTML="<option value='precinct'>Precinct</option>";
                     document.getElementById("precinctDropdown").style.display="inline";
             switch(stateName){
                 case "Rhode Island":
-                    //loadErrorsForState(stateID[0]);
+                    loadErrorsForState(stateID[0]);
                     loadPrecinctsForState(stateID[0],stateCoords[0],zoomLevel[0])
                     break;
                 default:
@@ -333,9 +327,15 @@ and open the template in the editor.
             xhr_error_data.open('GET','http://localhost:8080/errors/'+state_id);
             xhr_error_data.onload=()=> {
                 let error_data=JSON.parse(xhr_error_data.response);
-                console.log(error_data);
+                loadErrorDictionary(error_data);
             }
             xhr_error_data.send();
+        }
+        function loadErrorDictionary(error_data){
+            errorDictionary={};
+            for(i=0;i<error_data.length;i++){
+                errorDictionary[error_data[i].precinctID]=error_data[i].errorType;
+            }
         }
         function loadStateForMap(){
             let xhr_ri_state=new XMLHttpRequest();
@@ -363,6 +363,7 @@ and open the template in the editor.
         function prepareFeatureToUse(precinct_data){
             let jsonObj=JSON.parse(precinct_data[i]["shape_geojson"]);
             let newjsonObj={};
+            let errorType=errorDictionary[precinct_data[i]["ogrFID"]];
             newjsonObj["type"]="Feature";
             newjsonObj["properties"]={};
             newjsonObj.properties["aminov18"]=precinct_data[i]["aminov18"];
@@ -388,6 +389,8 @@ and open the template in the editor.
             newjsonObj.properties["totvot16"]=precinct_data[i]["totvot16"];
             newjsonObj.properties["totvot18"]=precinct_data[i]["totvot18"];
             newjsonObj.properties["statefp"]=precinct_data[i]["statefp"];
+            if(errorType==undefined) newjsonObj.properties["errorType"]="NONE";
+            else newjsonObj.properties["errorType"]=errorType;
             newjsonObj["geometry"]={};
             newjsonObj.geometry["type"]=jsonObj["type"];
             newjsonObj.geometry["coordinates"]=jsonObj["coordinates"];
@@ -532,6 +535,9 @@ and open the template in the editor.
             if(selectedValue==undefined){
                 selectedValue=document.getElementById("Precincts").value;
             }
+            else{
+                document.getElementById("Precincts").value=selectedValue;
+            }
             console.log(selectedValue);
             let selectedLayer=precinctLayers[selectedValue];
             let selectedFeature=selectedLayer.feature;
@@ -544,7 +550,7 @@ and open the template in the editor.
             selectedLayer.bindPopup('<h1>' + selectedFeature.properties.name + '</h1>');
             setDemographicSection(selectedFeature);
             setElectionSection(selectedFeature);
-            useErrorType(selectedFeature,selectedLayer);
+            showError(selectedLayer,selectedFeature.properties.errorType);
         }
         function changeAllColor(){
             for(i in precinctLayers){
@@ -554,7 +560,7 @@ and open the template in the editor.
             }
         }
         function changeFeatColor(ft,tLayer){
-            if(ft.properties.demvotpres ==0 && ft.properties.repvotpres == 0){
+            if(ft.properties.errorType!="NONE" && ft.properties.errorType!="RESOLVED"){
                 tLayer.setStyle(setShapeColor(tLayer,"ERROR_STYLE"));
             }
             else{
@@ -563,9 +569,6 @@ and open the template in the editor.
                 }
                 if(ft.properties.demvotpres<=ft.properties.repvotpres){
                     tLayer.setStyle(setShapeColor(tLayer,"REP_STYLE"));
-                }
-                if(ft.properties.name=="Burrillville 0302" && ft.geometry.type=="MultiPolygon"){
-                    tLayer.setStyle(setShapeColor(tLayer,"ERROR_STYLE"));
                 }
             }
         }
@@ -576,19 +579,6 @@ and open the template in the editor.
             dropdown.value = featInLayer.properties.name;
             showPrecinctOnClick(selectedLayer,featInLayer);
         }
-        function useErrorType(feat,layer){
-            if(feat.properties.demvotpres ==0 && feat.properties.repvotpres == 0 && layer.options.color=="orange"){
-                showError(layer,"GHOST");
-            }
-            else{
-                if(feat.properties.name=="Burrillville 0302" && layer.options.color=="orange"){
-                    showError(layer,"DONUT");
-                }
-                else{
-                    showError(layer);
-                }
-            }
-        }
         function addError(data){
             let xhr=new XMLHttpRequest();
             xhr.open('POST','http://localhost:8080/precincts');
@@ -598,6 +588,14 @@ and open the template in the editor.
             data=JSON.stringify(data);
             xhr.send(data);
         }
+        function addResolvedError(precinctName){
+            let today = new Date();
+            let dateTime = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate()+" "+today.getHours() + ":" + today.getMinutes()+":"+today.getSeconds();
+            let comment="["+dateTime+"] >>"+document.getElementById("commentArea").value+"<br/>";
+            document.getElementById("commentArea").value="";
+            addError({"dateTime":dateTime,"comment":document.getElementById("commentArea").value});
+            document.getElementById("errorLog").innerHTML+="<div style=\'border-style:solid\'>Error Resolved on: "+precinctName+" from ERROR. <br/> Optional Comment: "+comment+"</div><br/>";
+        }
         function setGhostPrecinct(layer){
             let feature=layer.feature;
             let featureID=feature.properties.ogrFID;
@@ -605,12 +603,11 @@ and open the template in the editor.
             buttonToBeDeleted.parentNode.removeChild(buttonToBeDeleted);
             let errorDiv=document.getElementById("currentError");
             layer.setStyle(setShapeColor(layer,"GHOST_STYLE"));
+            feature.properties.errorType="RESOLVED";
             errorDiv.innerHTML="";
             document.getElementById("errorSection").style.display="none";
-            //changes the type of error
-            updatePrecinct(featureID,prepareFeatureToSend(feature));
-            deleteError(feature.properties.name);
-            addResolvedError(feature.properties.name);
+            updatePrecinct(featureID,preparePrecinctToSend(feature));
+            //TO-DO Update Error
         }
         function updatePrecinct(selectedID,newData){
             let xhr=new XMLHttpRequest();
@@ -622,7 +619,7 @@ and open the template in the editor.
             console.log(data);
             xhr.send(data);
         }
-        function prepareFeatureToSend(feature){
+        function preparePrecinctToSend(feature){
             let jsonObj={};
             jsonObj["aminov18"]=feature.properties.aminov18;
             jsonObj["asianov18"]=feature.properties.asianov18;
@@ -649,11 +646,6 @@ and open the template in the editor.
             jsonObj["shape_geojson"]=JSON.stringify(feature.geometry);
             return jsonObj;
         }
-        function deleteError(precinctName){
-            let xhr=new XMLHttpRequest();
-            xhr.open('DELETE','http://localhost:8080/errors/'+precinctName);
-            xhr.send();
-        }
         function mergePrecincts(layer){
             let feature=layer.feature;
             let buttonToBeDeleted=document.getElementById(feature.properties.name+"_error");
@@ -677,8 +669,7 @@ and open the template in the editor.
             precLayer.addData(newPrecinct);
             
             updatePrecinct(feature.properties.ogrFID,newPrecinct);
-            deleteError(newPrecinct.properties.name);
-            addResolvedError(newFeature.properties.name);
+            //TO-DO Update Error
         }
         function showError(layer,errorType){
             let featureName=layer.feature.properties.name;
@@ -688,7 +679,7 @@ and open the template in the editor.
                     document.getElementById("errorSection").style.display="block";
                     errorDiv.innerHTML="Ghost Precinct? <br>\n\
                         <button onclick='setGhostPrecinct(precinctLayers[\""+featureName+"\"])'>Yes</button>\n\
-                        <button onclick='openChangeDataSection();errorDiv.innerHTML=\"\"'>No</button>";
+                        <button onclick='openChangeDataSection();'>No</button>";
                     break;
                 case "DONUT":
                     document.getElementById("errorSection").style.display="block";
@@ -738,10 +729,9 @@ and open the template in the editor.
             showPrecinctOnClick(selectedLayer,selectedFeature);
             selectedLayer.openPopup();
             
-            changeFeatColor(selectedLayer.feature,selectedLayer);
-            if(selectedFeature.properties.name=="Voting Districts Not Defined" && document.getElementById("pred16Dem").value!=0){
-                deleteError(selectedFeature.properties.name);
-                addResolvedError(newFeature.properties.name);
+            if(selectedFeature.properties.errorType=="GHOST" && document.getElementById("pred16Dem").value!=0){
+                selectedFeature.properties.errorType="RESOLVED";
+                //TO-DO Update Error
             }
             let selectedError=document.getElementById(selectedValue+"_error");
             if(selectedError!=undefined){
@@ -750,7 +740,8 @@ and open the template in the editor.
                 document.getElementById("errorSection").style.display="none";
             }
             document.getElementById('changeDataSection').style.display='none';
-            updatePrecinct(selectedID,prepareFeatureToSend(selectedFeature));
+            changeFeatColor(selectedLayer.feature,selectedLayer);
+            updatePrecinct(selectedID,preparePrecinctToSend(selectedFeature));
         }
 	function changePrecinctDemographicData(feature,whiteVotePop,blackVotePop,asianVotePop,hispanicVotePop,otherVotePop){
             feature.properties.whiteov18=parseInt(whiteVotePop);
@@ -775,7 +766,7 @@ and open the template in the editor.
                 mouseover: setNPS,
                 mouseout: setOPS
             });
-            if(feature.properties.demvotpres ==0 && feature.properties.repvotpres == 0 && layer.options.color=="#3388ff"){
+            if(feature.properties.errorType=="GHOST"){
                document.getElementById("errorLog").innerHTML+="<div id=\""+feature.properties.name+"_error\"><button onclick='document.getElementById(\"errorPopup\").style.display=\"none\";precMenuChange(\""+feature.properties.name+"\");'>Ghost Precinct Found ["+feature.properties.name+"](Requires Verification)</button></div>";
             }
             if(feature.properties.name=="Burrillville 0302" && feature.geometry.type=="MultiPolygon"){
