@@ -46,7 +46,7 @@ and open the template in the editor.
                     <tr>
                         <td><label for="dataSection">Data Type:</label></td>
                         <td>
-                            <select id="dataSection" onchange="switchDataSection()" style="">
+                            <select id="dataSection" onchange="switchDataSection();changeAllColor()" style="">
                                 <option value="election">Election</option>
                                 <option value="demographic">Demographic</option>
                             </select>
@@ -55,7 +55,7 @@ and open the template in the editor.
                     <tr>
                         <td><label for="year">Election Type:</label></td>
                         <td>
-                            <select id="year" onchange="setElectionSection()" style="">
+                            <select id="year" onchange="setElectionSection();changeAllColor()" style="">
                                 <option id="pred16" value="pred16">Presidential 2016</option>
                                 <option id="cong16" value="cong16">Congressional 2016</option>
                                 <option id="cong18" value="cong18">Congressional 2018</option>
@@ -216,11 +216,11 @@ and open the template in the editor.
                     <tr><td colspan="2"><br/>Demographic Data Color Change </td></tr>
                     <tr>
                         <td><label>White: </label></td>
-                        <td><input type="color" id="whiteColor" onchange="changeAllColor()" name="whiteColor" value="#0066ff"></td>
+                        <td><input type="color" id="whiteColor" onchange="changeAllColor()" name="whiteColor" value="#624a2e"></td>
                     </tr>
                     <tr> 
                         <td><label>Black: </label></td>
-                        <td><input type="color" id="blackColor" onchange="changeAllColor()" name="blackColor" value="#ff0000"></td>
+                        <td><input type="color" id="blackColor" onchange="changeAllColor()" name="blackColor" value="#8affff"></td>
                     </tr>
                     <tr> 
                         <td><label>Asian: </label></td>
@@ -430,6 +430,30 @@ and open the template in the editor.
                     return{
                         color:document.getElementById("repColor").value
                     };
+                case "OTHER_ELECTION_STYLE":
+                    return{
+                        color:document.getElementById("otherColor").value
+                    };
+                case "OTHER_DEMO_STYLE":
+                    return{
+                        color:document.getElementById("restColor").value
+                    };
+                case "WHITE_STYLE":
+                    return{
+                        color:document.getElementById("whiteColor").value
+                    };
+                case "BLACK_STYLE":
+                    return{
+                        color:document.getElementById("blackColor").value
+                    };
+                case "ASIAN_STYLE":
+                    return{
+                        color:document.getElementById("asianColor").value
+                    };
+                case "HIS_STYLE":
+                    return{
+                        color:document.getElementById("hisColor").value
+                    };
                 case "GHOST_STYLE":
                     return{
                         color:'gray'
@@ -559,16 +583,66 @@ and open the template in the editor.
                 changeFeatColor(feature,singleLayer);
             }
         }
-        function changeFeatColor(ft,tLayer){
-            if(ft.properties.errorType!="NONE" && ft.properties.errorType!="RESOLVED"){
+        function changeFeatColor(selectedFeature,tLayer){
+            if(selectedFeature.properties.errorType!="NONE" && selectedFeature.properties.errorType!="RESOLVED"){
                 tLayer.setStyle(setShapeColor(tLayer,"ERROR_STYLE"));
             }
             else{
-                if(ft.properties.demvotpres>ft.properties.repvotpres){
-                    tLayer.setStyle(setShapeColor(tLayer,"DEM_STYLE"));
-                }
-                if(ft.properties.demvotpres<=ft.properties.repvotpres){
-                    tLayer.setStyle(setShapeColor(tLayer,"REP_STYLE"));
+                let dataType=document.getElementById("dataSection").value;
+                switch (dataType){
+                    case "demographic":
+                        let whiteov18=selectedFeature.properties.whiteov18;
+                        let blackov18=selectedFeature.properties.blackov18;
+                        let asianov18=selectedFeature.properties.asianov18;
+                        let hisov18=selectedFeature.properties.hisov18;
+                        let otherov18=selectedFeature.properties.otherov18;
+                        let majorRaceIndex=Math.max(whiteov18,blackov18,asianov18,hisov18,otherov18);
+                        switch(majorRaceIndex){
+                            case whiteov18: {tLayer.setStyle(setShapeColor(tLayer,"WHITE_STYLE")); break;}
+                            case blackov18: {tLayer.setStyle(setShapeColor(tLayer,"BLACK_STYLE")); break;}
+                            case asianov18: {tLayer.setStyle(setShapeColor(tLayer,"ASIAN_STYLE")); break;}
+                            case hisov18: {tLayer.setStyle(setShapeColor(tLayer,"HIS_STYLE")); break;}
+                            case otherov18: {tLayer.setStyle(setShapeColor(tLayer,"OTHER_DEMO_STYLE")); break;}
+                        }
+                        break;
+                    case "election":
+                        let majorElectionIndex=0;
+                        let electionValue=document.getElementById("year").value;
+                        switch(electionValue){
+                            case "pred16":
+                                let demvotpres=selectedFeature.properties.demvotpres;
+                                let repvotpres=selectedFeature.properties.repvotpres;
+                                let othvotpres=selectedFeature.properties.othvotpres;
+                                majorElectionIndex=Math.max(demvotpres,repvotpres,othvotpres);
+                                switch(majorElectionIndex){
+                                    case demvotpres: {tLayer.setStyle(setShapeColor(tLayer,"DEM_STYLE")); break;}
+                                    case repvotpres: {tLayer.setStyle(setShapeColor(tLayer,"REP_STYLE")); break;}
+                                    case othvotpres: {tLayer.setStyle(setShapeColor(tLayer,"OTHER_ELECTION_STYLE")); break;}
+                                }
+                                break;
+                            case "cong16":
+                                let demvot16=selectedFeature.properties.demvot16;
+                                let repvot16=selectedFeature.properties.repvot16;
+                                let othvot16=selectedFeature.properties.othvot16;
+                                majorElectionIndex=Math.max(demvot16,repvot16,othvot16);
+                                switch(majorElectionIndex){
+                                    case demvot16: {tLayer.setStyle(setShapeColor(tLayer,"DEM_STYLE")); break;}
+                                    case repvot16: {tLayer.setStyle(setShapeColor(tLayer,"REP_STYLE")); break;}
+                                    case othvot16: {tLayer.setStyle(setShapeColor(tLayer,"OTHER_ELECTION_STYLE")); break;}
+                                }
+                                break;
+                            case "cong18":
+                                let demvot18=selectedFeature.properties.demvot18;
+                                let repvot18=selectedFeature.properties.repvot18;
+                                let othvot18=selectedFeature.properties.othvot18;
+                                majorElectionIndex=Math.max(demvot18,repvot18,othvot18);
+                                switch(majorElectionIndex){
+                                    case demvot18: {tLayer.setStyle(setShapeColor(tLayer,"DEM_STYLE")); break;}
+                                    case repvot18: {tLayer.setStyle(setShapeColor(tLayer,"REP_STYLE")); break;}
+                                    case othvot18: {tLayer.setStyle(setShapeColor(tLayer,"OTHER_ELECTION_STYLE")); break;}
+                                }
+                                break;
+                        }
                 }
             }
         }
