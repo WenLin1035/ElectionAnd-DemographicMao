@@ -493,7 +493,7 @@ and open the template in the editor.
             let pred16T=selectedFeature.properties.totvotpres;
             let cong16T=selectedFeature.properties.totvot16;
             let cong18T=selectedFeature.properties.totvot18;
-
+            
             let dropdownYear = document.getElementById("year");
             if(dropdownYear.options[dropdownYear.selectedIndex].value == "pred16"){
                 document.getElementById("totVotePop").innerHTML=pred16T + " people";
@@ -501,15 +501,19 @@ and open the template in the editor.
                 else document.getElementById("demNum").innerHTML = pred16D+ " people ["+Math.round(100*(pred16D/pred16T)) +"%]";
                 if(pred16T==0) document.getElementById("repNum").innerHTML = 0 + " people [0%]";
                 else document.getElementById("repNum").innerHTML = pred16R+ " people ["+Math.round(100*(pred16R/pred16T)) +"%]";
+                if(pred16O==0) document.getElementById("othNum").innerHTML = 0 + " people [0%]";
+                else document.getElementById("othNum").innerHTML = pred16O+ " people ["+Math.round(100*(pred16O/pred16T)) +"%]";
             }
             else if(dropdownYear.options[dropdownYear.selectedIndex].value == "cong16"){
                 document.getElementById("demNum").innerHTML = cong16D;
                 document.getElementById("repNum").innerHTML = cong16R;
                 document.getElementById("totVotePop").innerHTML=cong16T + " people";
+                document.getElementById("othNum").innerHTML = cong16O;
             }
             else{
                 document.getElementById("demNum").innerHTML = cong18D;
                 document.getElementById("repNum").innerHTML = cong18R;
+                document.getElementById("othNum").innerHTML = cong18O;
                 document.getElementById("totVotePop").innerHTML=cong18T + " people";
             }
         }
@@ -641,6 +645,7 @@ and open the template in the editor.
             jsonObj["repvot16"]=feature.properties.repvot16;
             jsonObj["repvot18"]=feature.properties.repvot18;
             jsonObj["repvotpres"]=feature.properties.repvotpres;
+            jsonObj["whiteov18"]=feature.properties.whiteov18;
             jsonObj["shape_geojson"]=JSON.stringify(feature.geometry);
             return jsonObj;
         }

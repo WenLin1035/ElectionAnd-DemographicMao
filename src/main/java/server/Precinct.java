@@ -18,7 +18,6 @@ public class Precinct {
     
     private Integer ogrFID;
     private String shape_geojson;
-    private String vtdst;
     private String name;
     private Integer demvotpres;
     private Integer repvotpres;
@@ -46,10 +45,9 @@ public class Precinct {
         super();
     }
     
-    public Precinct(String statefp,String shape_geojson,String vtdst, String name, Integer demvotpres, Integer repvotpres, Integer othvotpres, Integer totvotpres, Integer demvot16, Integer repvot16, Integer totvot16, Integer othvot16, Integer demvot18, Integer repvot18, Integer othvot18, Integer totvot18, Integer aminov18, Integer asianov18, Integer blackov18, Integer hawov18, Integer hisov18, Integer whiteov18, Integer otherov18, Integer pop100) {
+    public Precinct(String statefp,String shape_geojson, String name, Integer demvotpres, Integer repvotpres, Integer othvotpres, Integer totvotpres, Integer demvot16, Integer repvot16, Integer totvot16, Integer othvot16, Integer demvot18, Integer repvot18, Integer othvot18, Integer totvot18, Integer aminov18, Integer asianov18, Integer blackov18, Integer hawov18, Integer hisov18, Integer whiteov18, Integer otherov18, Integer pop100) {
         this.statefp=statefp;
         this.shape_geojson=shape_geojson;
-        this.vtdst=vtdst;
         this.name=name;
         this.demvotpres=demvotpres;
         this.repvotpres=repvotpres;
@@ -83,11 +81,6 @@ public class Precinct {
     @Column(name="statefp")
     public String getStatefp(){
         return statefp;
-    }
-    
-    @Column(name="vtdst")
-    public String getVtdst() {
-        return vtdst;
     }
 
     @Column(name="shape_geojson")
@@ -202,10 +195,6 @@ public class Precinct {
 
     public void setStatefp(String statefp){
         this.statefp=statefp;
-    }
-    
-    public void setVtdst(String vtdst) {
-        this.vtdst = vtdst;
     }
 
     public void setName(String name) {
