@@ -37,6 +37,7 @@ public class Error {
         return errorID;
     }
 
+    @Column(name="precinct_id")
     public Integer getPrecinctID() {
         return precinctID;
     }

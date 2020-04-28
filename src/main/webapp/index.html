@@ -291,6 +291,7 @@ and open the template in the editor.
             mymap.setView(new L.LatLng(usaCoords[0],usaCoords[1]), usaZoomLevel);
         }
         function initLoad(){
+            //L is an object that represents the library and its functions that are available.
             mymap = L.map('forMap').setView([39.436192999314095, -98.26171875], 4);
             L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
             attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -307,7 +308,7 @@ and open the template in the editor.
         function loadFeature(stateName){
             console.log(stateName);
             //0 is rhodeisland,1 is north carolina, 2 is arizona
-            let riCoords=[41.5801,-71.4774];
+            let stateCoords=[[41.5801,-71.4774]];
             let zoomLevel=[9];
             let stateID=[44];
             precLayer.clearLayers();
@@ -317,7 +318,8 @@ and open the template in the editor.
                     document.getElementById("precinctDropdown").style.display="inline";
             switch(stateName){
                 case "Rhode Island":
-                    loadPrecinctsforState(stateID[0],riCoords,zoomLevel[0])
+                    //loadErrorsForState(stateID[0]);
+                    loadPrecinctsForState(stateID[0],stateCoords[0],zoomLevel[0])
                     break;
                 default:
                     document.getElementById("precinctDropdown").style.display="none";
@@ -325,6 +327,15 @@ and open the template in the editor.
                     zoomOut();
                     break;
             }
+        }
+        function loadErrorsForState(state_id){
+            let xhr_precinct_data=new XMLHttpRequest();
+            xhr_error_data.open('GET','http://localhost:8080/errors/'+state_id);
+            xhr_error_data.onload=()=> {
+                let error_data=JSON.parse(xhr_error_data.response);
+                console.log(error_data);
+            }
+            xhr_error_data.send();
         }
         function loadStateForMap(){
             let xhr_ri_state=new XMLHttpRequest();
@@ -335,7 +346,7 @@ and open the template in the editor.
             };
             xhr_ri_state.send();
         }
-        function loadPrecinctsforState(state_id,riCoords,zoomLevel){
+        function loadPrecinctsForState(state_id,riCoords,zoomLevel){
             mymap.setView(new L.LatLng(riCoords[0],riCoords[1]), zoomLevel);
             let xhr_precinct_data=new XMLHttpRequest();
             xhr_precinct_data.open('GET','http://localhost:8080/precincts/'+state_id);
@@ -380,7 +391,6 @@ and open the template in the editor.
             newjsonObj["geometry"]={};
             newjsonObj.geometry["type"]=jsonObj["type"];
             newjsonObj.geometry["coordinates"]=jsonObj["coordinates"];
-            console.log(newjsonObj);
             return newjsonObj;
         }
         function loadPrecinctDictionary(){
@@ -512,6 +522,7 @@ and open the template in the editor.
             document.getElementById("totVotePop").innerHTML="N/A";
             document.getElementById("demNum").innerHTML ="N/A";
             document.getElementById("repNum").innerHTML ="N/A";
+            document.getElementById("othNum").innerHTML ="N/A";
         }
         function precMenuChange(selectedValue){
             if(selectedValue==undefined){

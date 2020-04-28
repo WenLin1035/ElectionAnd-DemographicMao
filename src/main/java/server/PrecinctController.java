@@ -26,7 +26,6 @@ public class PrecinctController {
  
     @Autowired
     private PrecinctRepo service;
-   
     
     // RESTful API methods for Retrieval operations
     @GetMapping("/precincts")
@@ -37,11 +36,6 @@ public class PrecinctController {
     @GetMapping("/precincts/{id}")
     public List<Precinct> listByStatefp(@PathVariable String id){
         return service.findByStatefp(id);
-    }
-    
-    @GetMapping("/errors")
-    public List<String> lister(){
-        return service.finder();
     }
     
     @GetMapping("/json_ri_prec")

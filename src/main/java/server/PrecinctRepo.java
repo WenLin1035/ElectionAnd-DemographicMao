@@ -11,16 +11,13 @@ package server;
  */
  
 import java.util.List;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
  
 
 public interface PrecinctRepo extends JpaRepository<Precinct, Integer> {
     List<Precinct> findAll();
-    @Query(value="select e.precinct_id from error e join precinct p WHERE p.OGR_FID=e.precinct_id",nativeQuery=true)
-    List<String> finder();
     List<Precinct> findByStatefp(String id);
     Precinct findByName(String name);
     Precinct findByOgrFID(Integer id);
