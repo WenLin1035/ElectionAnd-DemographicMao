@@ -600,6 +600,7 @@ and open the template in the editor.
                         let otherov18=selectedFeature.properties.otherov18;
                         let majorRaceIndex=Math.max(whiteov18,blackov18,asianov18,hisov18,otherov18);
                         switch(majorRaceIndex){
+                            case 0: {tLayer.setStyle(setShapeColor(tLayer,"GHOST_STYLE")); break;}
                             case whiteov18: {tLayer.setStyle(setShapeColor(tLayer,"WHITE_STYLE")); break;}
                             case blackov18: {tLayer.setStyle(setShapeColor(tLayer,"BLACK_STYLE")); break;}
                             case asianov18: {tLayer.setStyle(setShapeColor(tLayer,"ASIAN_STYLE")); break;}
@@ -617,6 +618,7 @@ and open the template in the editor.
                                 let othvotpres=selectedFeature.properties.othvotpres;
                                 majorElectionIndex=Math.max(demvotpres,repvotpres,othvotpres);
                                 switch(majorElectionIndex){
+                                    case 0: {tLayer.setStyle(setShapeColor(tLayer,"GHOST_STYLE")); break;}
                                     case demvotpres: {tLayer.setStyle(setShapeColor(tLayer,"DEM_STYLE")); break;}
                                     case repvotpres: {tLayer.setStyle(setShapeColor(tLayer,"REP_STYLE")); break;}
                                     case othvotpres: {tLayer.setStyle(setShapeColor(tLayer,"OTHER_ELECTION_STYLE")); break;}
@@ -628,6 +630,7 @@ and open the template in the editor.
                                 let othvot16=selectedFeature.properties.othvot16;
                                 majorElectionIndex=Math.max(demvot16,repvot16,othvot16);
                                 switch(majorElectionIndex){
+                                    case 0: {tLayer.setStyle(setShapeColor(tLayer,"GHOST_STYLE")); break;}
                                     case demvot16: {tLayer.setStyle(setShapeColor(tLayer,"DEM_STYLE")); break;}
                                     case repvot16: {tLayer.setStyle(setShapeColor(tLayer,"REP_STYLE")); break;}
                                     case othvot16: {tLayer.setStyle(setShapeColor(tLayer,"OTHER_ELECTION_STYLE")); break;}
@@ -639,6 +642,7 @@ and open the template in the editor.
                                 let othvot18=selectedFeature.properties.othvot18;
                                 majorElectionIndex=Math.max(demvot18,repvot18,othvot18);
                                 switch(majorElectionIndex){
+                                    case 0: {tLayer.setStyle(setShapeColor(tLayer,"GHOST_STYLE")); break;}
                                     case demvot18: {tLayer.setStyle(setShapeColor(tLayer,"DEM_STYLE")); break;}
                                     case repvot18: {tLayer.setStyle(setShapeColor(tLayer,"REP_STYLE")); break;}
                                     case othvot18: {tLayer.setStyle(setShapeColor(tLayer,"OTHER_ELECTION_STYLE")); break;}
@@ -661,9 +665,10 @@ and open the template in the editor.
             let comment="["+dateTime+"] >>"+document.getElementById("commentArea").value+"<br/>";
             let jsonObj={};
             jsonObj["comment"]=document.getElementById("commentArea").value;
-            jsonObj["errorType"]=feature.properties.errorType;
-            document.getElementById("commentArea").value="";
             document.getElementById("errorLog").innerHTML+="<div style=\'border-style:solid\'>Error Resolved on: "+feature.properties.name+" from ERROR: "+feature.properties.errorType+". <br/> Optional Comment: "+comment+"</div><br/>";
+            jsonObj["errorType"]="RESOLVED";
+            feature.properties.errorType="RESOLVED";
+            document.getElementById("commentArea").value="";
             return jsonObj;
         }
         function updateError(id,data){
@@ -686,7 +691,6 @@ and open the template in the editor.
             document.getElementById("errorSection").style.display="none";
             updatePrecinct(featureID,preparePrecinctToSend(feature));
             updateError(featureID,prepareErrorToSend(feature))
-            feature.properties.errorType="RESOLVED";
         }
         function updatePrecinct(selectedID,newData){
             let xhr=new XMLHttpRequest();
@@ -816,7 +820,6 @@ and open the template in the editor.
                     document.getElementById("errorSection").style.display="none";
                 }
                 updateError(selectedFeature.properties.ogrFID,prepareErrorToSend(selectedFeature));
-                selectedFeature.properties.errorType="RESOLVED";
             }
             document.getElementById('changeDataSection').style.display='none';
             changeFeatColor(selectedLayer.feature,selectedLayer);
