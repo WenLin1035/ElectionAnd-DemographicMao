@@ -42,7 +42,6 @@ public class ErrorController {
         try {
             Error existError = service.findByPrecinctID(Integer.parseInt(id));
             error.setErrorID(existError.getErrorID());
-            error.setPrecinctID(existError.getPrecinctID());
             error.setCommentTime(new Timestamp(System.currentTimeMillis()));
             service.save(error);
         } catch (NoSuchElementException e) {
