@@ -27,9 +27,9 @@ and open the template in the editor.
                     <label for="States" style="font-size: 20px;padding-right: 26px">State:</label>
                     <select id="States"> <!-- needs to be replaced by data from DB -->
                         <option value="State" onclick="loadFeature()">State</option>
-                        <option value ="Arizona" onclick="loadFeature(this.value)">Arizona</option>
-                        <option value="Rhode Island" onclick="loadFeature(this.value)">Rhode Island</option>
-                        <option value="North Carolina" onclick="loadFeature(this.value)">North Carolina</option>
+                        <option value ="Arizona" onclick="loadFeature()">Arizona</option>
+                        <option value="Rhode Island" onclick="loadFeature()">Rhode Island</option>
+                        <option value="North Carolina" onclick="loadFeature()">North Carolina</option>
                     </select>
                 </div>
                 <div id="precinctDropdown" style="display:none" >
@@ -191,11 +191,13 @@ and open the template in the editor.
                 <h4>Settings</h4>
                 <br>
                 <div>Map View Filter</div>
-                <form>
-                    <input type ="checkbox" id="congressional" value="congressional">
+                <form id="mapFilter">
+                    <input type ="checkbox" id="congressionalFilter" value="congressional">
                     <label for="congressional">Congressional Data</label><br/>
-                    <input type ="checkbox" id="nationalPark" value="national">
-                    <label for="congressional">National Park Data</label>
+                    <input type ="checkbox" id="nationalParkFilter" value="national">
+                    <label for="congrenationalssional">National Park Data</label><br/>
+                    <input type ="checkbox" onchange="loadFeature()" id="precinctFilter" value="precinct">
+                    <label for="precinct">Precincts</label>
                 </form>
                 <br/><br/>
                 <table>
@@ -299,23 +301,19 @@ and open the template in the editor.
             console.log("Hello, World!");
             loadFeature();
         }
-        function loadFeature(stateName){
+        function loadFeature(){
+            let stateName=document.getElementById("States").value;
             console.log(stateName);
             //0 is rhodeisland,1 is north carolina, 2 is arizona
             let stateCoords=[[41.5801,-71.4774]];
             let zoomLevel=[9];
             let stateID=[44];
-            precLayer.clearLayers();
-            precinctLayers={};
-            errorDictionary={};
-            clearBothSections();
-            document.getElementById("errorLog").innerHTML="";
-            document.getElementById("Precincts").innerHTML="<option value='precinct'>Precinct</option>";
-                    document.getElementById("precinctDropdown").style.display="inline";
+            unloadAll();
+            let precinctFilter=document.getElementById("precinctFilter").checked;
             switch(stateName){
                 case "Rhode Island":
-                    loadErrorsForState(stateID[0]);
-                    loadPrecinctsForState(stateID[0],stateCoords[0],zoomLevel[0])
+                    mymap.setView(new L.LatLng(stateCoords[0][0],stateCoords[0][1]), zoomLevel);
+                    if(precinctFilter) loadAllForState(stateID[0]);
                     break;
                 default:
                     document.getElementById("precinctDropdown").style.display="none";
@@ -323,6 +321,19 @@ and open the template in the editor.
                     zoomOut();
                     break;
             }
+        }
+        function unloadAll(){
+            precLayer.clearLayers();
+            precinctLayers={};
+            errorDictionary={};
+            clearBothSections();
+            document.getElementById("errorLog").innerHTML="";
+            document.getElementById("Precincts").innerHTML="<option value='precinct'>Precinct</option>";
+            document.getElementById("precinctDropdown").style.display="inline";
+        }
+        function loadAllForState(state_id){
+            loadErrorsForState(state_id);
+            loadPrecinctsForState(state_id);
         }
         function loadErrorsForState(state_id){
             let xhr_error_data=new XMLHttpRequest();
@@ -348,8 +359,7 @@ and open the template in the editor.
             };
             xhr_ri_state.send();
         }
-        function loadPrecinctsForState(state_id,riCoords,zoomLevel){
-            mymap.setView(new L.LatLng(riCoords[0],riCoords[1]), zoomLevel);
+        function loadPrecinctsForState(state_id){
             let xhr_precinct_data=new XMLHttpRequest();
             xhr_precinct_data.open('GET','http://localhost:8080/precincts/'+state_id);
             xhr_precinct_data.onload=()=> {
