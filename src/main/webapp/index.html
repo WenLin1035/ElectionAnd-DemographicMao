@@ -661,7 +661,7 @@ and open the template in the editor.
             jsonObj["comment"]=document.getElementById("commentArea").value;
             jsonObj["errorType"]=feature.properties.errorType;
             document.getElementById("commentArea").value="";
-            document.getElementById("errorLog").innerHTML+="<div style=\'border-style:solid\'>Error Resolved on: "+precinctName+" from ERROR. <br/> Optional Comment: "+comment+"</div><br/>";
+            document.getElementById("errorLog").innerHTML+="<div style=\'border-style:solid\'>Error Resolved on: "+feature.properties.name+" from Error:"+feature.properties.errorType+". <br/> Optional Comment: "+comment+"</div><br/>";
             return jsonObj;
         }
         function updateError(id,data){
@@ -680,11 +680,11 @@ and open the template in the editor.
             buttonToBeDeleted.parentNode.removeChild(buttonToBeDeleted);
             let errorDiv=document.getElementById("currentError");
             layer.setStyle(setShapeColor(layer,"GHOST_STYLE"));
-            feature.properties.errorType="RESOLVED";
             errorDiv.innerHTML="";
             document.getElementById("errorSection").style.display="none";
             updatePrecinct(featureID,preparePrecinctToSend(feature));
             updateError(featureID,prepareErrorToSend(feature))
+            feature.properties.errorType="RESOLVED";
         }
         function updatePrecinct(selectedID,newData){
             let xhr=new XMLHttpRequest();
@@ -807,7 +807,6 @@ and open the template in the editor.
             selectedLayer.openPopup();
             
             if(selectedFeature.properties.errorType=="GHOST" && document.getElementById("pred16Dem").value!=0){
-                selectedFeature.properties.errorType="RESOLVED";
                 let selectedError=document.getElementById(selectedValue+"_error");
                 if(selectedError!=undefined){
                     selectedError.parentNode.removeChild(selectedError);
@@ -815,6 +814,7 @@ and open the template in the editor.
                     document.getElementById("errorSection").style.display="none";
                 }
                 updateError(selectedFeature.properties.ogrFID,prepareErrorToSend(selectedFeature));
+                selectedFeature.properties.errorType="RESOLVED";
             }
             document.getElementById('changeDataSection').style.display='none';
             changeFeatColor(selectedLayer.feature,selectedLayer);
