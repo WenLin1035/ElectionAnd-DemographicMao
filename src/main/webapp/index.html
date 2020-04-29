@@ -52,7 +52,7 @@ and open the template in the editor.
                             </select>
                         </td>
                     </tr>
-                    <tr>
+                    <tr id="electionDropdownArea">
                         <td><label for="year">Election Type:</label></td>
                         <td>
                             <select id="year" onchange="setElectionSection();changeAllColor()" style="">
@@ -216,23 +216,23 @@ and open the template in the editor.
                     <tr><td colspan="2"><br/>Demographic Data Color Change </td></tr>
                     <tr>
                         <td><label>White: </label></td>
-                        <td><input type="color" id="whiteColor" onchange="changeAllColor()" name="whiteColor" value="#624a2e"></td>
+                        <td><input type="color" id="whiteColor" onchange="changeAllColor()" name="whiteColor" value="#d2b58c"></td>
                     </tr>
                     <tr> 
                         <td><label>Black: </label></td>
-                        <td><input type="color" id="blackColor" onchange="changeAllColor()" name="blackColor" value="#8affff"></td>
+                        <td><input type="color" id="blackColor" onchange="changeAllColor()" name="blackColor" value="#624a2e"></td>
                     </tr>
                     <tr> 
                         <td><label>Asian: </label></td>
-                        <td><input type="color" id="asianColor" onchange="changeAllColor()" name="asianColor" value="#cc99ff"></td>
+                        <td><input type="color" id="asianColor" onchange="changeAllColor()" name="asianColor" value="#ffbf00"></td>
                     </tr>
                     <tr> 
                         <td><label>Hispanic: </label></td>
-                        <td><input type="color" id="hisColor" onchange="changeAllColor()" name="hisColor" value="#ffcc99"></td>
+                        <td><input type="color" id="hisColor" onchange="changeAllColor()" name="hisColor" value="#6a0dad"></td>
                     </tr>
                     <tr> 
                         <td><label>Other: </label></td>
-                        <td><input type="color" id="restColor" onchange="changeAllColor()" name="restColor" value="#ffbf00"></td>
+                        <td><input type="color" id="restColor" onchange="changeAllColor()" name="restColor" value="#8affff"></td>
                     </tr>
                 </table>
             </div>
@@ -269,10 +269,12 @@ and open the template in the editor.
         }
         function switchDataSection(){
             if(document.getElementById("dataSection").value == "election"){
+                document.getElementById("electionDropdownArea").style.display="";
                 document.getElementById('electionSection').style.display = "block";
                 document.getElementById('demographicSection').style.display = "none";
             }
             if(document.getElementById("dataSection").value == "demographic"){
+                document.getElementById("electionDropdownArea").style.display="none";
                 document.getElementById('electionSection').style.display = "none";
                 document.getElementById('demographicSection').style.display = "block";
             }
