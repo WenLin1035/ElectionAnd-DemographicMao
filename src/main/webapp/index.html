@@ -288,10 +288,7 @@ and open the template in the editor.
             mymap = L.map('forMap').setView([39.436192999314095, -98.26171875], 4);
             L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
             attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-            maxZoom: 18,
             id: 'mapbox/streets-v11',
-            tileSize: 512,
-            zoomOffset: -1,
             accessToken: 'pk.eyJ1IjoiZTE1MzEwODgiLCJhIjoiY2s3NzdjOWl3MDRzdTNmcWtqdDNlamxhNiJ9.aN5tSOOA7nNJA0KCnOITBA'}).addTo(mymap);
             precLayer=L.geoJSON(null,{onEachFeature: onEachFeature}).addTo(mymap);
             stateLayer=L.geoJSON(null,{style:setShapeColor(this,"STATE_STYLE")}).addTo(mymap);
@@ -303,7 +300,7 @@ and open the template in the editor.
             console.log(stateName);
             //0 is rhodeisland,1 is north carolina, 2 is arizona
             let stateCoords=[[41.5801,-71.4774]];
-            let zoomLevel=[9];
+            let zoomLevel=[10];
             unloadAll();
             let precinctFilter=document.getElementById("precinctFilter").checked;
             let dropdown = document.getElementById("States");
@@ -516,12 +513,12 @@ and open the template in the editor.
         function precinctZoom(precinctCenter,precinctSize){
             //console.log(precinctSize);
             let precinctZoomLevel=10.5;
-            if(precinctSize<99999999) precinctZoomLevel=11;
-            if(precinctSize<59999999) precinctZoomLevel=11.5;
-            if(precinctSize<9999999) precinctZoomLevel=12;
-            if(precinctSize<5999999) precinctZoomLevel=12.5;
-            if(precinctSize<999999) precinctZoomLevel=13;
-            if(precinctSize<599999) precinctZoomLevel=13.5;
+            if(precinctSize<99999999) precinctZoomLevel=12;
+            if(precinctSize<59999999) precinctZoomLevel=13.5;
+            if(precinctSize<9999999) precinctZoomLevel=13;
+            if(precinctSize<5999999) precinctZoomLevel=13.5;
+            if(precinctSize<999999) precinctZoomLevel=14;
+            if(precinctSize<599999) precinctZoomLevel=14.5;
             //console.log(precinctZoomLevel);
             let centerCoords=precinctCenter.geometry.coordinates;
             //resets center
@@ -607,11 +604,11 @@ and open the template in the editor.
             let selectedFeature=selectedLayer.feature;
             
             showPrecinctOnClick(selectedLayer,selectedFeature);
-            selectedLayer.openPopup();
         }
         function showPrecinctOnClick(selectedLayer,selectedFeature){
             precinctZoom(turf.centroid(selectedFeature),turf.area(selectedFeature));
-            selectedLayer.bindPopup('<h1>' + selectedFeature.properties.name + '</h1>');
+            precLayer.setStyle(setShapeColor(precLayer,"OLD_PREC_STYLE"));
+            selectedLayer.setStyle(setShapeColor(selectedLayer,"NEW_PREC_STYLE"));
             setDemographicSection(selectedFeature);
             setElectionSection(selectedFeature);
             showError(selectedLayer,selectedFeature.properties.errorType);
@@ -833,7 +830,6 @@ and open the template in the editor.
             changePrecinctDemographicData(selectedFeature,whiteVotePop,blackVotePop,asianVotePop,hispanicVotePop,otherVotePop);
             
             //changes the name of the feature, removes the name off the dropdown, and adds the new name in
-            selectedLayer.closePopup();
             if(selectedValue!=document.getElementById("precinctName").value){
                 selectedFeature.properties.name=document.getElementById("precinctName").value;
                 precinctLayers[selectedFeature.properties.name]=precinctLayers[selectedValue];
@@ -848,7 +844,6 @@ and open the template in the editor.
                 console.log(selectedFeature);
             }
             showPrecinctOnClick(selectedLayer,selectedFeature);
-            selectedLayer.openPopup();
             
             if(selectedFeature.properties.errorType=="GHOST" && document.getElementById("pred16Dem").value!=0){
                 let selectedError=document.getElementById(selectedValue+"_error");
@@ -879,12 +874,9 @@ and open the template in the editor.
             feature.properties.repvot18=parseInt(cong18Rep);
         }
         function onEachFeature(feature,layer){
-            layer.bindPopup('<h1>' + feature.properties.name + '</h1>');
             loadPrecincts(feature, layer);
             layer.on({
-                click: onClick,
-                mouseover: setNPS,
-                mouseout: setOPS
+                click: onClick
             });
             if(feature.properties.errorType=="GHOST"){
                document.getElementById("errorLog").innerHTML+="<div id=\""+feature.properties.name+"_error\"><button onclick='document.getElementById(\"errorPopup\").style.display=\"none\";precMenuChange(\""+feature.properties.name+"\");'>Ghost Precinct Found ["+feature.properties.name+"](Requires Verification)</button></div>";
