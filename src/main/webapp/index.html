@@ -367,24 +367,14 @@ and open the template in the editor.
         }
         function loadStateNames(){
             let dropdown = document.getElementById("States");
-            let statesLayers=stateLayer._layers;
-            for (i in statesLayers){
-                let singleLayer=statesLayers[i];
+            let eachLayer=(singleLayer)=>{
                 let feature=singleLayer.feature;
                 let addedState = document.createElement("option");
                 addedState.text = feature.properties.name;
                 addedState.value = feature.properties.name;
                 dropdown.options.add(addedState);
             }
-        }
-        function loadStateDictionary(){
-            precinctLayers={};
-            let precLayers=precLayer._layers;
-            for (i in precLayers){
-                let singleLayer=precLayers[i];
-                let feature=singleLayer.feature;
-                precinctLayers[feature.properties.name]=singleLayer;
-            }
+            stateLayer.eachLayer(eachLayer);
         }
         function loadPrecinctsForState(state_id){
             let xhr_precinct_data=new XMLHttpRequest();
@@ -449,12 +439,11 @@ and open the template in the editor.
         }
         function loadPrecinctDictionary(){
             precinctLayers={};
-            let precLayers=precLayer._layers;
-            for (i in precLayers){
-                let singleLayer=precLayers[i];
+            let eachLayer=(singleLayer)=>{
                 let feature=singleLayer.feature;
                 precinctLayers[feature.properties.name]=singleLayer;
             }
+            precLayer.eachLayer(eachLayer);
         }
         function setShapeColor(ft,shapeStyle){
             switch(shapeStyle){
@@ -536,7 +525,7 @@ and open the template in the editor.
             //console.log(precinctZoomLevel);
             let centerCoords=precinctCenter.geometry.coordinates;
             //resets center
-            mymap.setView(new L.LatLng(0 ,0),precinctZoomLevel);
+            mymap.setView(new L.LatLng(0,0),precinctZoomLevel);
             mymap.setView(new L.LatLng(centerCoords[1],centerCoords[0]),precinctZoomLevel);
         }
         function setDemographicSection(feat){
@@ -613,7 +602,7 @@ and open the template in the editor.
             else{
                 document.getElementById("Precincts").value=selectedValue;
             }
-            console.log(selectedValue);
+            if(selectedValue=="precinct") return;
             let selectedLayer=precinctLayers[selectedValue];
             let selectedFeature=selectedLayer.feature;
             
