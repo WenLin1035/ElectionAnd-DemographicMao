@@ -513,12 +513,12 @@ and open the template in the editor.
         function precinctZoom(precinctCenter,precinctSize){
             //console.log(precinctSize);
             let precinctZoomLevel=10.5;
-            if(precinctSize<99999999) precinctZoomLevel=12;
-            if(precinctSize<59999999) precinctZoomLevel=13.5;
-            if(precinctSize<9999999) precinctZoomLevel=13;
-            if(precinctSize<5999999) precinctZoomLevel=13.5;
-            if(precinctSize<999999) precinctZoomLevel=14;
-            if(precinctSize<599999) precinctZoomLevel=14.5;
+            if(precinctSize<99999999) precinctZoomLevel=11;
+            if(precinctSize<59999999) precinctZoomLevel=11.5;
+            if(precinctSize<9999999) precinctZoomLevel=12;
+            if(precinctSize<5999999) precinctZoomLevel=12.5;
+            if(precinctSize<999999) precinctZoomLevel=13;
+            if(precinctSize<599999) precinctZoomLevel=13.5;
             //console.log(precinctZoomLevel);
             let centerCoords=precinctCenter.geometry.coordinates;
             //resets center
