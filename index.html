@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<!--
+Author: Wen Lin
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>State Election and Demographic Data</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="newcss.css">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+              integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="crossorigin=""/>
+        <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+        <script language="javascript" type="text/javascript" src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+                integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="crossorigin="">
+        </script>
+    </head>
+    <body>
+        <div class="split left">
+            <div class="centered">
+                <h3>Information</h3>
+                <!--<label for="time">Year</label>
+                <select id="time">
+                    <option value="2018">2018</option>
+                </select><br>-->
+                <div>
+                    <label for="States" style="font-size: 20px;padding-right: 26px">State:</label>
+                <select id="States" style="width: 120px"> <!-- needs to be replaced by data from DB -->
+                    <option value="State" onclick="zoomout()">State</option>
+                    <option value ="Arizona" onclick="zoomout()">Arizona</option>
+                    <option value="Rhode Island" onclick="zoomin()">Rhode Island</option>
+                    <option value="North Carolina" onclick="zoomout()">North Carolina</option>
+                </select>
+                    <br>
+                <label for="Precincts" style="font-size: 20px;">Precinct:</label>
+                <select id="Precincts" onchange="precMenuChange()" style="width: 120px"> <!-- needs to be replaced by DB data -->
+                    <option value="precinct">Precinct</option>
+                </select>
+                <br>
+                </div>
+                
+                <h4>Population:</h4>
+                <label id="pplnum"> </label>
+                <label> people</label><br><br> <!-- needs to be replaced by DB data -->
+                <table cellpadding="0">
+                    <tr>
+                        <td><label for="demographics">Data Type:</label></td>
+                        <td>
+                            <select id="demographics" onchange="showmap()" style="">
+                                <option id="uno" value="Parties">Election</option>
+                                <option id="dos" value="race">Demographic</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><label for="year">Election Type:</label></td>
+                        <td>
+                            <select id="year" onchange="changeyear()" style="">
+                                <option id="pred_16" value="pred_16">Presidential 2016</option>
+                                <option id="cog_16" value="cog_16">Congressional 2016</option>
+                                <option id="cog_18" value="cog_18">Congressional 2018</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+                <br><br>
+                <div id="partymap">
+                    <label>Democratic: </label><label id="demonum">X people [X%]</label><br/> <!-- needs to be replaced by DB data -->
+                    <label>Republican: </label><label id="repnum">Y people [Y%]</label><br/> <!-- needs to be replaced by DB data -->
+                    <label style="padding-right: 43px">Other:</label><label id="othernum">Z people [Z%]</label><br/> <!-- needs to be replaced by DB data -->
+                    <br>
+                </div>
+                <div id="racemap">
+                    <label>White: </label><label id="whitenum" style="padding-left: 20px">X people</label><br/> <!-- needs to be replaced by DB data -->
+                    <label>Black: </label><label id="blacknum" style="padding-left: 20px">Y people</label><br/> <!-- needs to be replaced by DB data -->
+                    <label>Asian: </label><label id="asiannum" style="padding-left: 20px">Y people</label><br/> <!-- needs to be replaced by DB data -->
+                    <label>Hispanic: </label><label id="hisnum">Y people</label><br/> <!-- needs to be replaced by DB data -->
+                    <label>Other: </label><label id="restnum" style="padding-left: 20px">Y people</label><br/> <!-- needs to be replaced by DB data -->
+                </div>
+
+                <h3>Error Type:</h3>
+                <div id="currentError"></div>
+                <br>
+                <label for="comment">Comments:</label><br>
+                <textarea id="comment" name="comment" rows="2" cols="20"></textarea>
+                <br>
+                <button onclick="changecomment()">Submit</button><!-- need to add func that saves comments into precinct comment string var in database -->
+                <br>
+                <div id="currentthing"></div>
+                <p>Options:</p>
+                <div id="options">
+                <button onclick="openchange()" style="width:auto;margin-right: 25px">Change Data</button>
+                <button onclick="document.getElementById('borderpopup').style.display='block'" style="width:auto;">Fix Borders</button>
+                <br>
+                </div>
+                <br>
+                <br>
+                <button onclick="document.getElementById('changepopup').style.display='block'" style="width:50px;height: 40px;"><img src="ee.png" alt="Error Log" style="width: 30px;height: 30px;"></button>
+                <button onclick="document.getElementById('settingspopup').style.display='block'" style="width:50px; height:40px"><img src="cog.png" alt="Settings" style="width: 30px; height:30px;"></button>
+                <div>Sources:</div>
+                <a href="https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/UBKYRU" style="text-decoration: none" target="_blank">Harvard Dataverse</a><br/>
+                <a href="https://catalog.data.gov/dataset/tiger-line-shapefile-2017-nation-u-s-current-state-and-equivalent-national" style="text-decoration: none"  target="_blank">US Census Bureau</a>
+            </div>
+        </div>
+        <!-- right side of the page -->
+        <div class="right">
+            <div id="formap">
+            </div>
+        </div>
+        <!-- this is popup window for changing data info -->
+        <div id="datapopup" class="modal">
+            <div class="modal-content">
+                <button onclick="document.getElementById('datapopup').style.display='none'" style="float:right;">X</button>
+                <p style="text-align: center"><b>Changes</b></p>
+                <label for="statename" style="margin-left: 180px">Name:</label>
+                <input type="text" id="statename" name="statename"><br>
+                <table>
+                    <tr>
+                        <td style="padding-right: 30px;">
+                            <p><b>2016 Presidential Election:</b></p>
+                            <label for="demo1" style="padding-right: 10px">Democrats:</label>
+                            <input type="number" id="demo1" name="demo1" value="0"><br><br>
+                            <label for="repub1">Republicans:</label>
+                            <input type="number" id="repub1" name="repub1" value="0"><br><br>
+                            <label for="other1" style="padding-right: 43px">Other:</label>
+                            <input type="number" id="other1" name="other1" value="0"><br><br>
+                            <p><b>2016 Congressional Election:</b></p>
+                            <label for="demo2" style="padding-right: 10px">Democrats:</label>
+                            <input type="number" id="demo2" name="demo2" value="0"><br><br>
+                            <label for="repub2">Republicans:</label>
+                            <input type="number" id="repub2" name="repub2" value="0"><br><br>
+                            <label for="other2" style="padding-right: 43px">Other:</label>
+                            <input type="number" id="other2" name="other2" value="0"><br><br>
+                            <p><b>2018 Congressional Election:</b></p>
+                            <label for="demo3" style="padding-right: 10px">Democrats:</label>
+                            <input type="number" id="demo3" name="demo3" value="0"><br><br>
+                            <label for="repub3">Republicans:</label>
+                            <input type="number" id="repub3" name="repub3" value="0"><br><br>
+                            <label for="other3" style="padding-right: 43px">Other:</label>
+                            <input type="number" id="other3" name="other3" value="0"><br><br>
+                        </td>
+                        <td>
+                            <p><b>Demographic Data:</b></p>
+                            <label for="white2" style="padding-right: 20px">White:</label>
+                            <input type="number" id="white2" name="white2" value="0"><br><br>
+                            <label for="black2" style="padding-right: 20px">Black:</label>
+                            <input type="number" id="black2" name="black2" value="0"><br><br>
+                            <label for="asian2" style="padding-right: 20px">Asian:</label>
+                            <input type="number" id="asian2" name="asian2" value="0"><br><br>
+                            <label for="his2">Hispanic:</label>
+                            <input type="number" id="his2" name="his2" value="0"><br><br>
+                            <label for="oth2" style="padding-right: 20px">Other:</label>
+                            <input type="number" id="oth2" name="oth2" value="0"><br><br>
+                        </td>
+                    </tr>
+                </table>
+                
+                <center><button onclick="changePrecinctData()">Save</button></center>
+            </div>
+        </div>
+        <!-- this is popup window for changing border -->
+        <div id="borderpopup" class="modal">
+            <div class="modal-content">
+                <button onclick="document.getElementById('borderpopup').style.display='none'" style="float:right;">X</button>
+                <label for="precinct1">Precinct to extend:</label>
+                <select id="precinct1">
+                    <option value="num1">precinct</option>
+                    <option>precinct1</option>
+                </select>
+                <br>
+                <br>
+                <label for="precinct2">Precinct to connect to:</label>
+                <select id="precinct2">
+                    <option value="num2">precinct</option>
+                    <option>precinct1</option>
+                </select>
+                <br><br>
+                <center><button>Save</button></center>
+            </div>
+        </div>
+        <!-- shows log of what user has done -->
+        <div id="changepopup" class="modal">
+            <div class="modal-content">
+                <button onclick="document.getElementById('changepopup').style.display='none'" style="float:right;">X</button>
+                <h4>Error Log</h4>
+                <br><br>
+                <div id="errorLog"></div>
+            </div>
+        </div>
+
+        <div id="settingspopup" class="modal">
+            <div class="modal-content">
+                <button onclick="document.getElementById('settingspopup').style.display='none'" style="float:right;">X</button>
+                <h4>Settings</h4>
+                <br>
+                <div>Map View Filter</div>
+                <form>
+                    <input type ="checkbox" id="congressional" value="congression">
+                    <label for="congressional">Congressional Data</label><br/>
+                    <input type ="checkbox" id="nationalpark" value="national">
+                    <label for="congressional">National Park Data</label>
+                </form>
+                <br/><br/>
+                <table>
+                    <tr> <td colspan="2">Election Data Color Change </td></tr>
+                <tr>
+                    <td><label>Democrat: </label></td>
+                    <td><input type="color" onchange="changeAllColor();" id="demcolor" name="demcolor" value="#0066ff"></td>
+                </tr>
+                <tr>
+                    <td><label>Republican: </label></td>
+                    <td><input type="color" id="repcolor" onchange="changeAllColor()" name="repcolor" value="#ff0000"></td>
+                </tr>
+                <tr>
+                    <td><label>Other: </label></td>
+                    <td><input type="color" id="othecolor" onchange="changeAllColor()" name="othecolor" value="#33cc33"></td>
+                </tr>
+                <tr><td colspan="2"><br/>Demographic Data Color Change </td></tr>
+                <tr>
+                    <td><label>White: </label></td>
+                    <td><input type="color" id="whitecolor" onchange="changeAllColor()" name="whitecolor" value="#0066ff"></td>
+                </tr>
+                <tr> 
+                    <td><label>Black: </label></td>
+                    <td><input type="color" id="blackcolor" onchange="changeAllColor()" name="blackcolor" value="#ff0000"></td>
+                </tr>
+                <tr> 
+                    <td><label>Asian: </label></td>
+                    <td><input type="color" id="asiancolor" onchange="changeAllColor()" name="asiancolor" value="#cc99ff"></td>
+                </tr>
+                <tr> 
+                    <td><label>Hispanic: </label></td>
+                    <td><input type="color" id="hiscolor" onchange="changeAllColor()" name="hiscolor" value="#ffcc99"></td>
+                </tr>
+                <tr> 
+                    <td><label>Other: </label></td>
+                    <td><input type="color" id="restcolor" onchange="changeAllColor()" name="restcolor" value="#ffbf00"></td>
+                </table>
+            </div>
+        </div>
+        <!--<div id="errorpopup" class="modal">
+            <div class="modal-content">
+                <button onclick="document.getElementById('errorpopup').style.display='none'" style="float:right;">X</button>
+                <h4>Error</h4>
+                <br><br>
+                <div id="errorLog"></div>
+            </div>
+        </div>-->
+    </body>
+    <script>
+        var mymap = L.map('formap').setView([39.436192999314095, -98.26171875], 4);
+        L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+            maxZoom: 18,
+            id: 'mapbox/streets-v11',
+            tileSize: 512,
+            zoomOffset: -1,
+            accessToken: 'pk.eyJ1IjoiZTE1MzEwODgiLCJhIjoiY2s3NzdjOWl3MDRzdTNmcWtqdDNlamxhNiJ9.aN5tSOOA7nNJA0KCnOITBA'}).addTo(mymap);
+        function changecomment(){
+            var x = document.getElementById("currentthing");
+            var today = new Date();
+            var dateTime = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate()+" "+today.getHours() + ":" + today.getMinutes()+":"+today.getSeconds();
+            var result="["+dateTime+"] >>"+document.getElementById("comment").value+"<br/>";
+            x.innerHTML += result;
+            document.getElementById("comment").value="";
+            addError({"dateTime":dateTime,"comment":document.getElementById("comment").value});
+        }
+        //change button
+        function openchange(){
+            value=document.getElementById("Precincts").value;
+            document.getElementById('statename').value = value;
+            if(value!="precinct"){
+                document.getElementById('datapopup').style.display='block';
+            }
+            fillChangeData();
+            //document.getElementById('demo').value = ; //number of votes democrats
+            //document.getElementById('repub').value = ; // number of votes republicans
+        }
+        
+        //IMPORTANT
+        //change years for election type
+        //changeyear(){}
+        
+        //demographics
+        function fillChangeData(){
+            selectedValue=document.getElementById("Precincts").value;
+            precSubLayers=precLayer._layers;
+            for(i in precSubLayers){
+                testLayer=precSubLayers[i];
+                feat=testLayer.feature;
+                if(feat.properties.PRENAME==selectedValue){
+                    document.getElementById("demo1").value=feat.properties.PRES16D;
+                    document.getElementById("repub1").value=feat.properties.PRES16R;
+                    document.getElementById("demo2").value=feat.properties.GOV18D;
+                    document.getElementById("repub2").value=feat.properties.GOV18R;
+                    document.getElementById("demo3").value=feat.properties.SEN18D;
+                    document.getElementById("repub3").value=feat.properties.SEN18R;
+                    document.getElementById("white2").value=Math.floor(feat.properties.WVAP);
+                    document.getElementById("black2").value=Math.floor(feat.properties.BVAP);
+                    document.getElementById("asian2").value=Math.floor(feat.properties.ASIANVAP);
+                    document.getElementById("his2").value=Math.floor(feat.properties.HVAP);
+                    document.getElementById("oth2").value=Math.floor(feat.properties.OTHERVAP);
+                }
+            }
+        }
+            function showmap(){
+                if(document.getElementById("demographics").value == "Parties"){
+                    document.getElementById('partymap').style.display = "block";
+                    document.getElementById('racemap').style.display = "none";
+                }
+                if(document.getElementById("demographics").value == "race"){
+                    document.getElementById('partymap').style.display = "none";
+                    document.getElementById('racemap').style.display = "block";
+                }
+            }
+        function zoomout(){
+            mymap.setView(new L.LatLng(39.436192999314095, -98.26171875), 4);
+        }
+        function zoomin(){
+            mymap.setView(new L.LatLng(41.5801, -71.4774), 9);
+        }
+        function precZoom(a,b){
+            mymap.setView(new L.LatLng(0,0),10.5);
+            mymap.setView(new L.LatLng(b,a),10.5);
+        }
+        precLayer=L.geoJSON(null,{onEachFeature: onEachFeature}).addTo(mymap);
+        function initLoad(){
+            console.log("Hello, World!");
+            xhr_ri_prec=new XMLHttpRequest();
+            xhr_ri_prec.open('GET','http://localhost:8080/json_ri_prec');
+            xhr_ri_prec.onload=function(){
+                data=JSON.parse(xhr_ri_prec.response);
+                precLayer.addData(data);
+            };
+            xhr_ri_prec.send();
+            xhr_ri_state=new XMLHttpRequest();
+            xhr_ri_state.open('GET','http://localhost:8080/json_ri_state');
+            xhr_ri_state.onload=function(){
+                data=JSON.parse(xhr_ri_state.response);
+                L.geoJSON(data,{style:setShapeColor(this,"STATE_STYLE")}).addTo(mymap);
+            };
+            xhr_ri_state.send();
+        }
+        initLoad();
+        function setShapeColor(ft,shapeStyle){
+            switch(shapeStyle){
+                case "STATE_STYLE": 
+                    return{
+                        fillColor:'none',
+                        weight:3,
+                        color:'black'
+                    };
+                case "NEW_PREC_STYLE":
+                    return{
+                        fillOpacity: 0.8
+                    };
+                case "OLD_PREC_STYLE":
+                    return{
+                        fillOpacity: 0.2,
+                        weight:3
+                    };
+                case "DEM_STYLE":
+                    return{
+                        color:document.getElementById("demcolor").value
+                    };
+                case "REP_STYLE":
+                    return{
+                        color:document.getElementById("repcolor").value
+                    };
+                case "GHOST_STYLE":
+                    return{
+                        color:'gray'
+                    };
+                case "ERROR_STYLE":
+                    return{
+                        color:'orange'
+                    }
+                default:
+                    console.log(ft);
+                    console.log("un-intended");
+            }
+        }
+        function setNPS(e){
+            this.setStyle(setShapeColor(this,"NEW_PREC_STYLE"));
+        }
+        function setOPS(e){
+            this.setStyle(setShapeColor(this,"OLD_PREC_STYLE"));
+        }
+        function findCenter(a){
+            minCoords=[a[0][0],a[0][1]];
+            maxCoords=[a[0][0],a[0][1]];
+            for(i in a){
+                if(a[i][0]<minCoords[0]) minCoords[0]=a[i][0];
+                if(a[i][1]<minCoords[1]) minCoords[1]=a[i][1];
+                if(a[i][0]>maxCoords[0]) maxCoords[0]=a[i][0];
+                if(a[i][1]>maxCoords[1]) maxCoords[1]=a[i][1];
+            }
+            centerCoords=[0,0];
+            centerCoords[0]=minCoords[0]+((maxCoords[0]-minCoords[0])/2);
+            centerCoords[1]=minCoords[1]+((maxCoords[1]-minCoords[1])/2);
+            return centerCoords;
+        }
+        function findCoordForPrec(b){
+            console.log(b);
+            if(b[0].length>1){
+               centerCoordList=[];
+                for(i in b){
+                    centerCoordList[i]=findCenter(b[i][0]);
+                }
+                centerCoords=findCenter(centerCoordList);
+                precZoom(centerCoords[0],centerCoords[1]);
+            }
+            else{
+                centerCoords=findCenter(b[0][0]);
+                precZoom(centerCoords[0],centerCoords[1]);
+            } 
+        }
+        function changeyear(){
+            demnum=feat.properties.PRES16D;
+            repnum=feat.properties.PRES16R;
+
+            //Modify these lines to correspond to correct data attributes later, these are placeholders
+            cdnum16=feat.properties.GOV18D;
+            crnum16=feat.properties.GOV18R;
+            cdnum18=feat.properties.SEN18D;
+            crnum18=feat.properties.SEN18R;
+
+            var dropdownyear = document.getElementById("year");
+            if(dropdownyear.options[dropdownyear.selectedIndex].value == "pred_16"){
+                document.getElementById("pplnum").innerHTML=demnum+repnum;
+                if(demnum==0)document.getElementById("demonum").innerHTML = 0 + "people [0%]";
+                else document.getElementById("demonum").innerHTML = demnum+ " people ["+Math.round(100*(demnum/(demnum+repnum))) +"%]";
+                if(repnum==0) document.getElementById("repnum").innerHTML = 0 + "people [0%]";
+                else document.getElementById("repnum").innerHTML = repnum+ " people ["+Math.round(100*(repnum/(demnum+repnum))) +"%]";
+            }
+            else if(dropdownyear.options[dropdownyear.selectedIndex].value == "cog_16"){
+                document.getElementById("demonum").innerHTML = cdnum16;
+                document.getElementById("repnum").innerHTML = crnum16;
+                
+            }
+            else{
+                document.getElementById("demonum").innerHTML = cdnum18;
+                document.getElementById("repnum").innerHTML = crnum18;
+                
+            }
+        }
+        function precMenuChange(selectedValue){
+            if(selectedValue==undefined){
+                selectedValue=document.getElementById("Precincts").value;
+            }
+            console.log(selectedValue);
+            precSubLayers=precLayer._layers;
+            for(i in precSubLayers){
+                testLayer=precSubLayers[i];
+                feat=testLayer.feature;
+                if(feat.properties.PRENAME==selectedValue){
+                    console.log(testLayer);
+                    menuChangeCoords=feat.geometry.coordinates;
+                    //findCoordForPrec(menuChangeCoords);
+                    mymap.setView(new L.LatLng(41.5801, -71.4774), 10.5);
+                    testLayer.openPopup();
+                    
+                    demnum=feat.properties.PRES16D;
+                    repnum=feat.properties.PRES16R;
+                    
+                    whitenum=feat.properties.WVAP;
+                    blacknum=feat.properties.BVAP;
+                    asiannum=feat.properties.ASIANVAP;
+                    hispanicnum=feat.properties.HVAP;
+                    othernum=feat.properties.OTHERVAP;
+                    totpopnum=feat.properties.TOTPOP;
+                    
+                    //Modify these lines to correspond to correct data attributes later, these are placeholders
+                    cdnum16=feat.properties.GOV18D;
+                    crnum16=feat.properties.GOV18R;
+                    cdnum18=feat.properties.SEN18D;
+                    crnum18=feat.properties.SEN18R;
+                    
+                    
+                    
+                    document.getElementById("pplnum").innerHTML=Math.floor(totpopnum);
+                    document.getElementById("whitenum").innerHTML=Math.floor(whitenum);
+                    document.getElementById("blacknum").innerHTML=Math.floor(blacknum);
+                    document.getElementById("asiannum").innerHTML=Math.floor(asiannum);
+                    document.getElementById("hisnum").innerHTML=Math.floor(hispanicnum);
+                    document.getElementById("restnum").innerHTML=Math.floor(othernum);
+                    
+                    changeyear();
+                    layer=testLayer;
+                    console.log(feat.properties.PRES16D+ " "+feat.properties.PRES16R+" "+layer.options.color);
+                    if(feat.properties.PRES16D ==0 && feat.properties.PRES16R == 0 && layer.options.color=="orange"){
+                        showError(layer,"GHOST");
+                    }
+                    else{
+                        if(feat.properties.PRENAME=="Burrillville 0302" && layer.options.color=="orange"){
+                            showError(layer,"DONUT");
+                        }
+                        else{
+                            showError(layer);
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        function changeAllColor(){
+            //if demographics dropbox is election then use normal colors but if demographics is selected use the other colors
+            precSubLayers=precLayer._layers;
+            for(i in precSubLayers){
+                testLayer=precSubLayers[i];
+                feat=testLayer.feature;
+                changeFeatColor(feat,testLayer);
+            }
+        }
+        function changeFeatColor(ft,tLayer){
+            if(ft.properties.PRES16D ==0 && ft.properties.PRES16R == 0){
+                tLayer.setStyle(setShapeColor(tLayer,"ERROR_STYLE"));
+            }
+            else{
+                if(ft.properties.PRES16D>ft.properties.PRES16R){
+                    tLayer.setStyle(setShapeColor(tLayer,"DEM_STYLE"));
+                }
+                if(ft.properties.PRES16D<=ft.properties.PRES16R){
+                    tLayer.setStyle(setShapeColor(tLayer,"REP_STYLE"));
+                }
+                if(ft.properties.PRENAME=="Burrillville 0302" && ft.geometry.type=="MultiPolygon"){
+                    tLayer.setStyle(setShapeColor(tLayer,"ERROR_STYLE"));
+                }
+            }
+        }
+        function onClick(e){
+            //highlight the selected precinct and highlight neighbors
+            layer=e.target;
+            console.log(layer);
+            feat=layer.feature;
+            var dropdown = document.getElementById("Precincts");
+            dropdown.value = feat.properties.PRENAME;
+            clickCoords=feat.geometry.coordinates;
+            demnum=feat.properties.PRES16D;
+            repnum=feat.properties.PRES16R;
+            
+            whitenum=feat.properties.WVAP;
+            blacknum=feat.properties.BVAP;
+            asiannum=feat.properties.ASIANVAP;
+            hispanicnum=feat.properties.HVAP;
+            othernum=feat.properties.OTHERVAP;
+
+            totpopnum=feat.properties.TOTPOP;
+
+            document.getElementById("pplnum").innerHTML=Math.floor(totpopnum);
+            document.getElementById("whitenum").innerHTML=Math.floor(whitenum);
+            document.getElementById("blacknum").innerHTML=Math.floor(blacknum);
+            document.getElementById("asiannum").innerHTML=Math.floor(asiannum);
+            document.getElementById("hisnum").innerHTML=Math.floor(hispanicnum);
+            document.getElementById("restnum").innerHTML=Math.floor(othernum);
+            
+            if(feat.properties.PRES16D ==0 && feat.properties.PRES16R == 0 && layer.options.color=="orange"){
+                showError(layer,"GHOST");
+            }
+            else{
+                if(feat.properties.PRENAME=="Burrillville 0302" && layer.options.color=="orange"){
+                    showError(layer,"DONUT");
+                }
+                else{
+                    showError(layer);
+                }
+            }
+            
+            changeyear();
+        }
+        function addError(data){
+            var xhr=new XMLHttpRequest();
+            xhr.open('POST','http://localhost:8080/precincts');
+            if(data){
+                xhr.setRequestHeader('Content-Type','application/json');
+            }
+            data=JSON.stringify(data);
+            xhr.send(data);
+        }
+        function setGhostPrecinct(layer){
+            oldFeature=layer.feature;
+            element=document.getElementById(layer.feature.properties.PRENAME+"_error");
+            element.parentNode.removeChild(element);
+            layer.setStyle(setShapeColor(layer,"GHOST_STYLE"));
+            errorDiv.innerHTML="";
+            //changes the type of error
+            newFeature=layer.feature;
+            updatePrecinct(oldFeature,newFeature);
+            deleteError(newFeature.properties.PRENAME);
+        }
+        function updatePrecinct(precinct,newData){
+            var xhr=new XMLHttpRequest();
+            xhr.open('PUT','http://localhost:8080/precincts/'+precinct.properties.PRENAME);
+            if(precinct){
+                xhr.setRequestHeader('Content-Type','application/json');
+            }
+            var data=JSON.stringify(newData);
+            console.log(data);
+            xhr.send(data);
+        }
+        function deleteError(precinctName){
+            var xhr=new XMLHttpRequest();
+            xhr.open('DELETE','http://localhost:8080/errors/'+precinctName);
+            xhr.send();
+        }
+        function mergePrecincts(layer){
+            feature=layer.feature;
+            element=document.getElementById(feature.properties.PRENAME+"_error");
+            element.parentNode.removeChild(element);
+            console.log(feature);
+            newPrecinct={"type":"Feature",
+                "properties":feature.properties,
+                "geometry":{
+                    "type":"Polygon",
+                    "coordinates":[feature.geometry.coordinates[0][0]]
+                }
+            };
+            var dropdown = document.getElementById("Precincts");
+            dropdown.remove(dropdown.selectedIndex);
+            layer.remove();
+            precLayer.removeLayer(layer);
+            console.log(precLayer._layers);
+            console.log(newPrecinct);
+            precLayer.addData(newPrecinct);
+            errorDiv.innerHTML="";
+            updatePrecinct(feature,newPrecinct);
+            deleteError(newPrecinct.properties.PRENAME);
+        }
+        function showError(layer,errorType){
+            errorDiv=document.getElementById("currentError");
+            switch(errorType){
+                case "GHOST":
+                    errorDiv.innerHTML="Ghost Precinct? <br>\n\
+                        <button onclick='setGhostPrecinct(layer)'>Yes</button>\n\
+                        <button onclick='openchange();errorDiv.innerHTML=\"\"'>No</button>";
+                    break;
+                case "DONUT":
+                    errorDiv.innerHTML="Merge Precinct<br>\n\
+                        <button onclick='mergePrecincts(layer)'>Yes</button>";
+                    break;
+                default:
+                    errorDiv.innerHTML="";
+            }
+        }
+        function changePrecinctData(){
+            demo1=document.getElementById("demo1").value;
+            repub1=document.getElementById("repub1").value;
+            demo2=document.getElementById("demo2").value;
+            repub2=document.getElementById("repub2").value;
+            demo3=document.getElementById("demo3").value;
+            repub3=document.getElementById("repub3").value;
+            white2=document.getElementById("white2").value;
+            black2=document.getElementById("black2").value;
+            asian2=document.getElementById("asian2").value;
+            his2=document.getElementById("his2").value;
+            oth2=document.getElementById("oth2").value;
+            selectedValue=document.getElementById("Precincts").value;
+            precSubLayers=precLayer._layers;
+            for(i in precSubLayers){
+                testLayer=precSubLayers[i];
+                feat=testLayer.feature;
+                oldFeat=feat;
+                if(feat.properties.PRENAME==selectedValue){
+                    changePrecinctVotingData(testLayer,demo1,repub1,demo2,repub2,demo3,repub3);
+                    changePrecinctDemographicData(layer,white2,black2,asian2,his2,oth2);
+                    precMenuChange();
+                    changeFeatColor(testLayer.feature,testLayer);
+                    if(feat.properties.PRENAME=="Ghost Precinct"){
+                        deleteError(feat.properties.PRENAME);
+                    }
+                    break;
+                }
+            }
+            document.getElementById('datapopup').style.display='none';
+            updatePrecinct(oldFeat,feat);
+        }
+	function changePrecinctDemographicData(layer,white2,black2,asian2,his2,oth2){
+            layer.feature.properties.WVAP=parseInt(white2);
+            layer.feature.properties.BVAP=parseInt(black2);
+            layer.feature.properties.ASIANVAP=parseInt(asian2);
+            layer.feature.properties.HVAP=parseInt(his2);
+            layer.feature.properties.OTHERVAP=parseInt(oth2);
+	}
+        function changePrecinctVotingData(layer,demo1,repub1,demo2,repub2,demo3,repub3){
+            layer.feature.properties.PRES16D=parseInt(demo1);
+            layer.feature.properties.PRES16R=parseInt(repub1);
+            layer.feature.properties.GOV18D=parseInt(demo2);
+            layer.feature.properties.GOV18R=parseInt(repub2);
+            layer.feature.properties.SEN18D=parseInt(demo3);
+            layer.feature.properties.SEN18R=parseInt(repub3);
+        }
+        //test
+        function onEachFeature(feature,layer){
+            featureLayer=layer;
+            featureLayer.bindPopup('<h1>' + feature.properties.PRENAME + '</h1>');
+            loadPrecincts(feature, layer);
+            featureLayer.on({
+                click: onClick,
+                mouseover: setNPS,
+                mouseout: setOPS
+            });
+            if(feature.properties.PRES16D ==0 && feature.properties.PRES16R == 0 && featureLayer.options.color=="#3388ff"){
+               document.getElementById("errorLog").innerHTML+="<div id=\""+feature.properties.PRENAME+"_error\"><button onclick='document.getElementById(\"changepopup\").style.display=\"none\";precMenuChange(\""+feature.properties.PRENAME+"\");'>Ghost Precinct Found ["+feature.properties.PRENAME+"](Requires Verification)</button></div>";
+            }
+            if(feature.properties.PRENAME=="Burrillville 0302" && feature.geometry.type=="MultiPolygon"){
+               document.getElementById("errorLog").innerHTML+="<div id=\""+feature.properties.PRENAME+"_error\"><button onclick='document.getElementById(\"changepopup\").style.display=\"none\";precMenuChange(\""+feature.properties.PRENAME+"\");'>Donut Precinct Found ["+feature.properties.PRENAME+"](Requires Modification)</button></div>";
+            }
+            changeFeatColor(feature,featureLayer);
+        }
+        function loadPrecincts(feature, layer){
+            var dropdown = document.getElementById("Precincts");
+            var addedPrecinct = document.createElement("option");
+            var precinctName = feature.properties.PRENAME;
+            addedPrecinct.text = precinctName;
+            addedPrecinct.value = precinctName;
+            dropdown.options.add(addedPrecinct);
+        }
+    </script>
+</html>
