@@ -25,11 +25,8 @@ and open the template in the editor.
                 <h3>Information</h3>
                 <div style="padding-bottom:10px">
                     <label for="States" style="font-size: 20px;padding-right: 26px">State:</label>
-                    <select id="States"> <!-- needs to be replaced by data from DB -->
-                        <option value="State" onclick="loadFeature()">State</option>
-                        <option value ="Arizona" onclick="loadFeature()">Arizona</option>
-                        <option value="Rhode Island" onclick="loadFeature()">Rhode Island</option>
-                        <option value="North Carolina" onclick="loadFeature()">North Carolina</option>
+                    <select id="States" onchange="loadFeature()"> <!-- needs to be replaced by data from DB -->
+                        <option value="State" onclick="">State</option>
                     </select>
                 </div>
                 <div id="precinctDropdown" style="display:none" >
@@ -297,7 +294,7 @@ and open the template in the editor.
             zoomOffset: -1,
             accessToken: 'pk.eyJ1IjoiZTE1MzEwODgiLCJhIjoiY2s3NzdjOWl3MDRzdTNmcWtqdDNlamxhNiJ9.aN5tSOOA7nNJA0KCnOITBA'}).addTo(mymap);
             precLayer=L.geoJSON(null,{onEachFeature: onEachFeature}).addTo(mymap);
-            
+            stateLayer=L.geoJSON(null,{style:setShapeColor(this,"STATE_STYLE")}).addTo(mymap);
             console.log("Hello, World!");
             loadFeature();
         }
@@ -307,23 +304,26 @@ and open the template in the editor.
             //0 is rhodeisland,1 is north carolina, 2 is arizona
             let stateCoords=[[41.5801,-71.4774]];
             let zoomLevel=[9];
-            let stateID=[44];
             unloadAll();
             let precinctFilter=document.getElementById("precinctFilter").checked;
+            let dropdown = document.getElementById("States");
             switch(stateName){
                 case "Rhode Island":
+                    let stateID=stateDictionary[stateName].properties.statefp;
                     mymap.setView(new L.LatLng(stateCoords[0][0],stateCoords[0][1]), zoomLevel);
-                    if(precinctFilter) loadAllForState(stateID[0]);
+                    if(precinctFilter) loadAllForState(stateID);
                     break;
                 default:
                     document.getElementById("precinctDropdown").style.display="none";
-                    loadStateForMap();
+                    dropdown.innerHTML="<option value='State'>State</option>";
+                    loadStatesForMap(stateName);
                     zoomOut();
                     break;
             }
         }
         function unloadAll(){
             precLayer.clearLayers();
+            stateLayer.clearLayers();
             precinctLayers={};
             errorDictionary={};
             clearBothSections();
@@ -350,14 +350,41 @@ and open the template in the editor.
                 errorDictionary[error_data[i].precinctID]=error_data[i].errorType;
             }
         }
-        function loadStateForMap(){
-            let xhr_ri_state=new XMLHttpRequest();
-            xhr_ri_state.open('GET','http://localhost:8080/json_ri_state');
-            xhr_ri_state.onload=()=>{
-                let data=JSON.parse(xhr_ri_state.response);
-                L.geoJSON(data,{style:setShapeColor(this,"STATE_STYLE")}).addTo(mymap);
+        function loadStatesForMap(stateName){
+            stateDictionary={};
+            let xhr_states=new XMLHttpRequest();
+            xhr_states.open('GET','http://localhost:8080/states');
+            xhr_states.onload=()=>{
+                let states_data=JSON.parse(xhr_states.response);
+                for(i=0;i<states_data.length;i++){
+                    let state=prepareStateToUse(states_data[i]);
+                    stateLayer.addData(state);
+                    stateDictionary[state.properties.name]=state;
+                }
+                loadStateNames();
             };
-            xhr_ri_state.send();
+            xhr_states.send();
+        }
+        function loadStateNames(){
+            let dropdown = document.getElementById("States");
+            let statesLayers=stateLayer._layers;
+            for (i in statesLayers){
+                let singleLayer=statesLayers[i];
+                let feature=singleLayer.feature;
+                let addedState = document.createElement("option");
+                addedState.text = feature.properties.name;
+                addedState.value = feature.properties.name;
+                dropdown.options.add(addedState);
+            }
+        }
+        function loadStateDictionary(){
+            precinctLayers={};
+            let precLayers=precLayer._layers;
+            for (i in precLayers){
+                let singleLayer=precLayers[i];
+                let feature=singleLayer.feature;
+                precinctLayers[feature.properties.name]=singleLayer;
+            }
         }
         function loadPrecinctsForState(state_id){
             let xhr_precinct_data=new XMLHttpRequest();
@@ -365,42 +392,54 @@ and open the template in the editor.
             xhr_precinct_data.onload=()=> {
                 let precinct_data=JSON.parse(xhr_precinct_data.response);
                 for(i=0;i<precinct_data.length;i++){
-                    precLayer.addData(prepareFeatureToUse(precinct_data));
+                    precLayer.addData(preparePrecinctToUse(precinct_data[i]));
                 }
                 loadPrecinctDictionary();
             }
             xhr_precinct_data.send();
         }
-        initLoad();
-        function prepareFeatureToUse(precinct_data){
-            let jsonObj=JSON.parse(precinct_data[i]["shape_geojson"]);
+        function prepareStateToUse(state){
+            let jsonObj=JSON.parse(state["state_geojson"]);
             let newjsonObj={};
-            let errorType=errorDictionary[precinct_data[i]["ogrFID"]];
             newjsonObj["type"]="Feature";
             newjsonObj["properties"]={};
-            newjsonObj.properties["aminov18"]=precinct_data[i]["aminov18"];
-            newjsonObj.properties["asianov18"]=precinct_data[i]["asianov18"];
-            newjsonObj.properties["blackov18"]=precinct_data[i]["blackov18"];
-            newjsonObj.properties["demvot16"]=precinct_data[i]["demvot16"];
-            newjsonObj.properties["demvot18"]=precinct_data[i]["demvot18"];
-            newjsonObj.properties["demvotpres"]=precinct_data[i]["demvotpres"];
-            newjsonObj.properties["hawov18"]=precinct_data[i]["hawov18"];
-            newjsonObj.properties["hisov18"]=precinct_data[i]["hisov18"];
-            newjsonObj.properties["name"]=precinct_data[i]["name"];
-            newjsonObj.properties["otherov18"]=precinct_data[i]["otherov18"];
-            newjsonObj.properties["othvot16"]=precinct_data[i]["othvot16"];
-            newjsonObj.properties["othvot18"]=precinct_data[i]["othvot18"];
-            newjsonObj.properties["othvotpres"]=precinct_data[i]["othvotpres"];
-            newjsonObj.properties["pop100"]=precinct_data[i]["pop100"];
-            newjsonObj.properties["repvot16"]=precinct_data[i]["repvot16"];
-            newjsonObj.properties["repvot18"]=precinct_data[i]["repvot18"];
-            newjsonObj.properties["repvotpres"]=precinct_data[i]["repvotpres"];
-            newjsonObj.properties["whiteov18"]=precinct_data[i]["whiteov18"];
-            newjsonObj.properties["ogrFID"]=precinct_data[i]["ogrFID"];
-            newjsonObj.properties["totvotpres"]=precinct_data[i]["totvotpres"];
-            newjsonObj.properties["totvot16"]=precinct_data[i]["totvot16"];
-            newjsonObj.properties["totvot18"]=precinct_data[i]["totvot18"];
-            newjsonObj.properties["statefp"]=precinct_data[i]["statefp"];
+            newjsonObj.properties["statefp"]=state["statefp"];
+            newjsonObj.properties["name"]=state["name"];
+            newjsonObj.properties["ogrFID"]=state["ogrFID"];
+            newjsonObj["geometry"]={};
+            newjsonObj.geometry["type"]=jsonObj["type"];
+            newjsonObj.geometry["coordinates"]=jsonObj["coordinates"];
+            return newjsonObj;
+        }
+        function preparePrecinctToUse(precinct){
+            let jsonObj=JSON.parse(precinct["shape_geojson"]);
+            let newjsonObj={};
+            let errorType=errorDictionary[precinct["ogrFID"]];
+            newjsonObj["type"]="Feature";
+            newjsonObj["properties"]={};
+            newjsonObj.properties["aminov18"]=precinct["aminov18"];
+            newjsonObj.properties["asianov18"]=precinct["asianov18"];
+            newjsonObj.properties["blackov18"]=precinct["blackov18"];
+            newjsonObj.properties["demvot16"]=precinct["demvot16"];
+            newjsonObj.properties["demvot18"]=precinct["demvot18"];
+            newjsonObj.properties["demvotpres"]=precinct["demvotpres"];
+            newjsonObj.properties["hawov18"]=precinct["hawov18"];
+            newjsonObj.properties["hisov18"]=precinct["hisov18"];
+            newjsonObj.properties["name"]=precinct["name"];
+            newjsonObj.properties["otherov18"]=precinct["otherov18"];
+            newjsonObj.properties["othvot16"]=precinct["othvot16"];
+            newjsonObj.properties["othvot18"]=precinct["othvot18"];
+            newjsonObj.properties["othvotpres"]=precinct["othvotpres"];
+            newjsonObj.properties["pop100"]=precinct["pop100"];
+            newjsonObj.properties["repvot16"]=precinct["repvot16"];
+            newjsonObj.properties["repvot18"]=precinct["repvot18"];
+            newjsonObj.properties["repvotpres"]=precinct["repvotpres"];
+            newjsonObj.properties["whiteov18"]=precinct["whiteov18"];
+            newjsonObj.properties["ogrFID"]=precinct["ogrFID"];
+            newjsonObj.properties["totvotpres"]=precinct["totvotpres"];
+            newjsonObj.properties["totvot16"]=precinct["totvot16"];
+            newjsonObj.properties["totvot18"]=precinct["totvot18"];
+            newjsonObj.properties["statefp"]=precinct["statefp"];
             if(errorType==undefined) newjsonObj.properties["errorType"]="NONE";
             else newjsonObj.properties["errorType"]=errorType;
             newjsonObj["geometry"]={};
@@ -875,5 +914,6 @@ and open the template in the editor.
             addedPrecinct.value = precinctName;
             dropdown.options.add(addedPrecinct);
         }
+        initLoad();
     </script>
 </html>
