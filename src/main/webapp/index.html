@@ -92,8 +92,8 @@ and open the template in the editor.
                 <button onclick="document.getElementById('errorPopup').style.display='block'" style="width:50px;height: 40px;"><img src="ee.png" alt="Error Log" style="width: 30px;height: 30px;"></button>
                 <button onclick="document.getElementById('settingsPopup').style.display='block'" style="width:50px; height:40px"><img src="cog.png" alt="Settings" style="width: 30px; height:30px;"></button>
                 <div>Sources:</div>
-                <a href="https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/UBKYRU" style="text-decoration: none" target="_blank">Harvard Dataverse</a><br/>
-                <a href="https://catalog.data.gov/dataset/tiger-line-shapefile-2017-nation-u-s-current-state-and-equivalent-national" style="text-decoration: none"  target="_blank">US Census Bureau</a>
+                <div>US Census Bureau</div>
+                <div>Rhode Island Geographic Information System</div>
             </div>
         </div>
         <!-- right side of the page -->
@@ -238,18 +238,15 @@ and open the template in the editor.
         </div>
     </body>
     <script>
-        //change button
         function openChangeDataSection(){
-            let dropdownValue=document.getElementById("Precincts").value;
-            document.getElementById('precinctName').value = dropdownValue;
-            if(dropdownValue!="precinct"){
+            let selectedPrecinct=document.getElementById("Precincts").value;
+            document.getElementById('precinctName').value = selectedPrecinct;
+            if(selectedPrecinct!="precinct"){
                 document.getElementById('changeDataSection').style.display='block';
             }
-            fillChangeData();
+            populatePrecinctData();
         }
-        
-        //demographics
-        function fillChangeData(){
+        function populatePrecinctData(){
             let selectedValue=document.getElementById("Precincts").value;
             if(selectedValue=="precinct") return;
             let selectedLayer=precinctLayers[selectedValue];
@@ -285,19 +282,20 @@ and open the template in the editor.
         }
         function initLoad(){
             //L is an object that represents the library and its functions that are available.
-            mymap = L.map('forMap').setView([39.436192999314095, -98.26171875], 4);
+            let usaCoords=[39.436192999314095,-98.26171875];
+            let usaZoomLevel=4;
+            mymap = L.map('forMap').setView(usaCoords, usaZoomLevel);
             L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
-            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors,\n\
+                        <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
             id: 'mapbox/streets-v11',
             accessToken: 'pk.eyJ1IjoiZTE1MzEwODgiLCJhIjoiY2s3NzdjOWl3MDRzdTNmcWtqdDNlamxhNiJ9.aN5tSOOA7nNJA0KCnOITBA'}).addTo(mymap);
             precLayer=L.geoJSON(null,{onEachFeature: onEachFeature}).addTo(mymap);
             stateLayer=L.geoJSON(null,{style:setShapeColor(this,"STATE_STYLE")}).addTo(mymap);
-            console.log("Hello, World!");
             loadFeature();
         }
         function loadFeature(){
             let stateName=document.getElementById("States").value;
-            console.log(stateName);
             //0 is rhodeisland,1 is north carolina, 2 is arizona
             let stateCoords=[[41.5801,-71.4774]];
             let zoomLevel=[10];

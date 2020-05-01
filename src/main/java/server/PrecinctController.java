@@ -50,36 +50,6 @@ public class PrecinctController {
         }      
     }
     
-    @GetMapping("/json_ri_prec")
-    public String returnRIPrec(){
-        try {
-            File file= new File("./src/main/webapp/RI_PRECINCT.json");
-            Scanner sc = new Scanner(file);
-            sc.useDelimiter("\\Z");
-            String result=sc.next();
-            return result;
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(PrecinctController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return "";
-        
-    }
-    
-    @GetMapping("/json_ri_state")
-    public String returnRIState(){
-        try {
-            File file= new File("./src/main/webapp/ri_state.json");
-            Scanner sc = new Scanner(file);
-            sc.useDelimiter("\\Z");
-            String result=sc.next();
-            return result;
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(PrecinctController.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return "";
-        
-    }
-    
     // RESTful API method for Create operation
     @PostMapping("/precincts")
     public void add(@RequestBody Precinct precinct) {
