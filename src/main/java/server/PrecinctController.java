@@ -30,12 +30,12 @@ public class PrecinctController {
     
     // RESTful API methods for Retrieval operations
     @GetMapping("/precincts")
-    public List<Precinct> list() {
+    public List<Precinct> findAllPrecincts() {
         return service.findAll();
     }
     
     @GetMapping("/precincts/{id}")
-    public List<Precinct> listByStatefp(@PathVariable String id){
+    public List<Precinct> findPrecinctsInState(@PathVariable String id){
         return service.findByStatefp(id);
     }
     

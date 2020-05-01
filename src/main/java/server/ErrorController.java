@@ -27,12 +27,12 @@ public class ErrorController {
     private ErrorRepo service;
     
     @GetMapping("/errors/{id}")
-    public List<Error> listById(@PathVariable String id){
+    public List<Error> findErrorById(@PathVariable String id){
         return service.findByStatefp(id);
     }
     
     @GetMapping("/errors")
-    public List<Error> list() {
+    public List<Error> findAllErrors() {
         return service.findAll();
     }
     

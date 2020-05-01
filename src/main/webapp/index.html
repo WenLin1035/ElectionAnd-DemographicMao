@@ -249,7 +249,7 @@ and open the template in the editor.
         function populatePrecinctData(){
             let selectedValue=document.getElementById("Precincts").value;
             if(selectedValue=="precinct") return;
-            let selectedLayer=precinctLayers[selectedValue];
+            let selectedLayer=precincts[selectedValue];
             let selectedFeature=selectedLayer.feature;
             document.getElementById("pred16Dem").value=selectedFeature.properties.demvotpres;
             document.getElementById("pred16Rep").value=selectedFeature.properties.repvotpres;
@@ -290,157 +290,157 @@ and open the template in the editor.
                         <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
             id: 'mapbox/streets-v11',
             accessToken: 'pk.eyJ1IjoiZTE1MzEwODgiLCJhIjoiY2s3NzdjOWl3MDRzdTNmcWtqdDNlamxhNiJ9.aN5tSOOA7nNJA0KCnOITBA'}).addTo(mymap);
-            precLayer=L.geoJSON(null,{onEachFeature: onEachFeature}).addTo(mymap);
+            precinctLayer=L.geoJSON(null,{onEachFeature: onEachFeature}).addTo(mymap);
             stateLayer=L.geoJSON(null,{style:setShapeColor(this,"STATE_STYLE")}).addTo(mymap);
             loadFeature();
         }
         function loadFeature(){
-            let stateName=document.getElementById("States").value;
+            let statesMenu = document.getElementById("States");
+            let stateName=statesMenu.value;
             //0 is rhodeisland,1 is north carolina, 2 is arizona
             let stateCoords=[[41.5801,-71.4774]];
             let zoomLevel=[10];
             unloadAll();
             let precinctFilter=document.getElementById("precinctFilter").checked;
-            let dropdown = document.getElementById("States");
             switch(stateName){
                 case "Rhode Island":
-                    let stateID=stateDictionary[stateName].properties.statefp;
+                    let stateFP=states[stateName].properties.statefp;
                     mymap.setView(new L.LatLng(stateCoords[0][0],stateCoords[0][1]), zoomLevel);
-                    if(precinctFilter) loadAllForState(stateID);
+                    if(precinctFilter) loadAllForState(stateFP);
                     break;
                 default:
                     stateLayer.clearLayers();
                     document.getElementById("precinctDropdown").style.display="none";
-                    dropdown.innerHTML="<option value='State'>State</option>";
+                    statesMenu.innerHTML="<option value='State'>State</option>";
                     loadStatesForMap(stateName);
                     zoomOut();
                     break;
             }
         }
         function unloadAll(){
-            precLayer.clearLayers();
-            precinctLayers={};
-            errorDictionary={};
+            precinctLayer.clearLayers();
+            precincts={};
+            errors={};
             clearBothSections();
             document.getElementById("errorLog").innerHTML="";
             document.getElementById("Precincts").innerHTML="<option value='precinct'>Precinct</option>";
             document.getElementById("precinctDropdown").style.display="inline";
         }
-        function loadAllForState(state_id){
-            loadErrorsForState(state_id);
-            loadPrecinctsForState(state_id);
+        function loadAllForState(stateFP){
+            loadErrorsForState(stateFP);
+            loadPrecinctsForState(stateFP);
         }
-        function loadErrorsForState(state_id){
-            let xhr_error_data=new XMLHttpRequest();
-            xhr_error_data.open('GET','http://localhost:8080/errors/'+state_id);
-            xhr_error_data.onload=()=> {
-                let error_data=JSON.parse(xhr_error_data.response);
-                loadErrorDictionary(error_data);
+        function loadErrorsForState(stateFP){
+            let errorsRequest=new XMLHttpRequest();
+            errorsRequest.open('GET','http://localhost:8080/errors/'+stateFP);
+            errorsRequest.onload=()=> {
+                let errorData=JSON.parse(errorsRequest.response);
+                loadErrorDictionary(errorData);
             }
-            xhr_error_data.send();
+            errorsRequest.send();
         }
-        function loadErrorDictionary(error_data){
-            errorDictionary={};
-            for(i=0;i<error_data.length;i++){
-                errorDictionary[error_data[i].precinctID]=error_data[i].errorType;
+        function loadErrorDictionary(errorData){
+            errors={};
+            for(i=0;i<errorData.length;i++){
+                errors[errorData[i].precinctID]=errorData[i].errorType;
             }
         }
         function loadStatesForMap(stateName){
-            stateDictionary={};
-            let xhr_states=new XMLHttpRequest();
-            xhr_states.open('GET','http://localhost:8080/states');
-            xhr_states.onload=()=>{
-                let states_data=JSON.parse(xhr_states.response);
-                for(i=0;i<states_data.length;i++){
-                    let state=prepareStateToUse(states_data[i]);
+            states={};
+            let statesRequest=new XMLHttpRequest();
+            statesRequest.open('GET','http://localhost:8080/states');
+            statesRequest.onload=()=>{
+                let statesData=JSON.parse(statesRequest.response);
+                for(i=0;i<statesData.length;i++){
+                    let state=prepareStateToUse(statesData[i]);
                     stateLayer.addData(state);
-                    stateDictionary[state.properties.name]=state;
+                    states[state.properties.name]=state;
                 }
                 loadStateNames();
             };
-            xhr_states.send();
+            statesRequest.send();
         }
         function loadStateNames(){
-            let dropdown = document.getElementById("States");
+            let statesMenu = document.getElementById("States");
             let eachLayer=(singleLayer)=>{
                 let feature=singleLayer.feature;
                 let addedState = document.createElement("option");
                 addedState.text = feature.properties.name;
                 addedState.value = feature.properties.name;
-                dropdown.options.add(addedState);
+                statesMenu.options.add(addedState);
             }
             stateLayer.eachLayer(eachLayer);
         }
-        function loadPrecinctsForState(state_id){
-            let xhr_precinct_data=new XMLHttpRequest();
-            xhr_precinct_data.open('GET','http://localhost:8080/precincts/'+state_id);
-            xhr_precinct_data.onload=()=> {
-                let precinct_data=JSON.parse(xhr_precinct_data.response);
-                for(i=0;i<precinct_data.length;i++){
-                    precLayer.addData(preparePrecinctToUse(precinct_data[i]));
+        function loadPrecinctsForState(stateFP){
+            let precinctsRequest=new XMLHttpRequest();
+            precinctsRequest.open('GET','http://localhost:8080/precincts/'+stateFP);
+            precinctsRequest.onload=()=> {
+                let precinctsData=JSON.parse(precinctsRequest.response);
+                for(i=0;i<precinctsData.length;i++){
+                    precinctLayer.addData(preparePrecinctToUse(precinctsData[i]));
                 }
                 loadPrecinctDictionary();
             }
-            xhr_precinct_data.send();
+            precinctsRequest.send();
         }
         function prepareStateToUse(state){
-            let jsonObj=JSON.parse(state["state_geojson"]);
-            let newjsonObj={};
-            newjsonObj["type"]="Feature";
-            newjsonObj["properties"]={};
-            newjsonObj.properties["statefp"]=state["statefp"];
-            newjsonObj.properties["name"]=state["name"];
-            newjsonObj.properties["ogrFID"]=state["ogrFID"];
-            newjsonObj["geometry"]={};
-            newjsonObj.geometry["type"]=jsonObj["type"];
-            newjsonObj.geometry["coordinates"]=jsonObj["coordinates"];
-            return newjsonObj;
+            let stateShape=JSON.parse(state["state_geojson"]);
+            let newState={};
+            newState["type"]="Feature";
+            newState["properties"]={};
+            newState.properties["statefp"]=state["statefp"];
+            newState.properties["name"]=state["name"];
+            newState.properties["ogrFID"]=state["ogrFID"];
+            newState["geometry"]={};
+            newState.geometry["type"]=stateShape["type"];
+            newState.geometry["coordinates"]=stateShape["coordinates"];
+            return newState;
         }
         function preparePrecinctToUse(precinct){
-            let jsonObj=JSON.parse(precinct["shape_geojson"]);
-            let newjsonObj={};
-            let errorType=errorDictionary[precinct["ogrFID"]];
-            newjsonObj["type"]="Feature";
-            newjsonObj["properties"]={};
-            newjsonObj.properties["aminov18"]=precinct["aminov18"];
-            newjsonObj.properties["asianov18"]=precinct["asianov18"];
-            newjsonObj.properties["blackov18"]=precinct["blackov18"];
-            newjsonObj.properties["demvot16"]=precinct["demvot16"];
-            newjsonObj.properties["demvot18"]=precinct["demvot18"];
-            newjsonObj.properties["demvotpres"]=precinct["demvotpres"];
-            newjsonObj.properties["hawov18"]=precinct["hawov18"];
-            newjsonObj.properties["hisov18"]=precinct["hisov18"];
-            newjsonObj.properties["name"]=precinct["name"];
-            newjsonObj.properties["otherov18"]=precinct["otherov18"];
-            newjsonObj.properties["othvot16"]=precinct["othvot16"];
-            newjsonObj.properties["othvot18"]=precinct["othvot18"];
-            newjsonObj.properties["othvotpres"]=precinct["othvotpres"];
-            newjsonObj.properties["pop100"]=precinct["pop100"];
-            newjsonObj.properties["repvot16"]=precinct["repvot16"];
-            newjsonObj.properties["repvot18"]=precinct["repvot18"];
-            newjsonObj.properties["repvotpres"]=precinct["repvotpres"];
-            newjsonObj.properties["whiteov18"]=precinct["whiteov18"];
-            newjsonObj.properties["ogrFID"]=precinct["ogrFID"];
-            newjsonObj.properties["totvotpres"]=precinct["totvotpres"];
-            newjsonObj.properties["totvot16"]=precinct["totvot16"];
-            newjsonObj.properties["totvot18"]=precinct["totvot18"];
-            newjsonObj.properties["statefp"]=precinct["statefp"];
-            if(errorType==undefined) newjsonObj.properties["errorType"]="NONE";
-            else newjsonObj.properties["errorType"]=errorType;
-            newjsonObj["geometry"]={};
-            newjsonObj.geometry["type"]=jsonObj["type"];
-            newjsonObj.geometry["coordinates"]=jsonObj["coordinates"];
-            return newjsonObj;
+            let precinctShape=JSON.parse(precinct["shape_geojson"]);
+            let newPrecinct={};
+            let errorType=errors[precinct["ogrFID"]];
+            newPrecinct["type"]="Feature";
+            newPrecinct["properties"]={};
+            newPrecinct.properties["aminov18"]=precinct["aminov18"];
+            newPrecinct.properties["asianov18"]=precinct["asianov18"];
+            newPrecinct.properties["blackov18"]=precinct["blackov18"];
+            newPrecinct.properties["demvot16"]=precinct["demvot16"];
+            newPrecinct.properties["demvot18"]=precinct["demvot18"];
+            newPrecinct.properties["demvotpres"]=precinct["demvotpres"];
+            newPrecinct.properties["hawov18"]=precinct["hawov18"];
+            newPrecinct.properties["hisov18"]=precinct["hisov18"];
+            newPrecinct.properties["name"]=precinct["name"];
+            newPrecinct.properties["otherov18"]=precinct["otherov18"];
+            newPrecinct.properties["othvot16"]=precinct["othvot16"];
+            newPrecinct.properties["othvot18"]=precinct["othvot18"];
+            newPrecinct.properties["othvotpres"]=precinct["othvotpres"];
+            newPrecinct.properties["pop100"]=precinct["pop100"];
+            newPrecinct.properties["repvot16"]=precinct["repvot16"];
+            newPrecinct.properties["repvot18"]=precinct["repvot18"];
+            newPrecinct.properties["repvotpres"]=precinct["repvotpres"];
+            newPrecinct.properties["whiteov18"]=precinct["whiteov18"];
+            newPrecinct.properties["ogrFID"]=precinct["ogrFID"];
+            newPrecinct.properties["totvotpres"]=precinct["totvotpres"];
+            newPrecinct.properties["totvot16"]=precinct["totvot16"];
+            newPrecinct.properties["totvot18"]=precinct["totvot18"];
+            newPrecinct.properties["statefp"]=precinct["statefp"];
+            if(errorType==undefined) newPrecinct.properties["errorType"]="NONE";
+            else newPrecinct.properties["errorType"]=errorType;
+            newPrecinct["geometry"]={};
+            newPrecinct.geometry["type"]=precinctShape["type"];
+            newPrecinct.geometry["coordinates"]=precinctShape["coordinates"];
+            return newPrecinct;
         }
         function loadPrecinctDictionary(){
-            precinctLayers={};
+            precincts={};
             let eachLayer=(singleLayer)=>{
                 let feature=singleLayer.feature;
-                precinctLayers[feature.properties.name]=singleLayer;
+                precincts[feature.properties.name]=singleLayer;
             }
-            precLayer.eachLayer(eachLayer);
+            precinctLayer.eachLayer(eachLayer);
         }
-        function setShapeColor(ft,shapeStyle){
+        function setShapeColor(feature,shapeStyle){
             switch(shapeStyle){
                 case "STATE_STYLE": 
                     return{
@@ -498,7 +498,7 @@ and open the template in the editor.
                         color:'orange'
                     }
                 default:
-                    console.log(ft);
+                    console.log(feature);
                     console.log("un-intended");
             }
         }
@@ -539,9 +539,9 @@ and open the template in the editor.
             document.getElementById("totVotePop").innerHTML=Math.floor(totVotePop);
         }
         function setElectionSection(){
-            let dropdownValue=document.getElementById("Precincts").value;
-            if(dropdownValue=="precinct") return;
-            let selectedLayer=precinctLayers[dropdownValue];
+            let selectedPrecinct=document.getElementById("Precincts").value;
+            if(selectedPrecinct=="precinct") return;
+            let selectedLayer=precincts[selectedPrecinct];
             let selectedFeature=selectedLayer.feature;
             let pred16D=selectedFeature.properties.demvotpres;
             let pred16R=selectedFeature.properties.repvotpres;
@@ -556,8 +556,8 @@ and open the template in the editor.
             let cong16T=selectedFeature.properties.totvot16;
             let cong18T=selectedFeature.properties.totvot18;
             
-            let dropdownYear = document.getElementById("year");
-            if(dropdownYear.options[dropdownYear.selectedIndex].value == "pred16"){
+            let selectedElection = document.getElementById("year");
+            if(selectedElection.options[selectedElection.selectedIndex].value == "pred16"){
                 document.getElementById("totVotePop").innerHTML=pred16T + " people";
                 if(pred16T==0)document.getElementById("demNum").innerHTML = 0 + " people [0%]";
                 else document.getElementById("demNum").innerHTML = pred16D+ " people ["+Math.round(100*(pred16D/pred16T)) +"%]";
@@ -566,7 +566,7 @@ and open the template in the editor.
                 if(pred16O==0) document.getElementById("othNum").innerHTML = 0 + " people [0%]";
                 else document.getElementById("othNum").innerHTML = pred16O+ " people ["+Math.round(100*(pred16O/pred16T)) +"%]";
             }
-            else if(dropdownYear.options[dropdownYear.selectedIndex].value == "cong16"){
+            else if(selectedElection.options[selectedElection.selectedIndex].value == "cong16"){
                 document.getElementById("demNum").innerHTML = cong16D;
                 document.getElementById("repNum").innerHTML = cong16R;
                 document.getElementById("totVotePop").innerHTML=cong16T + " people";
@@ -598,29 +598,29 @@ and open the template in the editor.
                 document.getElementById("Precincts").value=selectedValue;
             }
             if(selectedValue=="precinct") return;
-            let selectedLayer=precinctLayers[selectedValue];
+            let selectedLayer=precincts[selectedValue];
             let selectedFeature=selectedLayer.feature;
             
             showPrecinctOnClick(selectedLayer,selectedFeature);
         }
         function showPrecinctOnClick(selectedLayer,selectedFeature){
             precinctZoom(turf.centroid(selectedFeature),turf.area(selectedFeature));
-            precLayer.setStyle(setShapeColor(precLayer,"OLD_PREC_STYLE"));
+            precinctLayer.setStyle(setShapeColor(precinctLayer,"OLD_PREC_STYLE"));
             selectedLayer.setStyle(setShapeColor(selectedLayer,"NEW_PREC_STYLE"));
             setDemographicSection(selectedFeature);
             setElectionSection(selectedFeature);
             showError(selectedLayer,selectedFeature.properties.errorType);
         }
         function changeAllColor(){
-            for(i in precinctLayers){
-                let singleLayer=precinctLayers[i];
+            for(i in precincts){
+                let singleLayer=precincts[i];
                 let feature=singleLayer.feature;
                 changeFeatColor(feature,singleLayer);
             }
         }
-        function changeFeatColor(selectedFeature,tLayer){
+        function changeFeatColor(selectedFeature,selectedLayer){
             if(selectedFeature.properties.errorType!="NONE" && selectedFeature.properties.errorType!="RESOLVED"){
-                tLayer.setStyle(setShapeColor(tLayer,"ERROR_STYLE"));
+                selectedLayer.setStyle(setShapeColor(selectedLayer,"ERROR_STYLE"));
             }
             else{
                 let dataType=document.getElementById("dataSection").value;
@@ -631,54 +631,54 @@ and open the template in the editor.
                         let asianov18=selectedFeature.properties.asianov18;
                         let hisov18=selectedFeature.properties.hisov18;
                         let otherov18=selectedFeature.properties.otherov18;
-                        let majorRaceIndex=Math.max(whiteov18,blackov18,asianov18,hisov18,otherov18);
-                        switch(majorRaceIndex){
-                            case 0: {tLayer.setStyle(setShapeColor(tLayer,"GHOST_STYLE")); break;}
-                            case whiteov18: {tLayer.setStyle(setShapeColor(tLayer,"WHITE_STYLE")); break;}
-                            case blackov18: {tLayer.setStyle(setShapeColor(tLayer,"BLACK_STYLE")); break;}
-                            case asianov18: {tLayer.setStyle(setShapeColor(tLayer,"ASIAN_STYLE")); break;}
-                            case hisov18: {tLayer.setStyle(setShapeColor(tLayer,"HIS_STYLE")); break;}
-                            case otherov18: {tLayer.setStyle(setShapeColor(tLayer,"OTHER_DEMO_STYLE")); break;}
+                        let majorityRace=Math.max(whiteov18,blackov18,asianov18,hisov18,otherov18);
+                        switch(majorityRace){
+                            case 0: {selectedLayer.setStyle(setShapeColor(selectedLayer,"GHOST_STYLE")); break;}
+                            case whiteov18: {selectedLayer.setStyle(setShapeColor(selectedLayer,"WHITE_STYLE")); break;}
+                            case blackov18: {selectedLayer.setStyle(setShapeColor(selectedLayer,"BLACK_STYLE")); break;}
+                            case asianov18: {selectedLayer.setStyle(setShapeColor(selectedLayer,"ASIAN_STYLE")); break;}
+                            case hisov18: {selectedLayer.setStyle(setShapeColor(selectedLayer,"HIS_STYLE")); break;}
+                            case otherov18: {selectedLayer.setStyle(setShapeColor(selectedLayer,"OTHER_DEMO_STYLE")); break;}
                         }
                         break;
                     case "election":
-                        let majorElectionIndex=0;
+                        let majorityParty=0;
                         let electionValue=document.getElementById("year").value;
                         switch(electionValue){
                             case "pred16":
                                 let demvotpres=selectedFeature.properties.demvotpres;
                                 let repvotpres=selectedFeature.properties.repvotpres;
                                 let othvotpres=selectedFeature.properties.othvotpres;
-                                majorElectionIndex=Math.max(demvotpres,repvotpres,othvotpres);
-                                switch(majorElectionIndex){
-                                    case 0: {tLayer.setStyle(setShapeColor(tLayer,"GHOST_STYLE")); break;}
-                                    case demvotpres: {tLayer.setStyle(setShapeColor(tLayer,"DEM_STYLE")); break;}
-                                    case repvotpres: {tLayer.setStyle(setShapeColor(tLayer,"REP_STYLE")); break;}
-                                    case othvotpres: {tLayer.setStyle(setShapeColor(tLayer,"OTHER_ELECTION_STYLE")); break;}
+                                majorityParty=Math.max(demvotpres,repvotpres,othvotpres);
+                                switch(majorityParty){
+                                    case 0: {selectedLayer.setStyle(setShapeColor(selectedLayer,"GHOST_STYLE")); break;}
+                                    case demvotpres: {selectedLayer.setStyle(setShapeColor(selectedLayer,"DEM_STYLE")); break;}
+                                    case repvotpres: {selectedLayer.setStyle(setShapeColor(selectedLayer,"REP_STYLE")); break;}
+                                    case othvotpres: {selectedLayer.setStyle(setShapeColor(selectedLayer,"OTHER_ELECTION_STYLE")); break;}
                                 }
                                 break;
                             case "cong16":
                                 let demvot16=selectedFeature.properties.demvot16;
                                 let repvot16=selectedFeature.properties.repvot16;
                                 let othvot16=selectedFeature.properties.othvot16;
-                                majorElectionIndex=Math.max(demvot16,repvot16,othvot16);
-                                switch(majorElectionIndex){
-                                    case 0: {tLayer.setStyle(setShapeColor(tLayer,"GHOST_STYLE")); break;}
-                                    case demvot16: {tLayer.setStyle(setShapeColor(tLayer,"DEM_STYLE")); break;}
-                                    case repvot16: {tLayer.setStyle(setShapeColor(tLayer,"REP_STYLE")); break;}
-                                    case othvot16: {tLayer.setStyle(setShapeColor(tLayer,"OTHER_ELECTION_STYLE")); break;}
+                                majorityParty=Math.max(demvot16,repvot16,othvot16);
+                                switch(majorityParty){
+                                    case 0: {selectedLayer.setStyle(setShapeColor(selectedLayer,"GHOST_STYLE")); break;}
+                                    case demvot16: {selectedLayer.setStyle(setShapeColor(selectedLayer,"DEM_STYLE")); break;}
+                                    case repvot16: {selectedLayer.setStyle(setShapeColor(selectedLayer,"REP_STYLE")); break;}
+                                    case othvot16: {selectedLayer.setStyle(setShapeColor(selectedLayer,"OTHER_ELECTION_STYLE")); break;}
                                 }
                                 break;
                             case "cong18":
                                 let demvot18=selectedFeature.properties.demvot18;
                                 let repvot18=selectedFeature.properties.repvot18;
                                 let othvot18=selectedFeature.properties.othvot18;
-                                majorElectionIndex=Math.max(demvot18,repvot18,othvot18);
-                                switch(majorElectionIndex){
-                                    case 0: {tLayer.setStyle(setShapeColor(tLayer,"GHOST_STYLE")); break;}
-                                    case demvot18: {tLayer.setStyle(setShapeColor(tLayer,"DEM_STYLE")); break;}
-                                    case repvot18: {tLayer.setStyle(setShapeColor(tLayer,"REP_STYLE")); break;}
-                                    case othvot18: {tLayer.setStyle(setShapeColor(tLayer,"OTHER_ELECTION_STYLE")); break;}
+                                majorityParty=Math.max(demvot18,repvot18,othvot18);
+                                switch(majorityParty){
+                                    case 0: {selectedLayer.setStyle(setShapeColor(selectedLayer,"GHOST_STYLE")); break;}
+                                    case demvot18: {selectedLayer.setStyle(setShapeColor(selectedLayer,"DEM_STYLE")); break;}
+                                    case repvot18: {selectedLayer.setStyle(setShapeColor(selectedLayer,"REP_STYLE")); break;}
+                                    case othvot18: {selectedLayer.setStyle(setShapeColor(selectedLayer,"OTHER_ELECTION_STYLE")); break;}
                                 }
                                 break;
                         }
@@ -687,31 +687,31 @@ and open the template in the editor.
         }
         function onClick(e){
             let selectedLayer=e.target;
-            let featInLayer=selectedLayer.feature;
-            let dropdown = document.getElementById("Precincts");
-            dropdown.value = featInLayer.properties.name;
-            showPrecinctOnClick(selectedLayer,featInLayer);
+            let featureInLayer=selectedLayer.feature;
+            let selectedPrecinct = document.getElementById("Precincts");
+            selectedPrecinct.value = featureInLayer.properties.name;
+            showPrecinctOnClick(selectedLayer,featureInLayer);
         }
         function prepareErrorToSend(feature){
             let today = new Date();
             let dateTime = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate()+" "+today.getHours() + ":" + today.getMinutes()+":"+today.getSeconds();
             let comment="["+dateTime+"] >>"+document.getElementById("commentArea").value+"<br/>";
-            let jsonObj={};
-            jsonObj["comment"]=document.getElementById("commentArea").value;
+            let preparedError={};
+            preparedError["comment"]=document.getElementById("commentArea").value;
             document.getElementById("errorLog").innerHTML+="<div style=\'border-style:solid\'>Error Resolved on: "+feature.properties.name+" from ERROR: "+feature.properties.errorType+". <br/> Optional Comment: "+comment+"</div><br/>";
-            jsonObj["errorType"]="RESOLVED";
+            preparedError["errorType"]="RESOLVED";
             feature.properties.errorType="RESOLVED";
             document.getElementById("commentArea").value="";
-            return jsonObj;
+            return preparedError;
         }
-        function updateError(id,data){
-            let xhr=new XMLHttpRequest();
-            xhr.open('PUT','http://localhost:8080/errors/'+id);
-            if(data){
-                xhr.setRequestHeader('Content-Type','application/json');
+        function updateError(id,newError){
+            let errorRequest=new XMLHttpRequest();
+            errorRequest.open('PUT','http://localhost:8080/errors/'+id);
+            if(newError){
+                errorRequest.setRequestHeader('Content-Type','application/json');
             }
-            data=JSON.stringify(data);
-            xhr.send(data);
+            newError=JSON.stringify(newError);
+            errorRequest.send(newError);
         }
         function setGhostPrecinct(layer){
             let feature=layer.feature;
@@ -725,42 +725,42 @@ and open the template in the editor.
             updatePrecinct(featureID,preparePrecinctToSend(feature));
             updateError(featureID,prepareErrorToSend(feature))
         }
-        function updatePrecinct(selectedID,newData){
-            let xhr=new XMLHttpRequest();
-            xhr.open('PUT','http://localhost:8080/precincts/'+selectedID);
-            if(newData){
-                xhr.setRequestHeader('Content-Type','application/json');
+        function updatePrecinct(selectedID,newPrecinct){
+            let precinctRequest=new XMLHttpRequest();
+            precinctRequest.open('PUT','http://localhost:8080/precincts/'+selectedID);
+            if(newPrecinct){
+                precinctRequest.setRequestHeader('Content-Type','application/json');
             }
-            let data=JSON.stringify(newData);
-            console.log(data);
-            xhr.send(data);
+            let precinct=JSON.stringify(newPrecinct);
+            console.log(precinct);
+            precinctRequest.send(precinct);
         }
         function preparePrecinctToSend(feature){
-            let jsonObj={};
-            jsonObj["aminov18"]=feature.properties.aminov18;
-            jsonObj["asianov18"]=feature.properties.asianov18;
-            jsonObj["blackov18"]=feature.properties.blackov18;
-            jsonObj["demvot16"]=feature.properties.demvot16;
-            jsonObj["demvot18"]=feature.properties.demvot18;
-            jsonObj["demvotpres"]=feature.properties.demvotpres;
-            jsonObj["hawov18"]=feature.properties.hawov18;
-            jsonObj["hisov18"]=feature.properties.hisov18;
-            jsonObj["name"]=feature.properties.name;
-            jsonObj["otherov18"]=feature.properties.otherov18;
-            jsonObj["othvot16"]=feature.properties.othvot16;
-            jsonObj["othvot18"]=feature.properties.othvot18;
-            jsonObj["othvotpres"]=feature.properties.othvotpres;
-            jsonObj["pop100"]=feature.properties.pop100;
-            jsonObj["statefp"]=feature.properties.statefp;
-            jsonObj["totvotpres"]=feature.properties.totvotpres;
-            jsonObj["totvot16"]=feature.properties.totvot16;
-            jsonObj["totvot18"]=feature.properties.totvot18;
-            jsonObj["repvot16"]=feature.properties.repvot16;
-            jsonObj["repvot18"]=feature.properties.repvot18;
-            jsonObj["repvotpres"]=feature.properties.repvotpres;
-            jsonObj["whiteov18"]=feature.properties.whiteov18;
-            jsonObj["shape_geojson"]=JSON.stringify(feature.geometry);
-            return jsonObj;
+            let preparedPrecinct={};
+            preparedPrecinct["aminov18"]=feature.properties.aminov18;
+            preparedPrecinct["asianov18"]=feature.properties.asianov18;
+            preparedPrecinct["blackov18"]=feature.properties.blackov18;
+            preparedPrecinct["demvot16"]=feature.properties.demvot16;
+            preparedPrecinct["demvot18"]=feature.properties.demvot18;
+            preparedPrecinct["demvotpres"]=feature.properties.demvotpres;
+            preparedPrecinct["hawov18"]=feature.properties.hawov18;
+            preparedPrecinct["hisov18"]=feature.properties.hisov18;
+            preparedPrecinct["name"]=feature.properties.name;
+            preparedPrecinct["otherov18"]=feature.properties.otherov18;
+            preparedPrecinct["othvot16"]=feature.properties.othvot16;
+            preparedPrecinct["othvot18"]=feature.properties.othvot18;
+            preparedPrecinct["othvotpres"]=feature.properties.othvotpres;
+            preparedPrecinct["pop100"]=feature.properties.pop100;
+            preparedPrecinct["statefp"]=feature.properties.statefp;
+            preparedPrecinct["totvotpres"]=feature.properties.totvotpres;
+            preparedPrecinct["totvot16"]=feature.properties.totvot16;
+            preparedPrecinct["totvot18"]=feature.properties.totvot18;
+            preparedPrecinct["repvot16"]=feature.properties.repvot16;
+            preparedPrecinct["repvot18"]=feature.properties.repvot18;
+            preparedPrecinct["repvotpres"]=feature.properties.repvotpres;
+            preparedPrecinct["whiteov18"]=feature.properties.whiteov18;
+            preparedPrecinct["shape_geojson"]=JSON.stringify(feature.geometry);
+            return preparedPrecinct;
         }
         function mergePrecincts(layer){
             let feature=layer.feature;
@@ -781,8 +781,8 @@ and open the template in the editor.
             let dropdown = document.getElementById("Precincts");
             dropdown.remove(dropdown.selectedIndex);
             layer.remove();
-            precLayer.removeLayer(layer);
-            precLayer.addData(newPrecinct);
+            precinctLayer.removeLayer(layer);
+            precinctLayer.addData(newPrecinct);
             
             updatePrecinct(feature.properties.ogrFID,newPrecinct);
             updateError(feature.properties.ogrFID,prepareErrorToSend(newPrecinct));
@@ -794,13 +794,13 @@ and open the template in the editor.
                 case "GHOST":
                     document.getElementById("errorSection").style.display="block";
                     errorDiv.innerHTML="Ghost Precinct? <br>\n\
-                        <button onclick='setGhostPrecinct(precinctLayers[\""+featureName+"\"])'>Yes</button>\n\
+                        <button onclick='setGhostPrecinct(precincts[\""+featureName+"\"])'>Yes</button>\n\
                         <button onclick='openChangeDataSection();'>No</button>";
                     break;
                 case "DONUT":
                     document.getElementById("errorSection").style.display="block";
                     errorDiv.innerHTML="Merge Precinct<br>\n\
-                        <button onclick='mergePrecincts(precinctLayers[\""+featureName+"\"])'>Yes</button>";
+                        <button onclick='mergePrecincts(precincts[\""+featureName+"\"])'>Yes</button>";
                     break;
                 default:
                     document.getElementById("errorSection").style.display="none";
@@ -821,7 +821,7 @@ and open the template in the editor.
             let otherVotePop=document.getElementById("otherVotePop").value;
             
             let selectedValue=document.getElementById("Precincts").value;
-            let selectedLayer=precinctLayers[selectedValue];
+            let selectedLayer=precincts[selectedValue];
             let selectedFeature=selectedLayer.feature;
             let selectedID=selectedFeature.properties.ogrFID;
             changePrecinctVotingData(selectedFeature,pred16Dem,pred16Rep,cong16Dem,cong16Rep,cong18Dem,cong18Rep);
@@ -830,8 +830,8 @@ and open the template in the editor.
             //changes the name of the feature, removes the name off the dropdown, and adds the new name in
             if(selectedValue!=document.getElementById("precinctName").value){
                 selectedFeature.properties.name=document.getElementById("precinctName").value;
-                precinctLayers[selectedFeature.properties.name]=precinctLayers[selectedValue];
-                delete precinctLayers[selectedValue];
+                precincts[selectedFeature.properties.name]=precincts[selectedValue];
+                delete precincts[selectedValue];
                 let dropdown = document.getElementById("Precincts");
                 dropdown.remove(dropdown.selectedIndex);
                 let option = document.createElement("option");
@@ -886,12 +886,12 @@ and open the template in the editor.
             changeFeatColor(feature,layer);
         }
         function loadPrecincts(feature, layer){
-            let dropdown = document.getElementById("Precincts");
+            let precinctsMenu = document.getElementById("Precincts");
             let addedPrecinct = document.createElement("option");
             let precinctName = feature.properties.name;
             addedPrecinct.text = precinctName;
             addedPrecinct.value = precinctName;
-            dropdown.options.add(addedPrecinct);
+            precinctsMenu.options.add(addedPrecinct);
         }
         initLoad();
     </script>
