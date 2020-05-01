@@ -309,6 +309,7 @@ and open the template in the editor.
                     if(precinctFilter) loadAllForState(stateID);
                     break;
                 default:
+                    stateLayer.clearLayers();
                     document.getElementById("precinctDropdown").style.display="none";
                     dropdown.innerHTML="<option value='State'>State</option>";
                     loadStatesForMap(stateName);
@@ -318,7 +319,6 @@ and open the template in the editor.
         }
         function unloadAll(){
             precLayer.clearLayers();
-            stateLayer.clearLayers();
             precinctLayers={};
             errorDictionary={};
             clearBothSections();
