@@ -15,8 +15,8 @@ import javax.persistence.*;
 @Entity
 @Table(name="error")
 public class Error {
+    
     private Integer errorID;
-    private Integer precinctID;
     private String errorType;
     private String comment;
     private Timestamp commentTime;
@@ -25,9 +25,7 @@ public class Error {
         super();
     }
     
-    public Error(Timestamp commentTime,Integer errorID, Integer precinctID, String errorType, String comment){
-        this.errorID=errorID;
-        this.precinctID=precinctID;
+    public Error(Timestamp commentTime, String errorType, String comment){
         this.errorType=errorType;
         this.comment=comment;
         this.commentTime=commentTime;
@@ -44,11 +42,6 @@ public class Error {
     public Timestamp getCommentTime(){
         return commentTime;
     }
-    
-    @Column(name="precinct_id")
-    public Integer getPrecinctID() {
-        return precinctID;
-    }
 
     @Column(name="error_type")
     public String getErrorType() {
@@ -59,13 +52,9 @@ public class Error {
     public String getComment() {
         return comment;
     }
-
+    
     public void setErrorID(Integer errorID) {
         this.errorID = errorID;
-    }
-
-    public void setPrecinctID(Integer precinctID) {
-        this.precinctID = precinctID;
     }
 
     public void setErrorType(String errorType) {

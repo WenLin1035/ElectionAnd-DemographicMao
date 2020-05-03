@@ -21,4 +21,5 @@ public interface PrecinctRepo extends JpaRepository<Precinct, Integer> {
     List<Precinct> findByStatefp(String id);
     Precinct findByName(String name);
     Precinct findByOgrFID(Integer id);
+    List<Precinct> findByNameStartingWith(String partOfName);
 }

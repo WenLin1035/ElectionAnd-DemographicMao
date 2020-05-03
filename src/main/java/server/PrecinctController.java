@@ -31,7 +31,41 @@ public class PrecinctController {
     // RESTful API methods for Retrieval operations
     @GetMapping("/precincts")
     public List<Precinct> findAllPrecincts() {
-        return service.findAll();
+        List<Precinct> allPrecincts=service.findAll();
+        for(Precinct p: allPrecincts){
+            p.setDemographic(null);
+            p.setError(null);
+            p.setElection(null);
+        }
+        return allPrecincts;
+    }
+    
+    @GetMapping("/precincts/names/{partOfName}")
+    public List<String> findAllNamesForSearch(@PathVariable String partOfName){
+        List<Precinct> precincts=service.findByNameStartingWith(partOfName);
+        List<String> precinctNames=new ArrayList<String>();
+        for(Precinct p:precincts){
+            precinctNames.add(p.getName());
+        }
+        return precinctNames;
+    }
+    
+    @GetMapping("/precincts/error/{id}")
+    public Error findErrorForPrecincts(@PathVariable String id){
+        Precinct precinct=service.findByOgrFID(Integer.parseInt(id));
+        System.out.println(precinct.getError());
+        return precinct.getError();
+    }
+    
+    @GetMapping("/precincts/demographic/{id}")
+    public Demographic findDemographicForPrecincts(@PathVariable String id){
+        Precinct precinct=service.findByOgrFID(Integer.parseInt(id));
+        return precinct.getDemographic();
+    }
+    
+    public Election findElectionForPrecincts(@PathVariable String id){
+        Precinct precinct=service.findByOgrFID(Integer.parseInt(id));
+        return precinct.getElection();
     }
     
     @GetMapping("/precincts/{id}")
@@ -60,10 +94,13 @@ public class PrecinctController {
     
     @Transactional
     @PutMapping("/merge/{name1}/{name2}")
-    public ResponseEntity<?> merge(@RequestBody List<Precinct> precinctList, @PathVariable String name1, @PathVariable String name2){
+    public ResponseEntity<?> merge(@RequestBody String newCoordinates,@PathVariable String enclosingPrecinctID, @PathVariable String enclosedPrecinctID){
         //TO-DO
         try {
-            Precinct precinct1 = service.findByName(name1);
+            Precinct enclosingPrecinct = service.findByOgrFID(Integer.parseInt(enclosingPrecinctID));
+            Precinct enclosedPrecinct = service.findByOgrFID(Integer.parseInt(enclosedPrecinctID));
+            Precinct newPrecinct = enclosingPrecinct;
+            newPrecinct.setShape_geojson(newCoordinates);
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (NoSuchElementException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
