@@ -40,8 +40,8 @@ public class PrecinctController {
         return allPrecincts;
     }
     
-    @GetMapping("/precincts/names/{partOfName}/{statefp}")
-    public List<String> findAllNamesForSearch(@PathVariable String partOfName,@PathVariable String statefp){
+    @GetMapping("/precincts/search/{partOfName}/{statefp}")
+    public ResponseEntity<List<String>> findAllNamesForSearch(@PathVariable String partOfName,@PathVariable String statefp){
         List<Precinct> precincts=service.findByNameStartingWithIgnoreCaseAndStatefp(partOfName,statefp);
         List<String> precinctNames=new ArrayList<String>();
         int maxCount=0;
@@ -51,7 +51,8 @@ public class PrecinctController {
                 maxCount++;
             }
         }
-        return precinctNames;
+        if(precinctNames.size()==0) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        else return new ResponseEntity<>(precinctNames,HttpStatus.FOUND);
     }
     
     @GetMapping("/precincts/error/{id}")

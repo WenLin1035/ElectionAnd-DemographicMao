@@ -84,6 +84,7 @@ and open the template in the editor.
                 </div>
                 <p>Options:</p>
                 <div id="optionSection">
+                    <button onclick="//TO-DO">Show Errors</button>
                     <button onclick="openChangeDataSection()" style="width:auto;margin-right: 25px">Change Data</button>
                     <button onclick="document.getElementById('bordersPopup').style.display='block'" style="width:auto;">Fix Borders</button>
                     <br>
@@ -240,14 +241,21 @@ and open the template in the editor.
         </div>
     </body>
     <script>
+        function getAllErrors(){
+            let stateName=document.getElementById("States").value;
+            let statefp=states[stateName].properties.statefp;
+        }
         function findPrecincts(){
             let searchResult=document.getElementById("precinctSearch").value;
+            if(searchResult=="")return;
             let stateName=document.getElementById("States").value;
             let statefp=states[stateName].properties.statefp;
             let searchRequest=new XMLHttpRequest();
-            searchRequest.open('GET','http://localhost:8080/precincts/names/'+searchResult+"/"+statefp);
+            searchRequest.open('GET','http://localhost:8080/precincts/search/'+searchResult+"/"+statefp);
             searchRequest.onload=()=> {
-                let searchData=JSON.parse(searchRequest.response);
+                let searchData=searchRequest.response;
+                if(searchData=="")return;
+                searchData=JSON.parse(searchRequest.response);
                 document.getElementById("searchResults").innerHTML="";
                 for(let i=0;i<searchData.length;i++){
                     let newOption=document.createElement("button");
@@ -336,6 +344,8 @@ and open the template in the editor.
             accessToken: 'pk.eyJ1IjoiZTE1MzEwODgiLCJhIjoiY2s3NzdjOWl3MDRzdTNmcWtqdDNlamxhNiJ9.aN5tSOOA7nNJA0KCnOITBA'}).addTo(mymap);
             precinctLayer=L.geoJSON(null,{onEachFeature: onEachPrecinct}).addTo(mymap);
             stateLayer=L.geoJSON(null,{onEachFeature: onEachState}).addTo(mymap);
+            states={};
+            statesCache={};
             loadFeature();
         }
         function loadFeature(){
@@ -348,25 +358,40 @@ and open the template in the editor.
             let precinctFilter=document.getElementById("precinctFilter").checked;
             switch(stateName){
                 case "State":
-                    stateLayer.clearLayers();
+                    if(checkEmpty(states)){
+                        statesMenu.innerHTML="<option value='State'>State</option>";
+                        loadStatesForMap(stateName);
+                    }
                     document.getElementById("searchWindow").style.display="none";
-                    statesMenu.innerHTML="<option value='State'>State</option>";
-                    loadStatesForMap(stateName);
                     zoomOut();
                     break;
                 default:
                     let stateFP=states[stateName].properties.statefp;
                     mymap.setView(stateCoords[stateName], zoomLevel[stateName]);
-                    if(precinctFilter) loadPrecinctsForState(stateFP);
+                    if(precinctFilter){
+                        if(statesCache[stateFP]!=undefined){
+                            precinctLayer.addData(statesCache[stateFP]);
+                            loadPrecinctDictionary();
+                        }
+                        else{
+                            loadPrecinctsForState(stateFP);
+                        }
+                    }
                     break;
             }
+        }
+        function checkEmpty(dict){
+            for(let i in dict){
+                return false;
+            }
+            return true;
         }
         function unloadAll(){
             precinctLayer.clearLayers();
             precincts={};
             errors={};
             clearBothSections();
-            document.getElementById("selectedPrecinct").innerHTML=="";
+            document.getElementById("selectedPrecinct").innerHTML="";
             document.getElementById("errorLog").innerHTML="";
             document.getElementById("searchWindow").style.display="inline";
         }
@@ -380,13 +405,11 @@ and open the template in the editor.
             errorsRequest.send();
         }
         function loadErrorDictionary(errorData){
-            errors={};
             for(i=0;i<errorData.length;i++){
                 errors[errorData[i].precinctID]=errorData[i].errorType;
             }
         }
         function loadStatesForMap(stateName){
-            states={};
             let statesRequest=new XMLHttpRequest();
             statesRequest.open('GET','http://localhost:8080/states');
             statesRequest.onload=()=>{
@@ -412,14 +435,18 @@ and open the template in the editor.
             stateLayer.eachLayer(eachLayer);
         }
         function loadPrecinctsForState(stateFP){
+            statesCache[stateFP]=[];
             let precinctsRequest=new XMLHttpRequest();
             precinctsRequest.open('GET','http://localhost:8080/precincts/'+stateFP);
             precinctsRequest.onload=()=> {
                 let precinctsData=JSON.parse(precinctsRequest.response);
                 for(i=0;i<precinctsData.length;i++){
-                    precinctLayer.addData(preparePrecinctToUse(precinctsData[i]));
+                    let preparedFeature=preparePrecinctToUse(precinctsData[i]);
+                    precinctLayer.addData(preparedFeature);
+                    statesCache[stateFP].push(preparedFeature);
                 }
                 loadPrecinctDictionary();
+                
             }
             precinctsRequest.send();
         }
@@ -663,7 +690,7 @@ and open the template in the editor.
             selectedLayer.setStyle(setShapeColor(selectedLayer,"NEW_PREC_STYLE"));
             setDemographicSection(selectedFeature);
             setElectionSection(selectedFeature);
-            showError(selectedLayer,selectedFeature.properties.errorType);
+            //showError(selectedLayer,selectedFeature.properties.error.errorType);
         }
         function changeAllColor(){
             for(i in precincts){
