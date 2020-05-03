@@ -479,7 +479,7 @@ and open the template in the editor.
             switch(shapeStyle){
                 case "STATE_STYLE": 
                     return{
-                        weight:3,
+                        weight:4,
                         color:'black'
                     };
                 case "NEW_PREC_STYLE":
@@ -493,7 +493,8 @@ and open the template in the editor.
                     };
                 case "DEFAULT_STYLE":
                     return{
-                        color:'gray',
+                        color:'black',
+                        fillColor:'#C0C0C0',
                         weight:2
                     }
                 case "DEM_STYLE":
@@ -924,7 +925,7 @@ and open the template in the editor.
             layer.on({
                 click:loadFeature
             });
-            selectedLayer.setStyle(setShapeColor(this,"STATE_STYLE"));
+            layer.setStyle(setShapeColor(layer,"STATE_STYLE"));
         }
     </script>
 </html>
