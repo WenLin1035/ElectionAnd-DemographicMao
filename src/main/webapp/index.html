@@ -103,6 +103,7 @@ and open the template in the editor.
             <div class="modal-content">
                 <button onclick="document.getElementById('changeDataSection').style.display='none'" style="float:right;">X</button>
                 <p style="text-align: center"><b>Changes</b></p>
+                <p>Precinct's election and demographic must be loaded using the dropdown menu in order to update anything.</p>
                 <label for="precinctName" style="margin-left: 180px">Name:</label>
                 <input type="text" id="precinctName" name="precinctName"><br>
                 <table>
@@ -146,7 +147,7 @@ and open the template in the editor.
                     </tr>
                 </table>
                 
-                <center><button onclick="changePrecinctData()">Save</button></center>
+                <center><button id="saveButton" onclick="changePrecinctData()">Save</button></center>
             </div>
         </div>
         <!-- this is popup window for changing border -->
@@ -238,11 +239,19 @@ and open the template in the editor.
         function openChangeDataSection(){
             let selectedPrecinct=document.getElementById("selectedPrecinct").innerHTML;
             document.getElementById('precinctName').value = selectedPrecinct;
-            let selectedLayer=precincts[selectedPrecinct];
-            let selectedFeature=selectedLayer.feature;
-            if(selectedPrecinct!="" && selectedFeature.properties.demographic!=undefined && selectedFeature.properties.election!=undefined){
+            if(selectedPrecinct!=""){
                 document.getElementById('changeDataSection').style.display='block';
+                
+                let selectedLayer=precincts[selectedPrecinct];
+                let selectedFeature=selectedLayer.feature;
+                if(selectedFeature.properties.demographic!=undefined && selectedFeature.properties.election!=undefined){
+                    document.getElementById("saveButton").disabled=false;
+                }
+                else{
+                    document.getElementById("saveButton").disabled=true;
+                }
             }
+            
         }
         function populateElectionData(selectedFeature){
             document.getElementById("pred16Dem").value=selectedFeature.properties.election.demvotpres;
@@ -288,16 +297,15 @@ and open the template in the editor.
         }
         function initLoad(){
             //L is an object that represents the library and its functions that are available.
-            let usaCoords=[39.436192999314095,-98.26171875];
-            let usaZoomLevel=4;
-            mymap = L.map('forMap').setView(usaCoords, usaZoomLevel);
+            mymap = L.map('forMap');
+            zoomOut();
             L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
             attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors,\n\
                         <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
             id: 'mapbox/streets-v11',
             accessToken: 'pk.eyJ1IjoiZTE1MzEwODgiLCJhIjoiY2s3NzdjOWl3MDRzdTNmcWtqdDNlamxhNiJ9.aN5tSOOA7nNJA0KCnOITBA'}).addTo(mymap);
-            precinctLayer=L.geoJSON(null,{onEachFeature: onEachFeature}).addTo(mymap);
-            stateLayer=L.geoJSON(null,{style:setShapeColor(this,"STATE_STYLE")}).addTo(mymap);
+            precinctLayer=L.geoJSON(null,{onEachFeature: onEachPrecinct}).addTo(mymap);
+            stateLayer=L.geoJSON(null,{onEachFeature: onEachState}).addTo(mymap);
             loadFeature();
         }
         function loadFeature(){
@@ -536,7 +544,6 @@ and open the template in the editor.
                 return;
             }
             
-            console.log(selectedDemographic);
             let whiteVotePop=selectedFeature.properties.demographic.whiteov18;
             let blackVotePop=selectedFeature.properties.demographic.blackov18;
             let asianVotePop=selectedFeature.properties.demographic.asianov18;
@@ -559,14 +566,13 @@ and open the template in the editor.
             let selectedFeature=selectedLayer.feature;
             let selectedElection=document.getElementById("dataSection").value;
             if(selectedElection!="election") return;
-            selectedElection = document.getElementById("year").value;
-            if(selectedElection=="none") return;
             if(selectedFeature.properties.election==undefined){
                 loadElectionForPrecinct(selectedFeature);
                 return;
             }
+            selectedElection = document.getElementById("year").value;
+            if(selectedElection=="none") return;
             
-            console.log(selectedElection);
             let pred16D=selectedFeature.properties.election.demvotpres;
             let pred16R=selectedFeature.properties.election.repvotpres;
             let pred16O=selectedFeature.properties.election.othvotpres;
@@ -634,7 +640,6 @@ and open the template in the editor.
             }
         }
         function changeFeatColor(selectedFeature,selectedLayer){
-            console.log(selectedFeature);
             let properties=selectedFeature.properties;
             if(properties.demographic==undefined && properties.error==undefined && properties.election==undefined){
                 selectedLayer.setStyle(setShapeColor(selectedLayer,"DEFAULT_STYLE"));
@@ -756,37 +761,12 @@ and open the template in the editor.
         }
         function preparePrecinctToSend(feature){
             let preparedPrecinct={};
-            /*
             preparedPrecinct["ogrFID"]=feature.properties.ogrFID;
             preparedPrecinct["name"]=feature.properties.name;
-            preparedPrecinct["shape_geojson"[]=feature.geometry;
+            preparedPrecinct["statefp"]=feature.properties.statefp;
             preparedPrecinct["error"]=feature.properties.error;
             preparedPrecinct["demographic"]=feature.properties.demographic;
             preparedPrecinct["election"]=feature.properties.election;
-            
-            * */
-            preparedPrecinct["aminov18"]=feature.properties.aminov18;
-            preparedPrecinct["asianov18"]=feature.properties.asianov18;
-            preparedPrecinct["blackov18"]=feature.properties.blackov18;
-            preparedPrecinct["demvot16"]=feature.properties.demvot16;
-            preparedPrecinct["demvot18"]=feature.properties.demvot18;
-            preparedPrecinct["demvotpres"]=feature.properties.demvotpres;
-            preparedPrecinct["hawov18"]=feature.properties.hawov18;
-            preparedPrecinct["hisov18"]=feature.properties.hisov18;
-            preparedPrecinct["name"]=feature.properties.name;
-            preparedPrecinct["otherov18"]=feature.properties.otherov18;
-            preparedPrecinct["othvot16"]=feature.properties.othvot16;
-            preparedPrecinct["othvot18"]=feature.properties.othvot18;
-            preparedPrecinct["othvotpres"]=feature.properties.othvotpres;
-            preparedPrecinct["pop100"]=feature.properties.pop100;
-            preparedPrecinct["statefp"]=feature.properties.statefp;
-            preparedPrecinct["totvotpres"]=feature.properties.totvotpres;
-            preparedPrecinct["totvot16"]=feature.properties.totvot16;
-            preparedPrecinct["totvot18"]=feature.properties.totvot18;
-            preparedPrecinct["repvot16"]=feature.properties.repvot16;
-            preparedPrecinct["repvot18"]=feature.properties.repvot18;
-            preparedPrecinct["repvotpres"]=feature.properties.repvotpres;
-            preparedPrecinct["whiteov18"]=feature.properties.whiteov18;
             preparedPrecinct["shape_geojson"]=JSON.stringify(feature.geometry);
             return preparedPrecinct;
         }
@@ -836,21 +816,24 @@ and open the template in the editor.
         function changePrecinctData(){
             let pred16Dem=document.getElementById("pred16Dem").value;
             let pred16Rep=document.getElementById("pred16Rep").value;
+            let pred16Oth=document.getElementById("pred16Other").value;
             let cong16Dem=document.getElementById("cong16Dem").value;
             let cong16Rep=document.getElementById("cong16Rep").value;
+            let cong16Oth=document.getElementById("cong16Other").value;
             let cong18Dem=document.getElementById("cong18Dem").value;
             let cong18Rep=document.getElementById("cong18Rep").value;
+            let cong18Oth=document.getElementById("cong18Other").value;
             let whiteVotePop=document.getElementById("whiteVotePop").value;
             let blackVotePop=document.getElementById("blackVotePop").value;
             let asianVotePop=document.getElementById("asianVotePop").value;
             let hispanicVotePop=document.getElementById("hispanicVotePop").value;
             let otherVotePop=document.getElementById("otherVotePop").value;
             
-            //no drop down
+            let selectedValue=document.getElementById("selectedPrecinct").innerHTML;
             let selectedLayer=precincts[selectedValue];
             let selectedFeature=selectedLayer.feature;
             let selectedID=selectedFeature.properties.ogrFID;
-            changePrecinctVotingData(selectedFeature,pred16Dem,pred16Rep,cong16Dem,cong16Rep,cong18Dem,cong18Rep);
+            changePrecinctVotingData(selectedFeature,pred16Dem,pred16Rep,pred16Oth,cong16Dem,cong16Rep,cong16Oth,cong18Dem,cong18Rep,cong18Oth);
             changePrecinctDemographicData(selectedFeature,whiteVotePop,blackVotePop,asianVotePop,hispanicVotePop,otherVotePop);
             
             //changes the name of the feature, removes the name off the dropdown, and adds the new name in
@@ -858,6 +841,7 @@ and open the template in the editor.
                 selectedFeature.properties.name=document.getElementById("precinctName").value;
                 precincts[selectedFeature.properties.name]=precincts[selectedValue];
                 delete precincts[selectedValue];
+                document.getElementById("selectedPrecinct").innerHTML=selectedFeature.properties.name;
                 console.log(selectedFeature);
             }
             showPrecinctOnClick(selectedLayer,selectedFeature);
@@ -876,21 +860,24 @@ and open the template in the editor.
             updatePrecinct(selectedID,preparePrecinctToSend(selectedFeature));
         }
 	function changePrecinctDemographicData(feature,whiteVotePop,blackVotePop,asianVotePop,hispanicVotePop,otherVotePop){
-            feature.properties.whiteov18=parseInt(whiteVotePop);
-            feature.properties.blackov18=parseInt(blackVotePop);
-            feature.properties.asianov18=parseInt(asianVotePop);
-            feature.properties.hisov18=parseInt(hispanicVotePop);
-            feature.properties.otherov18=parseInt(otherVotePop);
+            feature.properties.demographic.whiteov18=parseInt(whiteVotePop);
+            feature.properties.demographic.blackov18=parseInt(blackVotePop);
+            feature.properties.demographic.asianov18=parseInt(asianVotePop);
+            feature.properties.demographic.hisov18=parseInt(hispanicVotePop);
+            feature.properties.demographic.otherov18=parseInt(otherVotePop);
 	}
-        function changePrecinctVotingData(feature,pred16Dem,pred16Rep,cong16Dem,cong16Rep,cong18Dem,cong18Rep){
-            feature.properties.demvotpres=parseInt(pred16Dem);
-            feature.properties.repvotpres=parseInt(pred16Rep);
-            feature.properties.demvot16=parseInt(cong16Dem);
-            feature.properties.repvot16=parseInt(cong16Rep);
-            feature.properties.demvot18=parseInt(cong18Dem);
-            feature.properties.repvot18=parseInt(cong18Rep);
+        function changePrecinctVotingData(feature,pred16Dem,pred16Rep,pred16Oth,cong16Dem,cong16Rep,cong16Oth,cong18Dem,cong18Rep,cong18Oth){
+            feature.properties.election.demvotpres=parseInt(pred16Dem);
+            feature.properties.election.repvotpres=parseInt(pred16Rep);
+            feature.properties.election.othvotpres=parseInt(pred16Oth);
+            feature.properties.election.demvot16=parseInt(cong16Dem);
+            feature.properties.election.repvot16=parseInt(cong16Rep);
+            feature.properties.election.othvot16=parseInt(cong16Oth);
+            feature.properties.election.demvot18=parseInt(cong18Dem);
+            feature.properties.election.repvot18=parseInt(cong18Rep);
+            feature.properties.election.othvot18=parseInt(cong18Oth);
         }
-        function onEachFeature(feature,layer){
+        function onEachPrecinct(feature,layer){
             layer.on({
                 click: onClick
             });
@@ -902,6 +889,12 @@ and open the template in the editor.
                        +"](Requires Modification)</button></div>";
             }
             changeFeatColor(feature,layer);
+        }
+        function onEachState(feature,layer){
+            layer.on({
+                click:loadFeature
+            });
+            selectedLayer.setStyle(setShapeColor(this,"STATE_STYLE"));
         }
     </script>
 </html>
