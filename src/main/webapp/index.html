@@ -242,9 +242,10 @@ and open the template in the editor.
     <script>
         function findPrecincts(){
             let searchResult=document.getElementById("precinctSearch").value;
-            
+            let stateName=document.getElementById("States").value;
+            let statefp=states[stateName].properties.statefp;
             let searchRequest=new XMLHttpRequest();
-            searchRequest.open('GET','http://localhost:8080/precincts/names/'+searchResult);
+            searchRequest.open('GET','http://localhost:8080/precincts/names/'+searchResult+"/"+statefp);
             searchRequest.onload=()=> {
                 let searchData=JSON.parse(searchRequest.response);
                 document.getElementById("searchResults").innerHTML="";
@@ -256,6 +257,7 @@ and open the template in the editor.
                         precMenuChange(name);
                         document.getElementById("precinctSearch").value="";
                         document.getElementById("searchResults").innerHTML="";
+                        document.getElementById("selectedPrecinct").innerHTML=name;
                     }
                     newOption.innerHTML=name;
                     document.getElementById("searchResults").append(newOption);
@@ -321,7 +323,7 @@ and open the template in the editor.
         function zoomOut(){
             let usaCoords=[39.436192999314095,-98.26171875];
             let usaZoomLevel=4;
-            mymap.setView(new L.LatLng(usaCoords[0],usaCoords[1]), usaZoomLevel);
+            mymap.setView(usaCoords, usaZoomLevel);
         }
         function initLoad(){
             //L is an object that represents the library and its functions that are available.
@@ -340,22 +342,22 @@ and open the template in the editor.
             let statesMenu = document.getElementById("States");
             let stateName=statesMenu.value;
             //0 is rhodeisland,1 is north carolina, 2 is arizona
-            let stateCoords=[[41.5801,-71.4774]];
-            let zoomLevel=[10];
+            let stateCoords={"Rhode Island":[41.5801,-71.4774]};
+            let zoomLevel={"Rhode Island":10};
             unloadAll();
             let precinctFilter=document.getElementById("precinctFilter").checked;
             switch(stateName){
-                case "Rhode Island":
-                    let stateFP=states[stateName].properties.statefp;
-                    mymap.setView(new L.LatLng(stateCoords[0][0],stateCoords[0][1]), zoomLevel);
-                    if(precinctFilter) loadPrecinctsForState(stateFP);
-                    break;
-                default:
+                case "State":
                     stateLayer.clearLayers();
                     document.getElementById("searchWindow").style.display="none";
                     statesMenu.innerHTML="<option value='State'>State</option>";
                     loadStatesForMap(stateName);
                     zoomOut();
+                    break;
+                default:
+                    let stateFP=states[stateName].properties.statefp;
+                    mymap.setView(stateCoords[stateName], zoomLevel[stateName]);
+                    if(precinctFilter) loadPrecinctsForState(stateFP);
                     break;
             }
         }
