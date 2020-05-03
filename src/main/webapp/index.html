@@ -29,6 +29,10 @@ and open the template in the editor.
                         <option value="State" onclick="">State</option>
                     </select>
                 </div>
+                <div id="searchWindow">
+                    <input id="precinctSearch" type="text" placeholder="Search for Precinct" onkeyup="findPrecincts()">
+                    <div id="searchResults"></div>
+                </div>
                 <div>
                     Selected Precinct: <label id="selectedPrecinct"></label>
                 </div>
@@ -236,6 +240,30 @@ and open the template in the editor.
         </div>
     </body>
     <script>
+        function findPrecincts(){
+            let searchResult=document.getElementById("precinctSearch").value;
+            
+            let searchRequest=new XMLHttpRequest();
+            searchRequest.open('GET','http://localhost:8080/precincts/names/'+searchResult);
+            searchRequest.onload=()=> {
+                let searchData=JSON.parse(searchRequest.response);
+                document.getElementById("searchResults").innerHTML="";
+                for(let i=0;i<searchData.length;i++){
+                    let newOption=document.createElement("button");
+                    let name=searchData[i];
+                    console.log(name);
+                    newOption.onclick=()=>{
+                        precMenuChange(name);
+                        document.getElementById("precinctSearch").value="";
+                        document.getElementById("searchResults").innerHTML="";
+                    }
+                    newOption.innerHTML=name;
+                    document.getElementById("searchResults").append(newOption);
+                }
+            }
+            searchRequest.send();
+        }
+        
         function openChangeDataSection(){
             let selectedPrecinct=document.getElementById("selectedPrecinct").innerHTML;
             document.getElementById('precinctName').value = selectedPrecinct;
@@ -324,6 +352,7 @@ and open the template in the editor.
                     break;
                 default:
                     stateLayer.clearLayers();
+                    document.getElementById("searchWindow").style.display="none";
                     statesMenu.innerHTML="<option value='State'>State</option>";
                     loadStatesForMap(stateName);
                     zoomOut();
@@ -337,6 +366,7 @@ and open the template in the editor.
             clearBothSections();
             document.getElementById("selectedPrecinct").innerHTML=="";
             document.getElementById("errorLog").innerHTML="";
+            document.getElementById("searchWindow").style.display="inline";
         }
         function loadErrorsForState(stateFP){
             let errorsRequest=new XMLHttpRequest();

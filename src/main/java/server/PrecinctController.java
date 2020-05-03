@@ -42,10 +42,14 @@ public class PrecinctController {
     
     @GetMapping("/precincts/names/{partOfName}")
     public List<String> findAllNamesForSearch(@PathVariable String partOfName){
-        List<Precinct> precincts=service.findByNameStartingWith(partOfName);
+        List<Precinct> precincts=service.findByNameStartingWithIgnoreCase(partOfName);
         List<String> precinctNames=new ArrayList<String>();
-        for(Precinct p:precincts){
-            precinctNames.add(p.getName());
+        int maxCount=0;
+        for(Precinct p: precincts){
+            if(maxCount<5){
+                precinctNames.add(p.getName());
+                maxCount++;
+            }
         }
         return precinctNames;
     }
