@@ -63,6 +63,7 @@ public class PrecinctController {
         return precinct.getDemographic();
     }
     
+    @GetMapping("/precincts/election/{id}")
     public Election findElectionForPrecincts(@PathVariable String id){
         Precinct precinct=service.findByOgrFID(Integer.parseInt(id));
         return precinct.getElection();

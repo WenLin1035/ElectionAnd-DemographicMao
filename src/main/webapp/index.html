@@ -29,14 +29,9 @@ and open the template in the editor.
                         <option value="State" onclick="">State</option>
                     </select>
                 </div>
-                <div id="precinctDropdown" style="display:none" >
-                    <label for="Precincts" style="font-size: 20px;">Precinct:</label>
-                    <select id="Precincts" onchange="precMenuChange()" style="width: 120px"> <!-- needs to be replaced by DB data -->
-                        <option value="precinct">Precinct</option>
-                    </select>
-                    <br>
+                <div>
+                    Selected Precinct: <label id="selectedPrecinct"></label>
                 </div>
-                
                 <h4>Population:</h4>
                 <label id="totVotePop"> X people</label>
                 <table cellpadding="0">
@@ -310,7 +305,6 @@ and open the template in the editor.
                     break;
                 default:
                     stateLayer.clearLayers();
-                    document.getElementById("precinctDropdown").style.display="none";
                     statesMenu.innerHTML="<option value='State'>State</option>";
                     loadStatesForMap(stateName);
                     zoomOut();
@@ -323,8 +317,6 @@ and open the template in the editor.
             errors={};
             clearBothSections();
             document.getElementById("errorLog").innerHTML="";
-            document.getElementById("Precincts").innerHTML="<option value='precinct'>Precinct</option>";
-            document.getElementById("precinctDropdown").style.display="inline";
         }
         function loadAllForState(stateFP){
             loadErrorsForState(stateFP);
@@ -382,6 +374,13 @@ and open the template in the editor.
                 loadPrecinctDictionary();
             }
             precinctsRequest.send();
+        }
+        function loadDemographicForPrecinct(precinctID){
+            let demographicRequest=new XMLHttpRequest();
+            demographicRequest.open('GET','http://localhost:8080/precincts/demographic/'+precinctID);
+            demographicRequest.onload=()=>{
+                
+            }
         }
         function prepareStateToUse(state){
             let stateShape=JSON.parse(state["state_geojson"]);
@@ -546,8 +545,7 @@ and open the template in the editor.
             document.getElementById("totVotePop").innerHTML=Math.floor(totVotePop);
         }
         function setElectionSection(){
-            let selectedPrecinct=document.getElementById("Precincts").value;
-            if(selectedPrecinct=="precinct") return;
+            //no selected precinct
             let selectedLayer=precincts[selectedPrecinct];
             let selectedFeature=selectedLayer.feature;
             let pred16D=selectedFeature.properties.demvotpres;
@@ -598,13 +596,7 @@ and open the template in the editor.
             document.getElementById("othNum").innerHTML ="N/A";
         }
         function precMenuChange(selectedValue){
-            if(selectedValue==undefined){
-                selectedValue=document.getElementById("Precincts").value;
-            }
-            else{
-                document.getElementById("Precincts").value=selectedValue;
-            }
-            if(selectedValue=="precinct") return;
+            //no dropdown
             let selectedLayer=precincts[selectedValue];
             let selectedFeature=selectedLayer.feature;
             
@@ -695,8 +687,9 @@ and open the template in the editor.
         function onClick(e){
             let selectedLayer=e.target;
             let featureInLayer=selectedLayer.feature;
-            let selectedPrecinct = document.getElementById("Precincts");
-            selectedPrecinct.value = featureInLayer.properties.name;
+            if(feature.properties.demographic==null){
+                loadDemographicForPrecinct(feature.properties.ogrFID);
+            }
             showPrecinctOnClick(selectedLayer,featureInLayer);
         }
         function prepareErrorToSend(feature){
@@ -794,8 +787,6 @@ and open the template in the editor.
                     "coordinates":[feature.geometry.coordinates[0][0]]
                 }
             };
-            let dropdown = document.getElementById("Precincts");
-            dropdown.remove(dropdown.selectedIndex);
             layer.remove();
             precinctLayer.removeLayer(layer);
             precinctLayer.addData(newPrecinct);
@@ -836,7 +827,7 @@ and open the template in the editor.
             let hispanicVotePop=document.getElementById("hispanicVotePop").value;
             let otherVotePop=document.getElementById("otherVotePop").value;
             
-            let selectedValue=document.getElementById("Precincts").value;
+            //no drop down
             let selectedLayer=precincts[selectedValue];
             let selectedFeature=selectedLayer.feature;
             let selectedID=selectedFeature.properties.ogrFID;
@@ -848,13 +839,6 @@ and open the template in the editor.
                 selectedFeature.properties.name=document.getElementById("precinctName").value;
                 precincts[selectedFeature.properties.name]=precincts[selectedValue];
                 delete precincts[selectedValue];
-                let dropdown = document.getElementById("Precincts");
-                dropdown.remove(dropdown.selectedIndex);
-                let option = document.createElement("option");
-                option.text = selectedFeature.properties.name;
-                dropdown.add(option);
-                dropdown.value=selectedFeature.properties.name;
-                console.log(dropdown.value);
                 console.log(selectedFeature);
             }
             showPrecinctOnClick(selectedLayer,selectedFeature);
@@ -888,7 +872,6 @@ and open the template in the editor.
             feature.properties.repvot18=parseInt(cong18Rep);
         }
         function onEachFeature(feature,layer){
-            loadPrecincts(feature, layer);
             layer.on({
                 click: onClick
             });
@@ -900,14 +883,6 @@ and open the template in the editor.
                        +"](Requires Modification)</button></div>";
             }
             changeFeatColor(feature,layer);
-        }
-        function loadPrecincts(feature, layer){
-            let precinctsMenu = document.getElementById("Precincts");
-            let addedPrecinct = document.createElement("option");
-            let precinctName = feature.properties.name;
-            addedPrecinct.text = precinctName;
-            addedPrecinct.value = precinctName;
-            precinctsMenu.options.add(addedPrecinct);
         }
         initLoad();
     </script>
