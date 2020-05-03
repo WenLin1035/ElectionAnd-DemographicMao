@@ -94,13 +94,12 @@ public class PrecinctController {
     
     @Transactional
     @PutMapping("/merge/{name1}/{name2}")
-    public ResponseEntity<?> merge(@RequestBody String newCoordinates,@PathVariable String enclosingPrecinctID, @PathVariable String enclosedPrecinctID){
+    public ResponseEntity<?> merge(@RequestBody Precinct newPrecinct,@PathVariable String enclosingPrecinctID, @PathVariable String enclosedPrecinctID){
         //TO-DO
         try {
-            Precinct enclosingPrecinct = service.findByOgrFID(Integer.parseInt(enclosingPrecinctID));
-            Precinct enclosedPrecinct = service.findByOgrFID(Integer.parseInt(enclosedPrecinctID));
-            Precinct newPrecinct = enclosingPrecinct;
-            newPrecinct.setShape_geojson(newCoordinates);
+            //delete precinct 1
+            //delete precinct 2
+            //add new precinct
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (NoSuchElementException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

@@ -402,6 +402,13 @@ and open the template in the editor.
             let errorType=errors[precinct["ogrFID"]];
             newPrecinct["type"]="Feature";
             newPrecinct["properties"]={};
+            /*newPrecinct.properties["ogrFID"]=precinct["ogrFID"];
+            newPrecinct.properties["name"]=precinct["name"]
+            newPrecinct.properties["statefp"]=precinct["statefp"]
+            newPrecinct["geometry"]={};
+            newPrecinct.geometry["type"]=precinctShape["type"];
+            newPrecinct.geometry["coordinates"]=precinctShape["coordinates"];
+            **/
             newPrecinct.properties["aminov18"]=precinct["aminov18"];
             newPrecinct.properties["asianov18"]=precinct["asianov18"];
             newPrecinct.properties["blackov18"]=precinct["blackov18"];
@@ -737,6 +744,15 @@ and open the template in the editor.
         }
         function preparePrecinctToSend(feature){
             let preparedPrecinct={};
+            /*
+            preparedPrecinct["ogrFID"]=feature.properties.ogrFID;
+            preparedPrecinct["name"]=feature.properties.name;
+            preparedPrecinct["shape_geojson"[]=feature.geometry;
+            preparedPrecinct["error"]=feature.properties.error;
+            preparedPrecinct["demographic"]=feature.properties.demographic;
+            preparedPrecinct["election"]=feature.properties.election;
+            
+            * */
             preparedPrecinct["aminov18"]=feature.properties.aminov18;
             preparedPrecinct["asianov18"]=feature.properties.asianov18;
             preparedPrecinct["blackov18"]=feature.properties.blackov18;
