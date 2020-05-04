@@ -420,6 +420,8 @@ and open the template in the editor.
             document.getElementById("errorLog").innerHTML="";
             document.getElementById("searchWindow").style.display="inline";
             document.getElementById("optionSection").style.display="";
+            document.getElementById("dataSection").selectedIndex=0;
+            document.getElementById("year").selectedIndex=0;
         }
         function loadErrorsForState(stateFP){
             let errorsRequest=new XMLHttpRequest();
@@ -930,16 +932,18 @@ and open the template in the editor.
                 console.log(selectedFeature);
             }
             showPrecinctOnClick(selectedLayer,selectedFeature);
-            
-            if(selectedFeature.properties.error==undefined && selectedFeature.properties.error.errorType=="GHOST" && document.getElementById("pred16Dem").value!=0){
-                let selectedError=document.getElementById(selectedValue+"_error");
-                if(selectedError!=undefined){
-                    selectedError.parentNode.removeChild(selectedError);
-                    document.getElementById("currentError").innerHTML="";
-                    document.getElementById("errorSection").style.display="none";
+            if(selectedFeature.properties.error!=undefined){
+                if(selectedFeature.properties.error.errorType=="GHOST" && document.getElementById("pred16Dem").value!=0){
+                    let selectedError=document.getElementById(selectedValue+"_error");
+                    if(selectedError!=undefined){
+                        selectedError.parentNode.removeChild(selectedError);
+                        document.getElementById("currentError").innerHTML="";
+                        document.getElementById("errorSection").style.display="none";
+                    }
+                    updateError(selectedFeature);
                 }
-                updateError(selectedFeature);
             }
+            
             document.getElementById('changeDataSection').style.display='none';
             changeFeatColor(selectedLayer.feature,selectedLayer);
             updatePrecinct(selectedID,preparePrecinctToSend(selectedFeature));
