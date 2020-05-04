@@ -33,6 +33,7 @@ and open the template in the editor.
                     <input id="precinctSearch" type="text" placeholder="Search for Precinct" onkeyup="findPrecincts()">
                     <div id="searchResults"></div>
                 </div>
+                <br/>
                 <div>
                     Selected Precinct: <label id="selectedPrecinct"></label>
                 </div>
@@ -84,9 +85,9 @@ and open the template in the editor.
                 </div>
                 <p>Options:</p>
                 <div id="optionSection">
-                    <button onclick="//TO-DO">Show Errors</button>
-                    <button onclick="openChangeDataSection()" style="width:auto;margin-right: 25px">Change Data</button>
-                    <button onclick="document.getElementById('bordersPopup').style.display='block'" style="width:auto;">Fix Borders</button>
+                    <button onclick="getAllErrors()">Show Errors</button><br>
+                    <button onclick="openChangeDataSection()" style="width:auto;">Change Data</button><br>
+                    <button onclick="document.getElementById('bordersPopup').style.display='block'">Fix Borders</button>
                     <br>
                 </div>
                 <br>
@@ -244,6 +245,29 @@ and open the template in the editor.
         function getAllErrors(){
             let stateName=document.getElementById("States").value;
             let statefp=states[stateName].properties.statefp;
+            for(let i in precincts){
+                //console.log(precincts[i].feature.properties.ogrFID);
+                loadErrorForPrecinct(precincts[i].feature);
+            }
+        }
+        function loadErrorForPrecinct(precinctFeature){
+            let errorRequest=new XMLHttpRequest();
+            errorRequest.open('GET','http://localhost:8080/precincts/error/'+precinctFeature.properties.ogrFID);
+            errorRequest.onload=()=>{
+                precinctFeature.properties.error=JSON.parse(errorRequest.response);
+                putErrorsInLog(precinctFeature);
+                changeFeatColor(precinctFeature,precincts[precinctFeature.properties.name]);
+            }
+            errorRequest.send();
+        }
+        function putErrorsInLog(feature){
+            if(feature.properties.error.errorType=="GHOST"){
+                document.getElementById("errorLog").innerHTML+="<div id=\""+feature.properties.name+"_error\"><button onclick='document.getElementById(\"errorPopup\").style.display=\"none\";precMenuChange(\""+feature.properties.name+"\");'>Ghost Precinct Found ["+feature.properties.name+"](Requires Verification)</button></div>";
+            }
+//            if(feature.properties.name=="Burrillville 0302" && feature.geometry.type=="MultiPolygon"){
+//               document.getElementById("errorLog").innerHTML+="<div id=\""+feature.properties.name+"_error\"><button onclick='document.getElementById(\"errorPopup\").style.display=\"none\";precMenuChange(\""+feature.properties.name+"\");'>Donut Precinct Found ["+feature.properties.name
+//                       +"](Requires Modification)</button></div>";
+//            }
         }
         function findPrecincts(){
             let searchResult=document.getElementById("precinctSearch").value;
@@ -363,6 +387,7 @@ and open the template in the editor.
                         loadStatesForMap(stateName);
                     }
                     document.getElementById("searchWindow").style.display="none";
+                    document.getElementById("optionSection").style.display="none";
                     zoomOut();
                     break;
                 default:
@@ -394,6 +419,7 @@ and open the template in the editor.
             document.getElementById("selectedPrecinct").innerHTML="";
             document.getElementById("errorLog").innerHTML="";
             document.getElementById("searchWindow").style.display="inline";
+            document.getElementById("optionSection").style.display="";
         }
         function loadErrorsForState(stateFP){
             let errorsRequest=new XMLHttpRequest();
@@ -528,43 +554,43 @@ and open the template in the editor.
                     }
                 case "DEM_STYLE":
                     return{
-                        color:document.getElementById("demColor").value
+                        fillColor:document.getElementById("demColor").value
                     };
                 case "REP_STYLE":
                     return{
-                        color:document.getElementById("repColor").value
+                        fillColor:document.getElementById("repColor").value
                     };
                 case "OTHER_ELECTION_STYLE":
                     return{
-                        color:document.getElementById("otherColor").value
+                        fillColor:document.getElementById("otherColor").value
                     };
                 case "OTHER_DEMO_STYLE":
                     return{
-                        color:document.getElementById("restColor").value
+                        fillColor:document.getElementById("restColor").value
                     };
                 case "WHITE_STYLE":
                     return{
-                        color:document.getElementById("whiteColor").value
+                        fillColor:document.getElementById("whiteColor").value
                     };
                 case "BLACK_STYLE":
                     return{
-                        color:document.getElementById("blackColor").value
+                        fillColor:document.getElementById("blackColor").value
                     };
                 case "ASIAN_STYLE":
                     return{
-                        color:document.getElementById("asianColor").value
+                        fillColor:document.getElementById("asianColor").value
                     };
                 case "HIS_STYLE":
                     return{
-                        color:document.getElementById("hisColor").value
+                        fillColor:document.getElementById("hisColor").value
                     };
                 case "GHOST_STYLE":
                     return{
-                        color:'gray'
+                        fillColor:'gray'
                     };
                 case "ERROR_STYLE":
                     return{
-                        color:'orange'
+                        fillColor:'orange'
                     }
                 default:
                     console.log(feature);
@@ -690,7 +716,7 @@ and open the template in the editor.
             selectedLayer.setStyle(setShapeColor(selectedLayer,"NEW_PREC_STYLE"));
             setDemographicSection(selectedFeature);
             setElectionSection(selectedFeature);
-            //showError(selectedLayer,selectedFeature.properties.error.errorType);
+            showError(selectedLayer,selectedFeature.properties.error);
         }
         function changeAllColor(){
             for(i in precincts){
@@ -703,7 +729,6 @@ and open the template in the editor.
             let properties=selectedFeature.properties;
             if(properties.demographic==undefined && properties.error==undefined && properties.election==undefined){
                 selectedLayer.setStyle(setShapeColor(selectedLayer,"DEFAULT_STYLE"));
-                return;
             }
             if(selectedFeature.properties.error!=undefined && selectedFeature.properties.error.errorType!="NONE" && selectedFeature.properties.error.errorType!="RESOLVED"){
                 selectedLayer.setStyle(setShapeColor(selectedLayer,"ERROR_STYLE"));
@@ -776,19 +801,17 @@ and open the template in the editor.
             document.getElementById("selectedPrecinct").innerHTML=selectedName;
             precMenuChange(selectedName);
         }
-        function prepareErrorToSend(feature){
+        function updateError(feature){
             let today = new Date();
             let dateTime = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate()+" "+today.getHours() + ":" + today.getMinutes()+":"+today.getSeconds();
             let comment="["+dateTime+"] >>"+document.getElementById("commentArea").value+"<br/>";
-            let preparedError={};
+            let preparedError=feature.properties.error;
             preparedError["comment"]=document.getElementById("commentArea").value;
-            document.getElementById("errorLog").innerHTML+="<div style=\'border-style:solid\'>Error Resolved on: "+feature.properties.name+" from ERROR: "+feature.properties.errorType+". <br/> Optional Comment: "+comment+"</div><br/>";
+            document.getElementById("errorLog").innerHTML+="<div style=\'border-style:solid\'>Error Resolved on: "+feature.properties.name+" from ERROR: "+feature.properties.error.errorType+". <br/> Optional Comment: "+comment+"</div><br/>";
             preparedError["errorType"]="RESOLVED";
-            feature.properties.errorType="RESOLVED";
             document.getElementById("commentArea").value="";
-            return preparedError;
         }
-        function updateError(id,newError){
+        /**function updateError(id,newError){
             let errorRequest=new XMLHttpRequest();
             errorRequest.open('PUT','http://localhost:8080/errors/'+id);
             if(newError){
@@ -796,7 +819,7 @@ and open the template in the editor.
             }
             newError=JSON.stringify(newError);
             errorRequest.send(newError);
-        }
+        }**/
         function setGhostPrecinct(layer){
             let feature=layer.feature;
             let featureID=feature.properties.ogrFID;
@@ -806,8 +829,8 @@ and open the template in the editor.
             layer.setStyle(setShapeColor(layer,"GHOST_STYLE"));
             errorDiv.innerHTML="";
             document.getElementById("errorSection").style.display="none";
+            updateError(feature);
             updatePrecinct(featureID,preparePrecinctToSend(feature));
-            updateError(featureID,prepareErrorToSend(feature));
         }
         function updatePrecinct(selectedID,newPrecinct){
             let precinctRequest=new XMLHttpRequest();
@@ -850,13 +873,15 @@ and open the template in the editor.
             precinctLayer.removeLayer(layer);
             precinctLayer.addData(newPrecinct);
             
+            updateError(feature);
             updatePrecinct(feature.properties.ogrFID,newPrecinct);
-            updateError(feature.properties.ogrFID,prepareErrorToSend(newPrecinct));
         }
-        function showError(layer,errorType){
+        function showError(layer,error){
             let featureName=layer.feature.properties.name;
             let errorDiv=document.getElementById("currentError");
-            switch(errorType){
+            if(error==undefined) return;
+            console.log(error.errorType);
+            switch(error.errorType){
                 case "GHOST":
                     document.getElementById("errorSection").style.display="block";
                     errorDiv.innerHTML="Ghost Precinct? <br>\n\
@@ -906,14 +931,14 @@ and open the template in the editor.
             }
             showPrecinctOnClick(selectedLayer,selectedFeature);
             
-            if(selectedFeature.properties.errorType=="GHOST" && document.getElementById("pred16Dem").value!=0){
+            if(selectedFeature.properties.error==undefined && selectedFeature.properties.error.errorType=="GHOST" && document.getElementById("pred16Dem").value!=0){
                 let selectedError=document.getElementById(selectedValue+"_error");
                 if(selectedError!=undefined){
                     selectedError.parentNode.removeChild(selectedError);
                     document.getElementById("currentError").innerHTML="";
                     document.getElementById("errorSection").style.display="none";
                 }
-                updateError(selectedFeature.properties.ogrFID,prepareErrorToSend(selectedFeature));
+                updateError(selectedFeature);
             }
             document.getElementById('changeDataSection').style.display='none';
             changeFeatColor(selectedLayer.feature,selectedLayer);
@@ -941,18 +966,16 @@ and open the template in the editor.
             layer.on({
                 click: onClick
             });
-            if(feature.properties.errorType=="GHOST"){
-               document.getElementById("errorLog").innerHTML+="<div id=\""+feature.properties.name+"_error\"><button onclick='document.getElementById(\"errorPopup\").style.display=\"none\";precMenuChange(\""+feature.properties.name+"\");'>Ghost Precinct Found ["+feature.properties.name+"](Requires Verification)</button></div>";
-            }
-            if(feature.properties.name=="Burrillville 0302" && feature.geometry.type=="MultiPolygon"){
-               document.getElementById("errorLog").innerHTML+="<div id=\""+feature.properties.name+"_error\"><button onclick='document.getElementById(\"errorPopup\").style.display=\"none\";precMenuChange(\""+feature.properties.name+"\");'>Donut Precinct Found ["+feature.properties.name
-                       +"](Requires Modification)</button></div>";
-            }
             changeFeatColor(feature,layer);
+        }
+        function clickState(e){
+            let selectedName=e.target.feature.properties.name;
+            document.getElementById("States").value=selectedName;
+            loadFeature()
         }
         function onEachState(feature,layer){
             layer.on({
-                click:loadFeature
+                click:clickState
             });
             layer.setStyle(setShapeColor(layer,"STATE_STYLE"));
         }

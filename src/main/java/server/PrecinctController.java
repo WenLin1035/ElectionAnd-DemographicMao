@@ -11,6 +11,7 @@ package server;
  */
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -58,7 +59,6 @@ public class PrecinctController {
     @GetMapping("/precincts/error/{id}")
     public Error findErrorForPrecincts(@PathVariable String id){
         Precinct precinct=service.findByOgrFID(Integer.parseInt(id));
-        System.out.println(precinct.getError());
         return precinct.getError();
     }
     
@@ -85,6 +85,20 @@ public class PrecinctController {
         try {
             Precinct existPrecinct = service.findByOgrFID(Integer.parseInt(id));
             precinct.setOgrFID(Integer.parseInt(id));
+            if(precinct.getDemographic()==null){
+                precinct.setDemographic(existPrecinct.getDemographic());
+            }
+            if(precinct.getElection()==null){
+                precinct.setElection(existPrecinct.getElection());
+            }
+            if(precinct.getError()==null){
+                precinct.setError(existPrecinct.getError());
+            }
+            else{
+                if(precinct.getError().getCommentTime()==null){
+                    precinct.getError().setCommentTime(new Timestamp(System.currentTimeMillis()));
+                }
+            }
             service.save(precinct);
         } catch (NoSuchElementException e) {
         }      
