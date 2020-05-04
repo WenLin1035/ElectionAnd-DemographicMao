@@ -53,7 +53,7 @@ and open the template in the editor.
                     <tr id="electionDropdownArea" style="display:none">
                         <td><label for="year">Election Type:</label></td>
                         <td>
-                            <select id="year" onchange="setElectionSection()" style="">
+                            <select id="year" onchange="loadElectionSection()" style="">
                                 <option id="noElection" value="none" selected>None</option>
                                 <option id="pred16" value="pred16">Presidential 2016</option>
                                 <option id="cong16" value="cong16">Congressional 2016</option>
@@ -308,11 +308,17 @@ and open the template in the editor.
                 
                 let selectedLayer=precincts[selectedPrecinct];
                 let selectedFeature=selectedLayer.feature;
-                if(selectedFeature.properties.demographic!=undefined && selectedFeature.properties.election!=undefined){
-                    document.getElementById("saveButton").disabled=false;
-                }
-                else{
-                    document.getElementById("saveButton").disabled=true;
+                if(selectedFeature.properties.demographic==undefined || selectedFeature.properties.election==undefined){
+                    loadDemographicForPrecinct(selectedFeature).then(response=>{
+                        selectedFeature.properties.demographic=response;
+                        setDemographicSection(selectedFeature);
+                        populateDemographicData(selectedFeature);
+                    });
+                    loadElectionForPrecinct(selectedFeature).then(response=>{
+                        selectedFeature.properties.election=response;
+                        setElectionSection(selectedFeature);
+                        populateElectionData(selectedFeature);
+                    });
                 }
             }
             
@@ -340,13 +346,13 @@ and open the template in the editor.
                 document.getElementById("electionDropdownArea").style.display="";
                 document.getElementById('electionSection').style.display = "block";
                 document.getElementById('demographicSection').style.display = "none";
-                setElectionSection();
+                loadElectionSection();
             }
             if(document.getElementById("dataSection").value == "demographic"){
                 document.getElementById("electionDropdownArea").style.display="none";
                 document.getElementById('electionSection').style.display = "none";
                 document.getElementById('demographicSection').style.display = "block";
-                setDemographicSection();
+                loadDemographicSection();
             }
             if(document.getElementById("dataSection").value == "none"){
                 document.getElementById("electionDropdownArea").style.display="none";
@@ -399,6 +405,7 @@ and open the template in the editor.
                         if(statesCache[stateFP]!=undefined){
                             precinctLayer.addData(statesCache[stateFP]);
                             loadPrecinctDictionary();
+                            changeAllColor();
                         }
                         else{
                             loadPrecinctsForState(stateFP);
@@ -481,24 +488,26 @@ and open the template in the editor.
             precinctsRequest.send();
         }
         function loadDemographicForPrecinct(precinctFeature){
-            let demographicRequest=new XMLHttpRequest();
-            demographicRequest.open('GET','http://localhost:8080/precincts/demographic/'+precinctFeature.properties.ogrFID);
-            demographicRequest.onload=()=>{
-                precinctFeature.properties.demographic=JSON.parse(demographicRequest.response);
-                setDemographicSection();
-                populateDemographicData(precinctFeature);
-            }
-            demographicRequest.send();
+            let promise = new Promise((resolve,reject)=>{
+                let demographicRequest=new XMLHttpRequest();
+                demographicRequest.open('GET','http://localhost:8080/precincts/demographic/'+precinctFeature.properties.ogrFID);
+                demographicRequest.onload=()=>{
+                    resolve(JSON.parse(demographicRequest.response));
+                };
+                demographicRequest.send();
+            });
+            return promise;
         }
         function loadElectionForPrecinct(precinctFeature){
-            let electionRequest=new XMLHttpRequest();
-            electionRequest.open('GET','http://localhost:8080/precincts/election/'+precinctFeature.properties.ogrFID);
-            electionRequest.onload=()=>{
-                precinctFeature.properties.election=JSON.parse(electionRequest.response);
-                setElectionSection();
-                populateElectionData(precinctFeature);
-            }
-            electionRequest.send();
+            let promise = new Promise((resolve,reject)=>{
+                let electionRequest=new XMLHttpRequest();
+                electionRequest.open('GET','http://localhost:8080/precincts/election/'+precinctFeature.properties.ogrFID);
+                electionRequest.onload=()=>{
+                    resolve(JSON.parse(electionRequest.response));
+                };
+                electionRequest.send();
+            });
+            return promise;
         }
         function prepareStateToUse(state){
             let stateShape=JSON.parse(state["state_geojson"]);
@@ -530,6 +539,7 @@ and open the template in the editor.
             precincts={};
             let eachLayer=(singleLayer)=>{
                 let feature=singleLayer.feature;
+                feature.properties.error=undefined;
                 precincts[feature.properties.name]=singleLayer;
             }
             precinctLayer.eachLayer(eachLayer);
@@ -558,42 +568,52 @@ and open the template in the editor.
                     }
                 case "DEM_STYLE":
                     return{
+                        color:'black',
                         fillColor:document.getElementById("demColor").value
                     };
                 case "REP_STYLE":
                     return{
+                        color:'black',
                         fillColor:document.getElementById("repColor").value
                     };
                 case "OTHER_ELECTION_STYLE":
                     return{
+                        color:'black',
                         fillColor:document.getElementById("otherColor").value
                     };
                 case "OTHER_DEMO_STYLE":
                     return{
+                        color:'black',
                         fillColor:document.getElementById("restColor").value
                     };
                 case "WHITE_STYLE":
                     return{
+                        color:'black',
                         fillColor:document.getElementById("whiteColor").value
                     };
                 case "BLACK_STYLE":
                     return{
+                        color:'black',
                         fillColor:document.getElementById("blackColor").value
                     };
                 case "ASIAN_STYLE":
                     return{
+                        color:'black',
                         fillColor:document.getElementById("asianColor").value
                     };
                 case "HIS_STYLE":
                     return{
+                        color:'black',
                         fillColor:document.getElementById("hisColor").value
                     };
                 case "GHOST_STYLE":
                     return{
+                        color:'black',
                         fillColor:'gray'
                     };
                 case "ERROR_STYLE":
                     return{
+                        color:'black',
                         fillColor:'orange'
                     }
                 default:
@@ -622,7 +642,7 @@ and open the template in the editor.
             mymap.setView(new L.LatLng(0,0),precinctZoomLevel);
             mymap.setView(new L.LatLng(centerCoords[1],centerCoords[0]),precinctZoomLevel);
         }
-        function setDemographicSection(){
+        function loadDemographicSection(){
             let selectedPrecinct=document.getElementById("selectedPrecinct").innerHTML;
             if(selectedPrecinct=="") return;
             let selectedLayer=precincts[selectedPrecinct];
@@ -630,10 +650,17 @@ and open the template in the editor.
             let selectedDemographic=document.getElementById("dataSection").value;
             if(selectedDemographic!="demographic") return;
             if(selectedFeature.properties.demographic==undefined){
-                loadDemographicForPrecinct(selectedFeature);
-                return;
+                loadDemographicForPrecinct(selectedFeature).then(response=>{
+                    selectedFeature.properties.demographic=response;
+                    setDemographicSection(selectedFeature);
+                    populateDemographicData(selectedFeature);
+                });
             }
-            
+            else{
+                setDemographicSection(selectedFeature);
+            }
+        }
+        function setDemographicSection(selectedFeature){
             let whiteVotePop=selectedFeature.properties.demographic.whiteov18;
             let blackVotePop=selectedFeature.properties.demographic.blackov18;
             let asianVotePop=selectedFeature.properties.demographic.asianov18;
@@ -649,20 +676,29 @@ and open the template in the editor.
             document.getElementById("totVotePop").innerHTML=Math.floor(totVotePop);
             changeAllColor();
         }
-        function setElectionSection(){
+        function loadElectionSection(){
             let selectedPrecinct=document.getElementById("selectedPrecinct").innerHTML;
             if(selectedPrecinct=="") return;
             let selectedLayer=precincts[selectedPrecinct];
             let selectedFeature=selectedLayer.feature;
             let selectedElection=document.getElementById("dataSection").value;
             if(selectedElection!="election") return;
-            if(selectedFeature.properties.election==undefined){
-                loadElectionForPrecinct(selectedFeature);
-                return;
-            }
             selectedElection = document.getElementById("year").value;
             if(selectedElection=="none") return;
+            if(selectedFeature.properties.election==undefined){
+                loadElectionForPrecinct(selectedFeature).then(response=>{
+                    selectedFeature.properties.election=response;
+                    setElectionSection(selectedFeature);
+                    populateElectionData(selectedFeature);
+                });
+            }
+            else{
+                setElectionSection(selectedFeature);
+            }
+        }
+        function setElectionSection(selectedFeature){
             
+            let selectedElection = document.getElementById("year").value;
             let pred16D=selectedFeature.properties.election.demvotpres;
             let pred16R=selectedFeature.properties.election.repvotpres;
             let pred16O=selectedFeature.properties.election.othvotpres;
@@ -718,8 +754,8 @@ and open the template in the editor.
             precinctZoom(turf.centroid(selectedFeature),turf.area(selectedFeature));
             precinctLayer.setStyle(setShapeColor(precinctLayer,"OLD_PREC_STYLE"));
             selectedLayer.setStyle(setShapeColor(selectedLayer,"NEW_PREC_STYLE"));
-            setDemographicSection(selectedFeature);
-            setElectionSection(selectedFeature);
+            loadDemographicSection(selectedFeature);
+            loadElectionSection(selectedFeature);
             showError(selectedLayer,selectedFeature.properties.error);
         }
         function changeAllColor(){
