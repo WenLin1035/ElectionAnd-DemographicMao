@@ -56,10 +56,15 @@ public class PrecinctController {
         else return new ResponseEntity<>(precinctNames,HttpStatus.FOUND);
     }
     
-    @GetMapping("/precincts/error/{id}")
-    public Error findErrorForPrecincts(@PathVariable String id){
-        Precinct precinct=service.findByOgrFID(Integer.parseInt(id));
-        return precinct.getError();
+    @GetMapping("/precincts/error/{statefp}")
+    public List<Precinct> findErrorsForPrecincts(@PathVariable String statefp){
+        List<Precinct> precincts=service.findByStatefpAndErrorIsNotNull(statefp);
+        for(Precinct p:precincts){
+            p.setShape_geojson(null);
+            p.setDemographic(null);
+            p.setElection(null);
+        }
+        return precincts;
     }
     
     @GetMapping("/precincts/demographic/{id}")

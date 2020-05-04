@@ -245,18 +245,20 @@ and open the template in the editor.
         function getAllErrors(){
             let stateName=document.getElementById("States").value;
             let statefp=states[stateName].properties.statefp;
-            for(let i in precincts){
-                //console.log(precincts[i].feature.properties.ogrFID);
-                loadErrorForPrecinct(precincts[i].feature);
-            }
+            loadErrorsForPrecinct(statefp);
         }
-        function loadErrorForPrecinct(precinctFeature){
+        function loadErrorsForPrecinct(statefp){
             let errorRequest=new XMLHttpRequest();
-            errorRequest.open('GET','http://localhost:8080/precincts/error/'+precinctFeature.properties.ogrFID);
+            errorRequest.open('GET','http://localhost:8080/precincts/error/'+statefp);
             errorRequest.onload=()=>{
-                precinctFeature.properties.error=JSON.parse(errorRequest.response);
-                putErrorsInLog(precinctFeature);
-                changeFeatColor(precinctFeature,precincts[precinctFeature.properties.name]);
+                let allPrecinctsWithError=JSON.parse(errorRequest.response);
+                for(let i=0;i<allPrecinctsWithError.length;i++){
+                    let precinct=allPrecinctsWithError[i];
+                    precincts[precinct.name].feature.properties.error=precinct.error;
+                    putErrorsInLog(precincts[precinct.name].feature);
+                    changeFeatColor(precincts[precinct.name].feature,precincts[precinct.name]);
+                }
+                
             }
             errorRequest.send();
         }
@@ -732,7 +734,7 @@ and open the template in the editor.
             if(properties.demographic==undefined && properties.error==undefined && properties.election==undefined){
                 selectedLayer.setStyle(setShapeColor(selectedLayer,"DEFAULT_STYLE"));
             }
-            if(selectedFeature.properties.error!=undefined && selectedFeature.properties.error.errorType!="NONE" && selectedFeature.properties.error.errorType!="RESOLVED"){
+            if(properties.error!=undefined && properties.error.errorType!="NONE" && properties.error.errorType!="RESOLVED"){
                 selectedLayer.setStyle(setShapeColor(selectedLayer,"ERROR_STYLE"));
             }
             else{
