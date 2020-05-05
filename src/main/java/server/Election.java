@@ -5,8 +5,10 @@
  */
 package server;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -37,6 +39,7 @@ public class Election {
     private Integer repvot18;
     private Integer othvot18;
     private Integer totvot18;
+    private Precinct precinct;
     
     public Election(){
         super();
@@ -61,6 +64,14 @@ public class Election {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     public Integer getId() {
         return id;
+    }
+    
+    @OneToOne(fetch=FetchType.LAZY)
+    @MapsId
+    @JoinColumn(name="id")
+    @JsonBackReference
+    public Precinct getPrecinct(){
+        return precinct;
     }
     
     @Column(name="demvotpres")
@@ -125,6 +136,10 @@ public class Election {
     
     public void setId(Integer id) {
         this.id = id;
+    }
+    
+    public void setPrecinct(Precinct precinct){
+        this.precinct=precinct;
     }
     
     public void setDemvotpres(Integer demvotpres) {

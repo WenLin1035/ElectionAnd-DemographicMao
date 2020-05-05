@@ -5,8 +5,10 @@
  */
 package server;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -33,6 +35,7 @@ public class Demographic {
     private Integer otherov18;
     private Integer pop100;
     private Integer id;
+    private Precinct precinct;
     
     public Demographic(){
         super();
@@ -53,6 +56,14 @@ public class Demographic {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     public Integer getId() {
         return id;
+    }
+    
+    @OneToOne(fetch=FetchType.LAZY)
+    @MapsId
+    @JoinColumn(name="id")
+    @JsonBackReference
+    public Precinct getPrecinct(){
+        return precinct;
     }
     
     @Column(name="aminov18")
@@ -97,6 +108,10 @@ public class Demographic {
     
     public void setId(Integer id) {
         this.id = id;
+    }
+    
+    public void setPrecinct(Precinct precinct){
+        this.precinct=precinct;
     }
     
     public void setAminov18(Integer aminov18) {

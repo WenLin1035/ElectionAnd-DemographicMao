@@ -5,6 +5,7 @@
  */
 package server;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import javax.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
 /**
@@ -40,20 +41,20 @@ public class Precinct {
         return id;
     }
     
-    @OneToOne(cascade=CascadeType.ALL)
-    @JoinColumn(name="id",referencedColumnName = "id")
+    @OneToOne(fetch = FetchType.LAZY,cascade=CascadeType.ALL,mappedBy="precinct")
+    @JsonManagedReference 
     public Error getError(){
         return error;
     }
     
-    @OneToOne(cascade=CascadeType.ALL)
-    @JoinColumn(name="id",referencedColumnName = "id")
+    @OneToOne(fetch = FetchType.LAZY,cascade=CascadeType.ALL,mappedBy="precinct")
+    @JsonManagedReference 
     public Demographic getDemographic(){
         return demographic;
     }
     
-    @OneToOne(cascade=CascadeType.ALL)
-    @JoinColumn(name="id",referencedColumnName = "id")
+    @OneToOne(fetch = FetchType.LAZY,cascade=CascadeType.ALL,mappedBy="precinct")
+    @JsonManagedReference 
     public Election getElection(){
         return election;
     }

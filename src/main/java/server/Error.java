@@ -5,6 +5,7 @@
  */
 package server;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import java.sql.Timestamp;
 import javax.persistence.*;
 
@@ -20,6 +21,7 @@ public class Error {
     private String errorType;
     private String comment;
     private Timestamp commentTime;
+    private Precinct precinct;
     
     public Error(){
         super();
@@ -35,6 +37,14 @@ public class Error {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     public Integer getId() {
         return id;
+    }
+    
+    @OneToOne(fetch=FetchType.LAZY)
+    @MapsId
+    @JoinColumn(name="id")
+    @JsonBackReference
+    public Precinct getPrecinct(){
+        return precinct;
     }
     
     @Column(name="comment_time")
@@ -56,6 +66,10 @@ public class Error {
         this.id = id;
     }
 
+    public void setPrecinct(Precinct precinct){
+        this.precinct=precinct;
+    }
+    
     public void setErrorType(String errorType) {
         this.errorType = errorType;
     }
