@@ -63,13 +63,13 @@ public class Precincts {
         return elections;
     }
     
-    @OneToMany(fetch = FetchType.LAZY,cascade=CascadeType.ALL,mappedBy="firstPrecinct")
+    @OneToMany(cascade=CascadeType.ALL,mappedBy="firstPrecinct")
     @JsonManagedReference 
     public List<Neighbors> getNeighbors(){
         return neighbors;
     }
     
-    @OneToOne(fetch = FetchType.LAZY,cascade=CascadeType.ALL,mappedBy="secondPrecinct")
+    @OneToOne(cascade=CascadeType.ALL,mappedBy="secondPrecinct")
     @JsonBackReference 
     public Neighbors getNeighbor(){
         return neighbor;
