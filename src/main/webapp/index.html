@@ -524,6 +524,17 @@ and open the template in the editor.
             });
             return promise;
         }
+        function loadNeighborsForPrecinct(precinctFeature){
+            let promise = new Promise((resolve,reject)=>{
+                let neighborRequest=new XMLHttpRequest();
+                neighborRequest.open('GET','http://localhost:8080/precincts/neighbors/'+precinctFeature.properties.id);
+                neighborRequest.onload=()=>{
+                    resolve(JSON.parse(neighborRequest.response));
+                }
+                neighborRequest.send();
+            });
+            return promise;
+        }
         function prepareStateToUse(state){
             let stateShape=JSON.parse(state["state_geojson"]);
             let newState={};
@@ -631,6 +642,12 @@ and open the template in the editor.
                         color:'black',
                         fillColor:'orange'
                     }
+                case "NEIGHBOR_STYLE":
+                    return{
+                        color:'black',
+                        fillColor:'pink',
+                        fillOpacity: 0.6
+                    }
                 default:
                     console.log(feature);
                     console.log("un-intended");
@@ -673,6 +690,29 @@ and open the template in the editor.
             }
             else{
                 setDemographicSection(selectedFeature);
+            }
+        }
+        function loadNeighbors(){
+            let selectedPrecinct=document.getElementById("selectedPrecinct").innerHTML;
+            if(selectedPrecinct=="") return;
+            let selectedLayer=precincts[selectedPrecinct];
+            let selectedFeature=selectedLayer.feature;
+            if(selectedFeature.properties.neighbors==undefined){
+                loadNeighborsForPrecinct(selectedFeature).then(response=>{
+                    selectedFeature.properties.neighbors=response;
+                    showNeighbors(selectedFeature);
+                });
+            }
+            else{
+                showNeighbors(selectedFeature);
+            }
+        }
+        function showNeighbors(selectedFeature){
+            let neighbors=selectedFeature.properties.neighbors;
+            for(let i=0;i<neighbors.length;i++){
+                let precinctName=neighbors[i].secondPrecinct.name;
+                let selectedLayer=precincts[precinctName];
+                selectedLayer.setStyle(setShapeColor(selectedLayer,"NEIGHBOR_STYLE"));
             }
         }
         function setDemographicSection(selectedFeature){
@@ -769,10 +809,12 @@ and open the template in the editor.
         }
         function showPrecinctOnClick(selectedLayer,selectedFeature){
             precinctZoom(turf.centroid(selectedFeature),turf.area(selectedFeature));
+            changeFeatColor(selectedFeature,selectedLayer);
             precinctLayer.setStyle(setShapeColor(precinctLayer,"OLD_PREC_STYLE"));
             selectedLayer.setStyle(setShapeColor(selectedLayer,"NEW_PREC_STYLE"));
-            loadDemographicSection(selectedFeature);
-            loadElectionSection(selectedFeature);
+            loadDemographicSection();
+            loadElectionSection();
+            loadNeighbors();
             showError(selectedLayer,selectedFeature.properties.error);
         }
         function changeAllColor(){
