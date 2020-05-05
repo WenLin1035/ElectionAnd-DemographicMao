@@ -69,13 +69,13 @@ public class PrecinctController {
     
     @GetMapping("/precincts/demographic/{id}")
     public Demographic findDemographicForPrecincts(@PathVariable String id){
-        Precinct precinct=service.findByOgrFID(Integer.parseInt(id));
+        Precinct precinct=service.findById(Integer.parseInt(id)).get();
         return precinct.getDemographic();
     }
     
     @GetMapping("/precincts/election/{id}")
     public Election findElectionForPrecincts(@PathVariable String id){
-        Precinct precinct=service.findByOgrFID(Integer.parseInt(id));
+        Precinct precinct=service.findById(Integer.parseInt(id)).get();
         return precinct.getElection();
     }
     
@@ -88,8 +88,8 @@ public class PrecinctController {
     @PutMapping("/precincts/{id}")
     public void update(@RequestBody Precinct precinct, @PathVariable String id) {
         try {
-            Precinct existPrecinct = service.findByOgrFID(Integer.parseInt(id));
-            precinct.setOgrFID(Integer.parseInt(id));
+            Precinct existPrecinct = service.findById(Integer.parseInt(id)).get();
+            precinct.setId(Integer.parseInt(id));
             if(precinct.getDemographic()==null){
                 precinct.setDemographic(existPrecinct.getDemographic());
             }

@@ -16,7 +16,7 @@ import javax.persistence.*;
 @Table(name="error")
 public class Error {
     
-    private Integer errorID;
+    private Integer id;
     private String errorType;
     private String comment;
     private Timestamp commentTime;
@@ -33,11 +33,10 @@ public class Error {
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    @Column(name="error_id")
-    public Integer getErrorID() {
-        return errorID;
+    public Integer getId() {
+        return id;
     }
-
+    
     @Column(name="comment_time")
     public Timestamp getCommentTime(){
         return commentTime;
@@ -53,8 +52,8 @@ public class Error {
         return comment;
     }
     
-    public void setErrorID(Integer errorID) {
-        this.errorID = errorID;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public void setErrorType(String errorType) {

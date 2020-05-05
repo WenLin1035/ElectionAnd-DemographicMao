@@ -10,6 +10,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapsId;
+import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 /**
@@ -28,8 +32,7 @@ public class Demographic {
     private Integer whiteov18;
     private Integer otherov18;
     private Integer pop100;
-    private Integer demographicID;
-    private Integer precinctID;
+    private Integer id;
     
     public Demographic(){
         super();
@@ -48,9 +51,8 @@ public class Demographic {
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    @Column(name="demographic_id")
-    public Integer getDemographicID() {
-        return demographicID;
+    public Integer getId() {
+        return id;
     }
     
     @Column(name="aminov18")
@@ -93,8 +95,8 @@ public class Demographic {
         return pop100;
     }
     
-    public void setDemographicID(Integer demographicID) {
-        this.demographicID = demographicID;
+    public void setId(Integer id) {
+        this.id = id;
     }
     
     public void setAminov18(Integer aminov18) {

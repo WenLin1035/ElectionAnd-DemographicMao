@@ -19,7 +19,7 @@ public class Precinct {
     private Error error;
     private Demographic demographic;
     private Election election;
-    private Integer ogrFID;
+    private Integer id;
     private String shape_geojson;
     private String name;
     private String statefp;
@@ -36,25 +36,24 @@ public class Precinct {
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    @Column(name="ogr_fid")
-    public Integer getOgrFID(){
-        return ogrFID;
+    public Integer getId(){
+        return id;
     }
     
     @OneToOne(cascade=CascadeType.ALL)
-    @JoinColumn(name="error_id",referencedColumnName = "error_id")
+    @JoinColumn(name="id",referencedColumnName = "id")
     public Error getError(){
         return error;
     }
     
     @OneToOne(cascade=CascadeType.ALL)
-    @JoinColumn(name="demographic_id",referencedColumnName = "demographic_id")
+    @JoinColumn(name="id",referencedColumnName = "id")
     public Demographic getDemographic(){
         return demographic;
     }
     
     @OneToOne(cascade=CascadeType.ALL)
-    @JoinColumn(name="election_id",referencedColumnName = "election_id")
+    @JoinColumn(name="id",referencedColumnName = "id")
     public Election getElection(){
         return election;
     }
@@ -98,7 +97,7 @@ public class Precinct {
         this.shape_geojson = shape_geojson;
     }
     
-    public void setOgrFID(Integer ogrFID){
-        this.ogrFID=ogrFID;
+    public void setId(Integer id){
+        this.id=id;
     }
 }

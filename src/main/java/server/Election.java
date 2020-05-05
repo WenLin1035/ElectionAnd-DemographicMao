@@ -10,6 +10,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MapsId;
+import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 /**
@@ -20,7 +24,7 @@ import javax.persistence.Table;
 @Table(name="election")
 public class Election {
     
-    private Integer electionID;
+    private Integer id;
     private Integer demvotpres;
     private Integer repvotpres;
     private Integer othvotpres;
@@ -55,9 +59,8 @@ public class Election {
     
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    @Column(name="election_id")
-    public Integer getElectionID() {
-        return electionID;
+    public Integer getId() {
+        return id;
     }
     
     @Column(name="demvotpres")
@@ -120,8 +123,8 @@ public class Election {
         return totvot18;
     }
     
-    public void setElectionID(Integer electionID) {
-        this.electionID = electionID;
+    public void setId(Integer id) {
+        this.id = id;
     }
     
     public void setDemvotpres(Integer demvotpres) {

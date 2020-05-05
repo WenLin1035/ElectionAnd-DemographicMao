@@ -39,8 +39,8 @@ public class ErrorController {
     @PutMapping("/errors/{id}")
     public void update(@RequestBody Error error, @PathVariable String id){
         try {
-            Error existError = service.findByErrorID(Integer.parseInt(id));
-            error.setErrorID(existError.getErrorID());
+            Error existError = service.findById(Integer.parseInt(id)).get();
+            error.setId(existError.getId());
             error.setCommentTime(new Timestamp(System.currentTimeMillis()));
             service.save(error);
         } catch (NoSuchElementException e) {

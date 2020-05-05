@@ -490,7 +490,7 @@ and open the template in the editor.
         function loadDemographicForPrecinct(precinctFeature){
             let promise = new Promise((resolve,reject)=>{
                 let demographicRequest=new XMLHttpRequest();
-                demographicRequest.open('GET','http://localhost:8080/precincts/demographic/'+precinctFeature.properties.ogrFID);
+                demographicRequest.open('GET','http://localhost:8080/precincts/demographic/'+precinctFeature.properties.id);
                 demographicRequest.onload=()=>{
                     resolve(JSON.parse(demographicRequest.response));
                 };
@@ -501,7 +501,7 @@ and open the template in the editor.
         function loadElectionForPrecinct(precinctFeature){
             let promise = new Promise((resolve,reject)=>{
                 let electionRequest=new XMLHttpRequest();
-                electionRequest.open('GET','http://localhost:8080/precincts/election/'+precinctFeature.properties.ogrFID);
+                electionRequest.open('GET','http://localhost:8080/precincts/election/'+precinctFeature.properties.id);
                 electionRequest.onload=()=>{
                     resolve(JSON.parse(electionRequest.response));
                 };
@@ -527,7 +527,7 @@ and open the template in the editor.
             let newPrecinct={};
             newPrecinct["type"]="Feature";
             newPrecinct["properties"]={};
-            newPrecinct.properties["ogrFID"]=precinct["ogrFID"];
+            newPrecinct.properties["id"]=precinct["id"];
             newPrecinct.properties["name"]=precinct["name"]
             newPrecinct.properties["statefp"]=precinct["statefp"]
             newPrecinct["geometry"]={};
@@ -862,7 +862,7 @@ and open the template in the editor.
         }**/
         function setGhostPrecinct(layer){
             let feature=layer.feature;
-            let featureID=feature.properties.ogrFID;
+            let featureID=feature.properties.id;
             let buttonToBeDeleted=document.getElementById(feature.properties.name+"_error");
             buttonToBeDeleted.parentNode.removeChild(buttonToBeDeleted);
             let errorDiv=document.getElementById("currentError");
@@ -884,7 +884,7 @@ and open the template in the editor.
         }
         function preparePrecinctToSend(feature){
             let preparedPrecinct={};
-            preparedPrecinct["ogrFID"]=feature.properties.ogrFID;
+            preparedPrecinct["id"]=feature.properties.id;
             preparedPrecinct["name"]=feature.properties.name;
             preparedPrecinct["statefp"]=feature.properties.statefp;
             preparedPrecinct["error"]=feature.properties.error;
@@ -914,7 +914,7 @@ and open the template in the editor.
             precinctLayer.addData(newPrecinct);
             
             updateError(feature);
-            updatePrecinct(feature.properties.ogrFID,newPrecinct);
+            updatePrecinct(feature.properties.id,newPrecinct);
         }
         function showError(layer,error){
             let featureName=layer.feature.properties.name;
@@ -957,7 +957,7 @@ and open the template in the editor.
             let selectedValue=document.getElementById("selectedPrecinct").innerHTML;
             let selectedLayer=precincts[selectedValue];
             let selectedFeature=selectedLayer.feature;
-            let selectedID=selectedFeature.properties.ogrFID;
+            let selectedID=selectedFeature.properties.id;
             changePrecinctVotingData(selectedFeature,pred16Dem,pred16Rep,pred16Oth,cong16Dem,cong16Rep,cong16Oth,cong18Dem,cong18Rep,cong18Oth);
             changePrecinctDemographicData(selectedFeature,whiteVotePop,blackVotePop,asianVotePop,hispanicVotePop,otherVotePop);
             
