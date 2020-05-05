@@ -809,7 +809,7 @@ and open the template in the editor.
         }
         function showPrecinctOnClick(selectedLayer,selectedFeature){
             precinctZoom(turf.centroid(selectedFeature),turf.area(selectedFeature));
-            changeFeatColor(selectedFeature,selectedLayer);
+            changeAllColor();
             precinctLayer.setStyle(setShapeColor(precinctLayer,"OLD_PREC_STYLE"));
             selectedLayer.setStyle(setShapeColor(selectedLayer,"NEW_PREC_STYLE"));
             loadDemographicSection();
@@ -826,7 +826,6 @@ and open the template in the editor.
         }
         function changeFeatColor(selectedFeature,selectedLayer){
             let properties=selectedFeature.properties;
-            console.log(properties);
             if(properties.demographic==undefined && properties.error==undefined && properties.election==undefined){
                 selectedLayer.setStyle(setShapeColor(selectedLayer,"DEFAULT_STYLE"));
             }

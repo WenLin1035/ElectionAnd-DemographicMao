@@ -27,12 +27,14 @@ import org.springframework.web.bind.annotation.*;
 public class PrecinctController {
     //The Autowired annotation injects the constructor of PrecinctRepo into this class and that object has the methods from PrecinctRepo and JPA Repo
     @Autowired
-    private PrecinctRepo service;
+    private PrecinctRepo precinctService;
+    @Autowired
+    private NeighborsRepo neighborService;
     
     // RESTful API methods for Retrieval operations
     @GetMapping("/precincts")
     public List<Precincts> findAllPrecincts() {
-        List<Precincts> allPrecincts=service.findAll();
+        List<Precincts> allPrecincts=precinctService.findAll();
         for(Precincts p: allPrecincts){
             p.setDemographic(null);
             p.setError(null);
@@ -44,7 +46,7 @@ public class PrecinctController {
     
     @GetMapping("/precincts/search/{partOfName}/{statefp}")
     public ResponseEntity<List<String>> findAllNamesForSearch(@PathVariable String partOfName,@PathVariable String statefp){
-        List<Precincts> precincts=service.findByNameStartingWithIgnoreCaseAndStatefp(partOfName,statefp);
+        List<Precincts> precincts=precinctService.findByNameStartingWithIgnoreCaseAndStatefp(partOfName,statefp);
         List<String> precinctNames=new ArrayList<String>();
         int maxCount=0;
         for(Precincts p: precincts){
@@ -59,7 +61,7 @@ public class PrecinctController {
     
     @GetMapping("/precincts/error/{statefp}")
     public List<Precincts> findErrorsForPrecincts(@PathVariable String statefp){
-        List<Precincts> precincts=service.findByStatefpAndErrorIsNotNull(statefp);
+        List<Precincts> precincts=precinctService.findByStatefpAndErrorIsNotNull(statefp);
         for(Precincts p:precincts){
             p.setShape_geojson(null);
             p.setDemographic(null);
@@ -70,41 +72,61 @@ public class PrecinctController {
     
     @GetMapping("/precincts/demographic/{id}")
     public Demographics findDemographicForPrecincts(@PathVariable String id){
-        Precincts precinct=service.findById(Integer.parseInt(id)).get();
+        Precincts precinct=precinctService.findById(Integer.parseInt(id)).get();
         return precinct.getDemographic();
     }
     
     @GetMapping("/precincts/election/{id}")
     public List<Elections> findElectionForPrecincts(@PathVariable String id){
-        Precincts precinct=service.findById(Integer.parseInt(id)).get();
+        Precincts precinct=precinctService.findById(Integer.parseInt(id)).get();
         return precinct.getElections();
     }
     
     @GetMapping("/precincts/neighbors/{id}")
     public List<Neighbors> findNeighborsForPrecincts(@PathVariable String id){
-        Precincts precinct=service.findById(Integer.parseInt(id)).get();
+        Precincts precinct=precinctService.findById(Integer.parseInt(id)).get();
         List<Neighbors> neighbors=precinct.getNeighbors();
-        for(Neighbors neighbor:neighbors){
-            Precincts neighborPrecinct=neighbor.getSecondPrecinct();
-            neighborPrecinct.setDemographic(null);
-            neighborPrecinct.setError(null);
-            neighborPrecinct.setElections(null);
-            neighborPrecinct.setNeighbors(null);
-            neighborPrecinct.setShape_geojson("");
+        //check if the precinct has no neighbor
+        if(neighbors.size()<1){
+            //if there is no neighbors find all precincts that said that our precinct is a neighbor
+            List<Neighbors> findNeighbors=neighborService.findBySecondPrecinct(precinct);
+            //for all those neighbors switch the edge and set everything unimportant to null
+            for(Neighbors findNeighbor:findNeighbors){
+                Precincts firstPrecinct=findNeighbor.getFirstPrecinct();
+                firstPrecinct.setDemographic(null);
+                firstPrecinct.setError(null);
+                firstPrecinct.setElections(null);
+                firstPrecinct.setNeighbors(null);
+                firstPrecinct.setShape_geojson("");
+                findNeighbor.setSecondPrecinct(firstPrecinct);
+            }
+            return findNeighbors;
         }
+        else{
+            //if there are neighbors, for all neighbors set everything unimportant to null
+            for(Neighbors neighbor:neighbors){
+                Precincts neighborPrecinct=neighbor.getSecondPrecinct();
+                neighborPrecinct.setDemographic(null);
+                neighborPrecinct.setError(null);
+                neighborPrecinct.setElections(null);
+                neighborPrecinct.setNeighbors(null);
+                neighborPrecinct.setShape_geojson("");
+            }
+        }
+
         return neighbors;
     }
     
     @GetMapping("/precincts/{id}")
     public List<Precincts> findPrecinctsInState(@PathVariable String id){
-        return service.findByStatefp(id);
+        return precinctService.findByStatefp(id);
     }
     
     // RESTful API method for Update operation
     @PutMapping("/precincts/{id}")
     public void update(@RequestBody Precincts precinct, @PathVariable String id) {
         try {
-            Precincts existPrecinct = service.findById(Integer.parseInt(id)).get();
+            Precincts existPrecinct = precinctService.findById(Integer.parseInt(id)).get();
             precinct.setId(Integer.parseInt(id));
             if(precinct.getDemographic()==null){
                 precinct.setDemographic(existPrecinct.getDemographic());
@@ -120,7 +142,7 @@ public class PrecinctController {
                     precinct.getError().setCommentTime(new Timestamp(System.currentTimeMillis()));
                 }
             }
-            service.save(precinct);
+            precinctService.save(precinct);
         } catch (NoSuchElementException e) {
         }      
     }
@@ -150,6 +172,6 @@ public class PrecinctController {
     // RESTful API method for Delete operation
     @DeleteMapping("/precincts/{id}")
     public void delete(@PathVariable Integer id) {
-        service.deleteById(id);
+        precinctService.deleteById(id);
     }
 }
