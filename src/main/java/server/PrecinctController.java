@@ -31,22 +31,23 @@ public class PrecinctController {
     
     // RESTful API methods for Retrieval operations
     @GetMapping("/precincts")
-    public List<Precinct> findAllPrecincts() {
-        List<Precinct> allPrecincts=service.findAll();
-        for(Precinct p: allPrecincts){
+    public List<Precincts> findAllPrecincts() {
+        List<Precincts> allPrecincts=service.findAll();
+        for(Precincts p: allPrecincts){
             p.setDemographic(null);
             p.setError(null);
-            p.setElection(null);
+            p.setElections(null);
+            p.setNeighbors(null);
         }
         return allPrecincts;
     }
     
     @GetMapping("/precincts/search/{partOfName}/{statefp}")
     public ResponseEntity<List<String>> findAllNamesForSearch(@PathVariable String partOfName,@PathVariable String statefp){
-        List<Precinct> precincts=service.findByNameStartingWithIgnoreCaseAndStatefp(partOfName,statefp);
+        List<Precincts> precincts=service.findByNameStartingWithIgnoreCaseAndStatefp(partOfName,statefp);
         List<String> precinctNames=new ArrayList<String>();
         int maxCount=0;
-        for(Precinct p: precincts){
+        for(Precincts p: precincts){
             if(maxCount<5){
                 precinctNames.add(p.getName());
                 maxCount++;
@@ -57,44 +58,59 @@ public class PrecinctController {
     }
     
     @GetMapping("/precincts/error/{statefp}")
-    public List<Precinct> findErrorsForPrecincts(@PathVariable String statefp){
-        List<Precinct> precincts=service.findByStatefpAndErrorIsNotNull(statefp);
-        for(Precinct p:precincts){
+    public List<Precincts> findErrorsForPrecincts(@PathVariable String statefp){
+        List<Precincts> precincts=service.findByStatefpAndErrorIsNotNull(statefp);
+        for(Precincts p:precincts){
             p.setShape_geojson(null);
             p.setDemographic(null);
-            p.setElection(null);
+            p.setElections(null);
         }
         return precincts;
     }
     
     @GetMapping("/precincts/demographic/{id}")
-    public Demographic findDemographicForPrecincts(@PathVariable String id){
-        Precinct precinct=service.findById(Integer.parseInt(id)).get();
+    public Demographics findDemographicForPrecincts(@PathVariable String id){
+        Precincts precinct=service.findById(Integer.parseInt(id)).get();
         return precinct.getDemographic();
     }
     
     @GetMapping("/precincts/election/{id}")
-    public Election findElectionForPrecincts(@PathVariable String id){
-        Precinct precinct=service.findById(Integer.parseInt(id)).get();
-        return precinct.getElection();
+    public List<Elections> findElectionForPrecincts(@PathVariable String id){
+        Precincts precinct=service.findById(Integer.parseInt(id)).get();
+        return precinct.getElections();
+    }
+    
+    @GetMapping("/precincts/neighbors/{id}")
+    public List<Neighbors> findNeighborsForPrecincts(@PathVariable String id){
+        Precincts precinct=service.findById(Integer.parseInt(id)).get();
+        List<Neighbors> neighbors=precinct.getNeighbors();
+        for(Neighbors neighbor:neighbors){
+            Precincts neighborPrecinct=neighbor.getSecondPrecinct();
+            neighborPrecinct.setDemographic(null);
+            neighborPrecinct.setError(null);
+            neighborPrecinct.setElections(null);
+            neighborPrecinct.setNeighbors(null);
+            neighborPrecinct.setShape_geojson("");
+        }
+        return neighbors;
     }
     
     @GetMapping("/precincts/{id}")
-    public List<Precinct> findPrecinctsInState(@PathVariable String id){
+    public List<Precincts> findPrecinctsInState(@PathVariable String id){
         return service.findByStatefp(id);
     }
     
     // RESTful API method for Update operation
     @PutMapping("/precincts/{id}")
-    public void update(@RequestBody Precinct precinct, @PathVariable String id) {
+    public void update(@RequestBody Precincts precinct, @PathVariable String id) {
         try {
-            Precinct existPrecinct = service.findById(Integer.parseInt(id)).get();
+            Precincts existPrecinct = service.findById(Integer.parseInt(id)).get();
             precinct.setId(Integer.parseInt(id));
             if(precinct.getDemographic()==null){
                 precinct.setDemographic(existPrecinct.getDemographic());
             }
-            if(precinct.getElection()==null){
-                precinct.setElection(existPrecinct.getElection());
+            if(precinct.getElections()==null){
+                precinct.setElections(existPrecinct.getElections());
             }
             if(precinct.getError()==null){
                 precinct.setError(existPrecinct.getError());
@@ -111,7 +127,7 @@ public class PrecinctController {
     
     // RESTful API method for Create operation
     @PostMapping("/precincts")
-    public void add(@RequestBody Precinct precinct) {
+    public void add(@RequestBody Precincts precinct) {
         System.out.println("hi from java");
         System.out.println(precinct);
         //service.save(precinct);
@@ -119,7 +135,7 @@ public class PrecinctController {
     
     @Transactional
     @PutMapping("/merge/{name1}/{name2}")
-    public ResponseEntity<?> merge(@RequestBody Precinct newPrecinct,@PathVariable String enclosingPrecinctID, @PathVariable String enclosedPrecinctID){
+    public ResponseEntity<?> merge(@RequestBody Precincts newPrecinct,@PathVariable String enclosingPrecinctID, @PathVariable String enclosedPrecinctID){
         //TO-DO
         try {
             //delete precinct 1

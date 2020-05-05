@@ -20,7 +20,7 @@ public class StateController {
     private StateRepo service;
     
     @GetMapping("/states")
-    public List<State> findAllStates() {
+    public List<States> findAllStates() {
         return service.findAll();
     }
 }

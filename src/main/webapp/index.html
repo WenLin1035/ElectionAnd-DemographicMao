@@ -55,7 +55,7 @@ and open the template in the editor.
                         <td>
                             <select id="year" onchange="loadElectionSection()" style="">
                                 <option id="noElection" value="none" selected>None</option>
-                                <option id="pred16" value="pred16">Presidential 2016</option>
+                                <option id="pres16" value="pres16">Presidential 2016</option>
                                 <option id="cong16" value="cong16">Congressional 2016</option>
                                 <option id="cong18" value="cong18">Congressional 2018</option>
                             </select>
@@ -116,12 +116,12 @@ and open the template in the editor.
                     <tr>
                         <td style="padding-right: 30px;">
                             <p><b>2016 Presidential Election:</b></p>
-                            <label for="pred16Dem" style="padding-right: 10px">Democrats:</label>
-                            <input type="number" id="pred16Dem" name="pred16Dem" value="0"><br><br>
-                            <label for="pred16Rep">Republicans:</label>
-                            <input type="number" id="pred16Rep" name="pred16Rep" value="0"><br><br>
-                            <label for="pred16Other" style="padding-right: 43px">Other:</label>
-                            <input type="number" id="pred16Other" name="pred16Other" value="0"><br><br>
+                            <label for="pres16Dem" style="padding-right: 10px">Democrats:</label>
+                            <input type="number" id="pres16Dem" name="pres16Dem" value="0"><br><br>
+                            <label for="pres16Rep">Republicans:</label>
+                            <input type="number" id="pres16Rep" name="pres16Rep" value="0"><br><br>
+                            <label for="pres16Other" style="padding-right: 43px">Other:</label>
+                            <input type="number" id="pres16Other" name="pres16Other" value="0"><br><br>
                             <p><b>2016 Congressional Election:</b></p>
                             <label for="cong16Dem" style="padding-right: 10px">Democrats:</label>
                             <input type="number" id="cong16Dem" name="cong16Dem" value="0"><br><br>
@@ -324,15 +324,30 @@ and open the template in the editor.
             
         }
         function populateElectionData(selectedFeature){
-            document.getElementById("pred16Dem").value=selectedFeature.properties.election.demvotpres;
-            document.getElementById("pred16Rep").value=selectedFeature.properties.election.repvotpres;
-            document.getElementById("pred16Other").value=selectedFeature.properties.election.othvotpres;
-            document.getElementById("cong16Dem").value=selectedFeature.properties.election.demvot16;
-            document.getElementById("cong16Rep").value=selectedFeature.properties.election.repvot16;
-            document.getElementById("cong16Other").value=selectedFeature.properties.election.othvot16;
-            document.getElementById("cong18Dem").value=selectedFeature.properties.election.demvot18;
-            document.getElementById("cong18Rep").value=selectedFeature.properties.election.repvot18;
-            document.getElementById("cong18Other").value=selectedFeature.properties.election.othvot18;
+            let elections=selectedFeature.properties.election;
+            let pres16=[];
+            let cong16=[];
+            let cong18=[];
+            for(let i=0;i<elections.length;i++){
+                if(elections[i].type=="PRES" && elections[i].year=="16"){
+                    pres16=elections[i];
+                }
+                if(elections[i].type=="CONG" && elections[i].year=="16"){
+                    cong16=elections[i];
+                }
+                if(elections[i].type=="CONG" && elections[i].year=="18"){
+                    cong18=elections[i];
+                }
+            }
+            document.getElementById("pres16Dem").value=pres16.dem;
+            document.getElementById("pres16Rep").value=pres16.rep;
+            document.getElementById("pres16Other").value=pres16.other;
+            document.getElementById("cong16Dem").value=cong16.dem;
+            document.getElementById("cong16Rep").value=cong16.rep;
+            document.getElementById("cong16Other").value=cong16.other;
+            document.getElementById("cong18Dem").value=cong18.dem;
+            document.getElementById("cong18Rep").value=cong18.rep;
+            document.getElementById("cong18Other").value=cong18.other;
         }
         function populateDemographicData(selectedFeature){
             document.getElementById("whiteVotePop").value=Math.floor(selectedFeature.properties.demographic.whiteov18);
@@ -697,40 +712,42 @@ and open the template in the editor.
             }
         }
         function setElectionSection(selectedFeature){
-            
             let selectedElection = document.getElementById("year").value;
-            let pred16D=selectedFeature.properties.election.demvotpres;
-            let pred16R=selectedFeature.properties.election.repvotpres;
-            let pred16O=selectedFeature.properties.election.othvotpres;
-            let cong16D=selectedFeature.properties.election.demvot16;
-            let cong16R=selectedFeature.properties.election.repvot16;
-            let cong16O=selectedFeature.properties.election.othvot16;
-            let cong18D=selectedFeature.properties.election.demvot18;
-            let cong18R=selectedFeature.properties.election.repvot18;
-            let cong18O=selectedFeature.properties.election.othvot18;
-            let pred16T=selectedFeature.properties.election.totvotpres;
-            let cong16T=selectedFeature.properties.election.totvot16;
-            let cong18T=selectedFeature.properties.election.totvot18;
-            if(selectedElection == "pred16"){
-                document.getElementById("totVotePop").innerHTML=pred16T + " people";
-                if(pred16T==0)document.getElementById("demNum").innerHTML = 0 + " people [0%]";
-                else document.getElementById("demNum").innerHTML = pred16D+ " people ["+Math.round(100*(pred16D/pred16T)) +"%]";
-                if(pred16T==0) document.getElementById("repNum").innerHTML = 0 + " people [0%]";
-                else document.getElementById("repNum").innerHTML = pred16R+ " people ["+Math.round(100*(pred16R/pred16T)) +"%]";
-                if(pred16O==0) document.getElementById("othNum").innerHTML = 0 + " people [0%]";
-                else document.getElementById("othNum").innerHTML = pred16O+ " people ["+Math.round(100*(pred16O/pred16T)) +"%]";
+            let elections=selectedFeature.properties.election;
+            let pres16=[];
+            let cong16=[];
+            let cong18=[];
+            for(let i=0;i<elections.length;i++){
+                if(elections[i].type=="PRES" && elections[i].year=="16"){
+                    pres16=elections[i];
+                }
+                if(elections[i].type=="CONG" && elections[i].year=="16"){
+                    cong16=elections[i];
+                }
+                if(elections[i].type=="CONG" && elections[i].year=="18"){
+                    cong18=elections[i];
+                }
+            }
+            if(selectedElection == "pres16"){
+                document.getElementById("totVotePop").innerHTML=pres16.tot + " people";
+                if(pres16.tot==0)document.getElementById("demNum").innerHTML = 0 + " people [0%]";
+                else document.getElementById("demNum").innerHTML = pres16.dem+ " people ["+Math.round(100*(pres16.dem/pres16.tot)) +"%]";
+                if(pres16.tot==0) document.getElementById("repNum").innerHTML = 0 + " people [0%]";
+                else document.getElementById("repNum").innerHTML = pres16.rep+ " people ["+Math.round(100*(pres16.rep/pres16.tot)) +"%]";
+                if(pres16.other==0) document.getElementById("othNum").innerHTML = 0 + " people [0%]";
+                else document.getElementById("othNum").innerHTML = pres16.other+ " people ["+Math.round(100*(pres16.other/pres16.tot)) +"%]";
             }
             else if(selectedElection == "cong16"){
-                document.getElementById("demNum").innerHTML = cong16D;
-                document.getElementById("repNum").innerHTML = cong16R;
-                document.getElementById("totVotePop").innerHTML=cong16T + " people";
-                document.getElementById("othNum").innerHTML = cong16O;
+                document.getElementById("demNum").innerHTML = cong16.dem;
+                document.getElementById("repNum").innerHTML = cong16.rep;
+                document.getElementById("totVotePop").innerHTML=cong16.tot + " people";
+                document.getElementById("othNum").innerHTML = cong16.other;
             }
             else if(selectedElection == "cong18"){
-                document.getElementById("demNum").innerHTML = cong18D;
-                document.getElementById("repNum").innerHTML = cong18R;
-                document.getElementById("othNum").innerHTML = cong18O;
-                document.getElementById("totVotePop").innerHTML=cong18T + " people";
+                document.getElementById("demNum").innerHTML = cong18.dem;
+                document.getElementById("repNum").innerHTML = cong18.rep;
+                document.getElementById("othNum").innerHTML = cong18.other;
+                document.getElementById("totVotePop").innerHTML=cong18.tot + " people";
             }
             changeAllColor();
         }
@@ -767,10 +784,11 @@ and open the template in the editor.
         }
         function changeFeatColor(selectedFeature,selectedLayer){
             let properties=selectedFeature.properties;
+            console.log(properties);
             if(properties.demographic==undefined && properties.error==undefined && properties.election==undefined){
                 selectedLayer.setStyle(setShapeColor(selectedLayer,"DEFAULT_STYLE"));
             }
-            if(properties.error!=undefined && properties.error.errorType!="NONE" && properties.error.errorType!="RESOLVED"){
+            else if(properties.error!=undefined && properties.error.errorType!="NONE" && properties.error.errorType!="RESOLVED"){
                 selectedLayer.setStyle(setShapeColor(selectedLayer,"ERROR_STYLE"));
             }
             else{
@@ -795,11 +813,28 @@ and open the template in the editor.
                     case "election":
                         let majorityParty=0;
                         let electionValue=document.getElementById("year").value;
+                        
+                        let elections=selectedFeature.properties.election;
+                        let pres16=[];
+                        let cong16=[];
+                        let cong18=[];
+                        console.log(selectedFeature);
+                        for(let i=0;i<elections.length;i++){
+                            if(elections[i].type=="PRES" && elections[i].year=="16"){
+                                pres16=elections[i];
+                            }
+                            if(elections[i].type=="CONG" && elections[i].year=="16"){
+                                cong16=elections[i];
+                            }
+                            if(elections[i].type=="CONG" && elections[i].year=="18"){
+                                cong18=elections[i];
+                            }
+                        }
                         switch(electionValue){
-                            case "pred16":
-                                let demvotpres=properties.election.demvotpres;
-                                let repvotpres=properties.election.repvotpres;
-                                let othvotpres=properties.election.othvotpres;
+                            case "pres16":
+                                let demvotpres=pres16.dem;
+                                let repvotpres=pres16.rep;
+                                let othvotpres=pres16.other;
                                 majorityParty=Math.max(demvotpres,repvotpres,othvotpres);
                                 switch(majorityParty){
                                     case 0: {selectedLayer.setStyle(setShapeColor(selectedLayer,"GHOST_STYLE")); break;}
@@ -809,9 +844,9 @@ and open the template in the editor.
                                 }
                                 break;
                             case "cong16":
-                                let demvot16=properties.election.demvot16;
-                                let repvot16=properties.election.repvot16;
-                                let othvot16=properties.election.othvot16;
+                                let demvot16=cong16.dem;
+                                let repvot16=cong16.rep;
+                                let othvot16=cong16.other;
                                 majorityParty=Math.max(demvot16,repvot16,othvot16);
                                 switch(majorityParty){
                                     case 0: {selectedLayer.setStyle(setShapeColor(selectedLayer,"GHOST_STYLE")); break;}
@@ -821,9 +856,9 @@ and open the template in the editor.
                                 }
                                 break;
                             case "cong18":
-                                let demvot18=properties.election.demvot18;
-                                let repvot18=properties.election.repvot18;
-                                let othvot18=properties.election.othvot18;
+                                let demvot18=cong18.dem;
+                                let repvot18=cong18.rep;
+                                let othvot18=cong18.other;
                                 majorityParty=Math.max(demvot18,repvot18,othvot18);
                                 switch(majorityParty){
                                     case 0: {selectedLayer.setStyle(setShapeColor(selectedLayer,"GHOST_STYLE")); break;}
@@ -890,6 +925,7 @@ and open the template in the editor.
             preparedPrecinct["error"]=feature.properties.error;
             preparedPrecinct["demographic"]=feature.properties.demographic;
             preparedPrecinct["election"]=feature.properties.election;
+            preparedPrecinct["neighbors"]=feature.properties.neighbors;
             preparedPrecinct["shape_geojson"]=JSON.stringify(feature.geometry);
             return preparedPrecinct;
         }
@@ -939,9 +975,9 @@ and open the template in the editor.
             }
         }
         function changePrecinctData(){
-            let pred16Dem=document.getElementById("pred16Dem").value;
-            let pred16Rep=document.getElementById("pred16Rep").value;
-            let pred16Oth=document.getElementById("pred16Other").value;
+            let pres16Dem=document.getElementById("pres16Dem").value;
+            let pres16Rep=document.getElementById("pres16Rep").value;
+            let pres16Oth=document.getElementById("pres16Other").value;
             let cong16Dem=document.getElementById("cong16Dem").value;
             let cong16Rep=document.getElementById("cong16Rep").value;
             let cong16Oth=document.getElementById("cong16Other").value;
@@ -958,7 +994,7 @@ and open the template in the editor.
             let selectedLayer=precincts[selectedValue];
             let selectedFeature=selectedLayer.feature;
             let selectedID=selectedFeature.properties.id;
-            changePrecinctVotingData(selectedFeature,pred16Dem,pred16Rep,pred16Oth,cong16Dem,cong16Rep,cong16Oth,cong18Dem,cong18Rep,cong18Oth);
+            changePrecinctVotingData(selectedFeature,pres16Dem,pres16Rep,pres16Oth,cong16Dem,cong16Rep,cong16Oth,cong18Dem,cong18Rep,cong18Oth);
             changePrecinctDemographicData(selectedFeature,whiteVotePop,blackVotePop,asianVotePop,hispanicVotePop,otherVotePop);
             
             //changes the name of the feature, removes the name off the dropdown, and adds the new name in
@@ -971,7 +1007,7 @@ and open the template in the editor.
             }
             showPrecinctOnClick(selectedLayer,selectedFeature);
             if(selectedFeature.properties.error!=undefined){
-                if(selectedFeature.properties.error.errorType=="GHOST" && document.getElementById("pred16Dem").value!=0){
+                if(selectedFeature.properties.error.errorType=="GHOST" && document.getElementById("pres16Dem").value!=0){
                     let selectedError=document.getElementById(selectedValue+"_error");
                     if(selectedError!=undefined){
                         selectedError.parentNode.removeChild(selectedError);
@@ -993,16 +1029,31 @@ and open the template in the editor.
             feature.properties.demographic.hisov18=parseInt(hispanicVotePop);
             feature.properties.demographic.otherov18=parseInt(otherVotePop);
 	}
-        function changePrecinctVotingData(feature,pred16Dem,pred16Rep,pred16Oth,cong16Dem,cong16Rep,cong16Oth,cong18Dem,cong18Rep,cong18Oth){
-            feature.properties.election.demvotpres=parseInt(pred16Dem);
-            feature.properties.election.repvotpres=parseInt(pred16Rep);
-            feature.properties.election.othvotpres=parseInt(pred16Oth);
-            feature.properties.election.demvot16=parseInt(cong16Dem);
-            feature.properties.election.repvot16=parseInt(cong16Rep);
-            feature.properties.election.othvot16=parseInt(cong16Oth);
-            feature.properties.election.demvot18=parseInt(cong18Dem);
-            feature.properties.election.repvot18=parseInt(cong18Rep);
-            feature.properties.election.othvot18=parseInt(cong18Oth);
+        function changePrecinctVotingData(feature,pres16Dem,pres16Rep,pres16Oth,cong16Dem,cong16Rep,cong16Oth,cong18Dem,cong18Rep,cong18Oth){
+            let elections=feature.properties.election;
+            let pres16=[];
+            let cong16=[];
+            let cong18=[];
+            for(let i=0;i<elections.length;i++){
+                if(elections[i].type=="PRES" && elections[i].year=="16"){
+                    pres16=elections[i];
+                }
+                if(elections[i].type=="CONG" && elections[i].year=="16"){
+                    cong16=elections[i];
+                }
+                if(elections[i].type=="CONG" && elections[i].year=="18"){
+                    cong18=elections[i];
+                }
+            }
+            pres16.dem=parseInt(pres16Dem);
+            pres16.rep=parseInt(pres16Rep);
+            pres16.other=parseInt(pres16Oth);
+            cong16.dem=parseInt(cong16Dem);
+            cong16.rep=parseInt(cong16Rep);
+            cong16.other=parseInt(cong16Oth);
+            cong18.dem=parseInt(cong18Dem);
+            cong18.rep=parseInt(cong18Rep);
+            cong18.other=parseInt(cong18Oth);
         }
         function onEachPrecinct(feature,layer){
             layer.on({

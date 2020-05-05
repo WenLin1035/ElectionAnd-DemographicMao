@@ -17,17 +17,17 @@ import javax.persistence.Table;
  * @author webst
  */
 @Entity
-@Table(name="STATE")
-public class State {
+@Table(name="states")
+public class States {
     private Integer ogrFID;
     private String statefp;
     private String state_geojson;
     private String name;
     
-    public State(){
+    public States(){
         super();
     }
-    public State(Integer ogrFID, String statefp, String state_geojson, String name){
+    public States(Integer ogrFID, String statefp, String state_geojson, String name){
         this.ogrFID=ogrFID;
         this.statefp=statefp;
         this.state_geojson=state_geojson;

@@ -27,19 +27,19 @@ public class ErrorController {
     private ErrorRepo service;
     
     @GetMapping("/errors/{id}")
-    public List<Error> findErrorById(@PathVariable String id){
+    public List<Errors> findErrorById(@PathVariable String id){
         return service.findByStatefp(id);
     }
     
     @GetMapping("/errors")
-    public List<Error> findAllErrors() {
+    public List<Errors> findAllErrors() {
         return service.findAll();
     }
     
     @PutMapping("/errors/{id}")
-    public void update(@RequestBody Error error, @PathVariable String id){
+    public void update(@RequestBody Errors error, @PathVariable String id){
         try {
-            Error existError = service.findById(Integer.parseInt(id)).get();
+            Errors existError = service.findById(Integer.parseInt(id)).get();
             error.setId(existError.getId());
             error.setCommentTime(new Timestamp(System.currentTimeMillis()));
             service.save(error);

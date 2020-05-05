@@ -11,6 +11,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
  *
  * @author webst
  */
-public interface StateRepo extends JpaRepository<State, Integer> {
+public interface StateRepo extends JpaRepository<States, Integer> {
     
 }

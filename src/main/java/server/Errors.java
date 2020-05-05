@@ -14,20 +14,20 @@ import javax.persistence.*;
  * @author webst
  */
 @Entity
-@Table(name="error")
-public class Error {
+@Table(name="errors")
+public class Errors {
     
     private Integer id;
     private String errorType;
     private String comment;
     private Timestamp commentTime;
-    private Precinct precinct;
+    private Precincts precinct;
     
-    public Error(){
+    public Errors(){
         super();
     }
     
-    public Error(Timestamp commentTime, String errorType, String comment){
+    public Errors(Timestamp commentTime, String errorType, String comment){
         this.errorType=errorType;
         this.comment=comment;
         this.commentTime=commentTime;
@@ -43,7 +43,7 @@ public class Error {
     @MapsId
     @JoinColumn(name="id")
     @JsonBackReference
-    public Precinct getPrecinct(){
+    public Precincts getPrecinct(){
         return precinct;
     }
     
@@ -66,7 +66,7 @@ public class Error {
         this.id = id;
     }
 
-    public void setPrecinct(Precinct precinct){
+    public void setPrecinct(Precincts precinct){
         this.precinct=precinct;
     }
     

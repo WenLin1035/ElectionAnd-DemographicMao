@@ -16,10 +16,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
  
 
-public interface PrecinctRepo extends JpaRepository<Precinct, Integer> {
-    List<Precinct> findAll();
-    List<Precinct> findByStatefp(String id);
-    Precinct findByName(String name);
-    List<Precinct> findByNameStartingWithIgnoreCaseAndStatefp(String partOfName, String statefp);
-    List<Precinct> findByStatefpAndErrorIsNotNull(String statefp);
+public interface PrecinctRepo extends JpaRepository<Precincts, Integer> {
+    List<Precincts> findAll();
+    List<Precincts> findByStatefp(String id);
+    Precincts findByName(String name);
+    List<Precincts> findByNameStartingWithIgnoreCaseAndStatefp(String partOfName, String statefp);
+    List<Precincts> findByStatefpAndErrorIsNotNull(String statefp);
 }

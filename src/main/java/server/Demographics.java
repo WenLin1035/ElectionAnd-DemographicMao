@@ -23,8 +23,8 @@ import javax.persistence.Table;
  * @author webst
  */
 @Entity
-@Table(name="demographic")
-public class Demographic {
+@Table(name="demographics")
+public class Demographics {
     
     private Integer aminov18;
     private Integer asianov18;
@@ -35,13 +35,13 @@ public class Demographic {
     private Integer otherov18;
     private Integer pop100;
     private Integer id;
-    private Precinct precinct;
+    private Precincts precinct;
     
-    public Demographic(){
+    public Demographics(){
         super();
     }
     
-    public Demographic(Integer aminov18, Integer asiannov18,Integer blackov18,Integer hawov18, Integer whiteov18, Integer otherov18, Integer pop100){
+    public Demographics(Integer aminov18, Integer asiannov18,Integer blackov18,Integer hawov18, Integer whiteov18, Integer otherov18, Integer pop100){
         this.aminov18=aminov18;
         this.asianov18=asianov18;
         this.blackov18=blackov18;
@@ -62,7 +62,7 @@ public class Demographic {
     @MapsId
     @JoinColumn(name="id")
     @JsonBackReference
-    public Precinct getPrecinct(){
+    public Precincts getPrecinct(){
         return precinct;
     }
     
@@ -110,7 +110,7 @@ public class Demographic {
         this.id = id;
     }
     
-    public void setPrecinct(Precinct precinct){
+    public void setPrecinct(Precincts precinct){
         this.precinct=precinct;
     }
     

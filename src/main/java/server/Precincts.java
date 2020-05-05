@@ -5,7 +5,9 @@
  */
 package server;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import java.util.List;
 import javax.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
 /**
@@ -14,22 +16,24 @@ import org.hibernate.annotations.GenericGenerator;
  */
 
 @Entity
-@Table(name="PRECINCT")
-public class Precinct {
+@Table(name="precincts")
+public class Precincts {
     
-    private Error error;
-    private Demographic demographic;
-    private Election election;
+    private Errors error;
+    private Demographics demographic;
+    private List<Elections> elections;
     private Integer id;
     private String shape_geojson;
     private String name;
     private String statefp;
+    private List<Neighbors> neighbors;
+    private Neighbors neighbor;
  
-    public Precinct(){
+    public Precincts(){
         super();
     }
     
-    public Precinct(String statefp,String shape_geojson, String name) {
+    public Precincts(String statefp,String shape_geojson, String name) {
         this.statefp=statefp;
         this.shape_geojson=shape_geojson;
         this.name=name;
@@ -43,20 +47,32 @@ public class Precinct {
     
     @OneToOne(fetch = FetchType.LAZY,cascade=CascadeType.ALL,mappedBy="precinct")
     @JsonManagedReference 
-    public Error getError(){
+    public Errors getError(){
         return error;
     }
     
     @OneToOne(fetch = FetchType.LAZY,cascade=CascadeType.ALL,mappedBy="precinct")
     @JsonManagedReference 
-    public Demographic getDemographic(){
+    public Demographics getDemographic(){
         return demographic;
     }
     
-    @OneToOne(fetch = FetchType.LAZY,cascade=CascadeType.ALL,mappedBy="precinct")
+    @OneToMany(fetch = FetchType.LAZY,cascade=CascadeType.ALL,mappedBy="precinct")
     @JsonManagedReference 
-    public Election getElection(){
-        return election;
+    public List<Elections> getElections(){
+        return elections;
+    }
+    
+    @OneToMany(fetch = FetchType.LAZY,cascade=CascadeType.ALL,mappedBy="firstPrecinct")
+    @JsonManagedReference 
+    public List<Neighbors> getNeighbors(){
+        return neighbors;
+    }
+    
+    @OneToOne(fetch = FetchType.LAZY,cascade=CascadeType.ALL,mappedBy="secondPrecinct")
+    @JsonBackReference 
+    public Neighbors getNeighbor(){
+        return neighbor;
     }
     
     @Column(name="statefp")
@@ -73,21 +89,29 @@ public class Precinct {
     public String getName() {
         return name;
     }
+    
+    public void setNeighbors(List<Neighbors> neighbors){
+        this.neighbors=neighbors;
+    }
+    
+    public void setNeighbor(Neighbors neighbor){
+        this.neighbor=neighbor;
+    }
 
     public void setStatefp(String statefp){
         this.statefp=statefp;
     }
     
-    public void setError(Error error){
+    public void setError(Errors error){
         this.error=error;
     }
     
-    public void setDemographic(Demographic demographic){
+    public void setDemographic(Demographics demographic){
         this.demographic=demographic;
     }
     
-    public void setElection(Election election){
-        this.election=election;
+    public void setElections(List<Elections> elections){
+        this.elections=elections;
     }
 
     public void setName(String name) {
