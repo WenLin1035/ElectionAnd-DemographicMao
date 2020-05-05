@@ -58,7 +58,7 @@ public class Demographics {
         return id;
     }
     
-    @OneToOne(fetch=FetchType.LAZY)
+    @OneToOne()
     @MapsId
     @JoinColumn(name="id")
     @JsonBackReference

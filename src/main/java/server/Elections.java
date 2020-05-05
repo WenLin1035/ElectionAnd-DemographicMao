@@ -53,7 +53,7 @@ public class Elections {
         return id;
     }
     
-    @ManyToOne(fetch=FetchType.LAZY)
+    @ManyToOne()
     @JoinColumn(name="precinct_id")
     @JsonBackReference
     public Precincts getPrecinct(){

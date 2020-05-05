@@ -45,25 +45,25 @@ public class Precincts {
         return id;
     }
     
-    @OneToOne(fetch = FetchType.LAZY,cascade=CascadeType.ALL,mappedBy="precinct")
+    @OneToOne(cascade=CascadeType.ALL,mappedBy="precinct")
     @JsonManagedReference 
     public Errors getError(){
         return error;
     }
     
-    @OneToOne(fetch = FetchType.LAZY,cascade=CascadeType.ALL,mappedBy="precinct")
+    @OneToOne(cascade=CascadeType.ALL,mappedBy="precinct")
     @JsonManagedReference 
     public Demographics getDemographic(){
         return demographic;
     }
     
-    @OneToMany(fetch = FetchType.LAZY,cascade=CascadeType.ALL,mappedBy="precinct")
+    @OneToMany(cascade=CascadeType.ALL,mappedBy="precinct", orphanRemoval=true)
     @JsonManagedReference 
     public List<Elections> getElections(){
         return elections;
     }
     
-    @OneToMany(cascade=CascadeType.ALL,mappedBy="firstPrecinct")
+    @OneToMany(cascade=CascadeType.ALL,mappedBy="firstPrecinct", orphanRemoval=true)
     @JsonManagedReference 
     public List<Neighbors> getNeighbors(){
         return neighbors;

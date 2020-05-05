@@ -39,7 +39,7 @@ public class Errors {
         return id;
     }
     
-    @OneToOne(fetch=FetchType.LAZY)
+    @OneToOne()
     @MapsId
     @JoinColumn(name="id")
     @JsonBackReference
