@@ -30,6 +30,7 @@ public class Precincts {
     private String countyname;
     private List<Neighbors> neighbors;
     private List<Neighbors> secondNeighbor;
+    private String districtid;
  
     public Precincts(){
         super();
@@ -90,6 +91,11 @@ public class Precincts {
     @Column(name="statefp")
     public String getStatefp(){
         return statefp;
+    }  
+    
+    @Column(name="districtid")
+    public String getDistrictid(){
+        return districtid;
     }
 
     @Column(name="shape_geojson")
@@ -100,6 +106,10 @@ public class Precincts {
     @Column(name="name")
     public String getName() {
         return name;
+    }
+    
+    public void setDistrictid(String districtid){
+        this.districtid=districtid;
     }
     
     public void setOrigname(String origname){
