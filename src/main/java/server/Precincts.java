@@ -25,7 +25,9 @@ public class Precincts {
     private Integer id;
     private String shape_geojson;
     private String name;
+    private String origname;
     private String statefp;
+    private String countyname;
     private List<Neighbors> neighbors;
     private List<Neighbors> secondNeighbor;
  
@@ -33,7 +35,7 @@ public class Precincts {
         super();
     }
     
-    public Precincts(String statefp,String shape_geojson, String name) {
+    public Precincts(String origname,String countyname,String statefp,String shape_geojson, String name) {
         this.statefp=statefp;
         this.shape_geojson=shape_geojson;
         this.name=name;
@@ -73,6 +75,16 @@ public class Precincts {
     @JsonBackReference 
     public List<Neighbors> getSecondNeighbor(){
         return secondNeighbor;
+    }   
+    
+    @Column(name="origname")
+    public String getOrigname(){
+        return origname;
+    }
+        
+    @Column(name="countyname")
+    public String getCountyname(){
+        return countyname;
     }
     
     @Column(name="statefp")
@@ -88,6 +100,14 @@ public class Precincts {
     @Column(name="name")
     public String getName() {
         return name;
+    }
+    
+    public void setOrigname(String origname){
+        this.origname=origname;
+    }
+    
+    public void setCountyname(String countyname){
+        this.countyname=countyname;
     }
     
     public void setNeighbors(List<Neighbors> neighbors){

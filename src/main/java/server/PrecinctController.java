@@ -130,9 +130,9 @@ public class PrecinctController {
         return neighbors;
     }
     
-    @GetMapping("/precincts/{id}")
-    public List<Precincts> findPrecinctsInState(@PathVariable String id){
-        List<Precincts> allPrecincts=precinctService.findByStatefp(id);        
+    @GetMapping("/precincts/{statefp}/{countyname}")
+    public List<Precincts> findPrecinctsInState(@PathVariable String statefp,@PathVariable String countyname){
+        List<Precincts> allPrecincts=precinctService.findByStatefpAndCountyname(statefp,countyname);        
         for(Precincts p: allPrecincts){
             p.setDemographic(null);
             p.setError(null);
@@ -140,6 +140,11 @@ public class PrecinctController {
             p.setNeighbors(null);
         }
         return allPrecincts;
+    }
+    
+    @GetMapping("/precincts/counties/{statefp}")
+    public List<String> findCountiesInState(@PathVariable String statefp){
+        return precinctService.getAllCounties(statefp);
     }
     
     // RESTful API method for Update operation

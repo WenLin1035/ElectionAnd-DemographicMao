@@ -18,8 +18,10 @@ import org.springframework.data.repository.query.Param;
 
 public interface PrecinctRepo extends JpaRepository<Precincts, Integer> {
     List<Precincts> findAll();
-    List<Precincts> findByStatefp(String id);
+    List<Precincts> findByStatefpAndCountyname(String statefp,String countyname);
     Precincts findByName(String name);
     List<Precincts> findByNameStartingWithIgnoreCaseAndStatefp(String partOfName, String statefp);
     List<Precincts> findByStatefpAndErrorIsNotNull(String statefp);
+    @Query(value="SELECT countyname FROM precincts WHERE statefp=:statefp GROUP BY countyname;",nativeQuery=true)
+    List<String> getAllCounties(String statefp);
 }

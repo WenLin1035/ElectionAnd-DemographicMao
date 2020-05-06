@@ -488,19 +488,29 @@ and open the template in the editor.
         }
         function loadPrecinctsForState(stateFP){
             statesCache[stateFP]=[];
-            let precinctsRequest=new XMLHttpRequest();
-            precinctsRequest.open('GET','http://localhost:8080/precincts/'+stateFP);
-            precinctsRequest.onload=()=> {
-                let precinctsData=JSON.parse(precinctsRequest.response);
-                for(i=0;i<precinctsData.length;i++){
-                    let preparedFeature=preparePrecinctToUse(precinctsData[i]);
-                    precinctLayer.addData(preparedFeature);
-                    statesCache[stateFP].push(preparedFeature);
+            let countiesRequest=new XMLHttpRequest();
+            countiesRequest.open('GET','http://localhost:8080/precincts/counties/'+stateFP);
+            countiesRequest.onload=()=> {
+                let countiesData=JSON.parse(countiesRequest.response);
+                for(i=0;i<countiesData.length;i++){
+                    let precinctsRequest=new XMLHttpRequest();
+                    precinctsRequest.open('GET','http://localhost:8080/precincts/'+stateFP+"/"+countiesData[i]);
+                    precinctsRequest.onload=()=> {
+                        let precinctsData=JSON.parse(precinctsRequest.response);
+                        for(i=0;i<precinctsData.length;i++){
+                            let preparedFeature=preparePrecinctToUse(precinctsData[i]);
+                            precinctLayer.addData(preparedFeature);
+                            statesCache[stateFP].push(preparedFeature);
+                        }
+                        loadPrecinctDictionary();
+                    }
+                    precinctsRequest.send();
                 }
-                loadPrecinctDictionary();
-                
             }
-            precinctsRequest.send();
+            countiesRequest.send();
+        }
+        async function loadPrecinctsInCounty(stateFP,countyname){
+            
         }
         function loadDemographicForPrecinct(precinctFeature){
             let promise = new Promise((resolve,reject)=>{
@@ -554,6 +564,8 @@ and open the template in the editor.
             newPrecinct["type"]="Feature";
             newPrecinct["properties"]={};
             newPrecinct.properties["id"]=precinct["id"];
+            newPrecinct.properties["countyname"]=precinct["countyname"];
+            newPrecinct.properties["origname"]=precinct["origname"];
             newPrecinct.properties["name"]=precinct["name"]
             newPrecinct.properties["statefp"]=precinct["statefp"]
             newPrecinct["geometry"]={};
@@ -964,6 +976,8 @@ and open the template in the editor.
             preparedPrecinct["name"]=feature.properties.name;
             preparedPrecinct["statefp"]=feature.properties.statefp;
             preparedPrecinct["error"]=feature.properties.error;
+            preparedPrecinct["countyname"]=feature.properties.countyname;
+            preparedPrecinct["origname"]=feature.properties.origname;
             preparedPrecinct["demographic"]=feature.properties.demographic;
             preparedPrecinct["elections"]=feature.properties.election;
             preparedPrecinct["neighbors"]=feature.properties.neighbors;
