@@ -66,6 +66,7 @@ public class PrecinctController {
             p.setShape_geojson(null);
             p.setDemographic(null);
             p.setElections(null);
+            p.setNeighbors(null);
         }
         return precincts;
     }
