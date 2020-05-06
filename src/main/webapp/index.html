@@ -26,7 +26,7 @@ and open the template in the editor.
                 <div style="padding-bottom:10px">
                     <label for="States" style="font-size: 20px;padding-right: 26px">State:</label>
                     <select id="States" onchange="loadFeature()"> <!-- needs to be replaced by data from DB -->
-                        <option value="State" onclick="">State</option>
+                        <option value="State" onclick="">States</option>
                     </select>
                 </div>
                 <div id="searchWindow">
@@ -92,8 +92,8 @@ and open the template in the editor.
                 </div>
                 <br>
                 <br>
-                <button onclick="document.getElementById('errorPopup').style.display='block'" style="width:50px;height: 40px;"><img src="ee.png" alt="Error Log" style="width: 30px;height: 30px;"></button>
-                <button onclick="document.getElementById('settingsPopup').style.display='block'" style="width:50px; height:40px"><img src="cog.png" alt="Settings" style="width: 30px; height:30px;"></button>
+                <input type ="image" src="ee.png" alt="Errors" class="nicebuttons" onclick="document.getElementById('errorPopup').style.display='block'">
+                <input type ="image" src="cog.png" alt="Settings" class="nicebuttons" onclick="document.getElementById('settingsPopup').style.display='block'">
                 <div>Sources:</div>
                 <div>US Census Bureau</div>
                 <div>Rhode Island Geographic Information System</div>

@@ -80,3 +80,12 @@ and open the template in the editor.
             #errorLog > div{
                 padding:5px
             }
+            .nicebuttons{
+                width: 35px;
+                height: 35px;
+                border-style: solid;
+                border-radius: 10px;
+                border-color: #e6ffff;
+                padding: 1px;
+                background-color: #e6ffff;
+            }
