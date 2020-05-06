@@ -30,6 +30,8 @@ public class PrecinctController {
     private PrecinctRepo precinctService;
     @Autowired
     private NeighborsRepo neighborService;
+    @Autowired
+    private DistrictsRepo districtService;
     
     // RESTful API methods for Retrieval operations
     @GetMapping("/precincts")
@@ -42,6 +44,11 @@ public class PrecinctController {
             p.setNeighbors(null);
         }
         return allPrecincts;
+    }
+    
+    @GetMapping("/cong/{statefp}")
+    public List<Districts> getAllCongsForState(@PathVariable String statefp){
+        return districtService.findByStatefp(statefp);
     }
     
     @GetMapping("/precincts/search/{partOfName}/{statefp}")
@@ -131,7 +138,7 @@ public class PrecinctController {
     }
     
     @GetMapping("/precincts/{statefp}/{countyname}")
-    public List<Precincts> findPrecinctsInState(@PathVariable String statefp,@PathVariable String countyname){
+    public List<Precincts> findPrecinctsInCong(@PathVariable String statefp,@PathVariable String countyname){
         List<Precincts> allPrecincts=precinctService.findByStatefpAndCountyname(statefp,countyname);        
         for(Precincts p: allPrecincts){
             p.setDemographic(null);
@@ -142,9 +149,9 @@ public class PrecinctController {
         return allPrecincts;
     }
     
-    @GetMapping("/precincts/counties/{statefp}")
-    public List<String> findCountiesInState(@PathVariable String statefp){
-        return precinctService.getAllCounties(statefp);
+    @GetMapping("/precincts/counties/{statefp}/{districtid}")
+    public List<String> findCountiesInCong(@PathVariable String statefp,@PathVariable String districtid){
+        return precinctService.getAllCounties(statefp,districtid);
     }
     
     // RESTful API method for Update operation

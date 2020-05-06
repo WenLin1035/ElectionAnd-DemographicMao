@@ -22,6 +22,6 @@ public interface PrecinctRepo extends JpaRepository<Precincts, Integer> {
     Precincts findByName(String name);
     List<Precincts> findByNameStartingWithIgnoreCaseAndStatefp(String partOfName, String statefp);
     List<Precincts> findByStatefpAndErrorIsNotNull(String statefp);
-    @Query(value="SELECT countyname FROM precincts WHERE statefp=:statefp GROUP BY countyname;",nativeQuery=true)
-    List<String> getAllCounties(String statefp);
+    @Query(value="SELECT countyname FROM precincts WHERE statefp=:statefp AND districtid=:districtid GROUP BY countyname;",nativeQuery=true)
+    List<String> getAllCounties(String statefp,String districtid);
 }

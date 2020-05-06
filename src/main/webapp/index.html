@@ -329,13 +329,13 @@ and open the template in the editor.
             let cong16=[];
             let cong18=[];
             for(let i=0;i<elections.length;i++){
-                if(elections[i].type=="PRES" && elections[i].year=="16"){
+                if(elections[i].type=="PRES" && elections[i].year=="2016"){
                     pres16=elections[i];
                 }
-                if(elections[i].type=="CONG" && elections[i].year=="16"){
+                if(elections[i].type=="CONG" && elections[i].year=="2016"){
                     cong16=elections[i];
                 }
-                if(elections[i].type=="CONG" && elections[i].year=="18"){
+                if(elections[i].type=="CONG" && elections[i].year=="2018"){
                     cong18=elections[i];
                 }
             }
@@ -391,8 +391,10 @@ and open the template in the editor.
             accessToken: 'pk.eyJ1IjoiZTE1MzEwODgiLCJhIjoiY2s3NzdjOWl3MDRzdTNmcWtqdDNlamxhNiJ9.aN5tSOOA7nNJA0KCnOITBA'}).addTo(mymap);
             precinctLayer=L.geoJSON(null,{onEachFeature: onEachPrecinct}).addTo(mymap);
             stateLayer=L.geoJSON(null,{onEachFeature: onEachState}).addTo(mymap);
+            congLayer=L.geoJSON(null,{onEachFeature: onEachCong}).addTo(mymap);
             states={};
             statesCache={};
+            congs={};
             loadFeature();
         }
         function loadFeature(){
@@ -416,16 +418,7 @@ and open the template in the editor.
                 default:
                     let stateFP=states[stateName].properties.statefp;
                     mymap.setView(stateCoords[stateName], zoomLevel[stateName]);
-                    if(precinctFilter){
-                        if(statesCache[stateFP]!=undefined){
-                            precinctLayer.addData(statesCache[stateFP]);
-                            loadPrecinctDictionary();
-                            changeAllColor();
-                        }
-                        else{
-                            loadPrecinctsForState(stateFP);
-                        }
-                    }
+                    loadCongForState(stateFP);
                     break;
             }
         }
@@ -461,6 +454,36 @@ and open the template in the editor.
                 errors[errorData[i].precinctID]=errorData[i].errorType;
             }
         }
+        function loadCongForState(stateFP){
+            statesCache[stateFP]={};
+            let congRequest=new XMLHttpRequest();
+            congRequest.open('GET','http://localhost:8080/cong/'+stateFP);
+            congRequest.onload=()=>{
+                let congData=JSON.parse(congRequest.response);
+                for(i=0;i<congData.length;i++){
+                    let cong=prepareCongToUse(congData[i]);
+                    console.log(cong);
+                    congLayer.addData(cong);
+                    congs[cong.properties.congid]=cong;
+                    statesCache[stateFP][cong.properties.congid]=[];
+                    statesCache[stateFP][cong.properties.congid].push(cong);
+                }
+            };
+            congRequest.send();
+        }
+        function prepareCongToUse(cong){
+            let congShape=JSON.parse(cong["shape_geojson"]);
+            let newCong={};
+            newCong["type"]="Feature";
+            newCong["properties"]={};
+            newCong.properties["statefp"]=cong["statefp"];
+            newCong.properties["congid"]=cong["congid"];
+            newCong.properties["id"]=cong["id"];
+            newCong["geometry"]={};
+            newCong.geometry["type"]=congShape["type"];
+            newCong.geometry["coordinates"]=congShape["coordinates"];
+            return newCong;
+        }
         function loadStatesForMap(stateName){
             let statesRequest=new XMLHttpRequest();
             statesRequest.open('GET','http://localhost:8080/states');
@@ -486,13 +509,12 @@ and open the template in the editor.
             }
             stateLayer.eachLayer(eachLayer);
         }
-        function loadPrecinctsForState(stateFP){
-            statesCache[stateFP]=[];
+        function loadPrecinctsForState(stateFP,congid){
             let countiesRequest=new XMLHttpRequest();
-            countiesRequest.open('GET','http://localhost:8080/precincts/counties/'+stateFP);
-            countiesRequest.onload=()=> {
+            countiesRequest.open('GET','http://localhost:8080/precincts/counties/'+stateFP+"/"+congid);
+            countiesRequest.onload=()=>{
                 let countiesData=JSON.parse(countiesRequest.response);
-                for(i=0;i<countiesData.length;i++){
+                for(let i=0;i<countiesData.length;i++){
                     let precinctsRequest=new XMLHttpRequest();
                     precinctsRequest.open('GET','http://localhost:8080/precincts/'+stateFP+"/"+countiesData[i]);
                     precinctsRequest.onload=()=> {
@@ -500,7 +522,7 @@ and open the template in the editor.
                         for(i=0;i<precinctsData.length;i++){
                             let preparedFeature=preparePrecinctToUse(precinctsData[i]);
                             precinctLayer.addData(preparedFeature);
-                            statesCache[stateFP].push(preparedFeature);
+                            statesCache[stateFP][congid].push(preparedFeature);
                         }
                         loadPrecinctDictionary();
                     }
@@ -508,9 +530,6 @@ and open the template in the editor.
                 }
             }
             countiesRequest.send();
-        }
-        async function loadPrecinctsInCounty(stateFP,countyname){
-            
         }
         function loadDemographicForPrecinct(precinctFeature){
             let promise = new Promise((resolve,reject)=>{
@@ -589,19 +608,27 @@ and open the template in the editor.
                         weight:4,
                         color:'black'
                     };
+                case "CONG_STYLE": 
+                    return{
+                        weight:4,
+                        fillColor:'#864665',
+                        fillOpacity: 1,
+                        color:'black'
+                    };
                 case "NEW_PREC_STYLE":
                     return{
-                        fillOpacity: 0.8
+                        fillOpacity: 0.95
                     };
                 case "OLD_PREC_STYLE":
                     return{
-                        fillOpacity: 0.2,
+                        fillOpacity: 0.5,
                         weight:1
                     };
                 case "DEFAULT_STYLE":
                     return{
                         color:'black',
                         fillColor:'#C0C0C0',
+                        fillOpacity: 0.5,
                         weight:2
                     }
                 case "DEM_STYLE":
@@ -770,13 +797,13 @@ and open the template in the editor.
             let cong16=[];
             let cong18=[];
             for(let i=0;i<elections.length;i++){
-                if(elections[i].type=="PRES" && elections[i].year=="16"){
+                if(elections[i].type=="PRES" && elections[i].year=="2016"){
                     pres16=elections[i];
                 }
-                if(elections[i].type=="CONG" && elections[i].year=="16"){
+                if(elections[i].type=="CONG" && elections[i].year=="2016"){
                     cong16=elections[i];
                 }
-                if(elections[i].type=="CONG" && elections[i].year=="18"){
+                if(elections[i].type=="CONG" && elections[i].year=="2018"){
                     cong18=elections[i];
                 }
             }
@@ -873,13 +900,13 @@ and open the template in the editor.
                         let cong18=[];
                         console.log(selectedFeature);
                         for(let i=0;i<elections.length;i++){
-                            if(elections[i].type=="PRES" && elections[i].year=="16"){
+                            if(elections[i].type=="PRES" && elections[i].year=="2016"){
                                 pres16=elections[i];
                             }
-                            if(elections[i].type=="CONG" && elections[i].year=="16"){
+                            if(elections[i].type=="CONG" && elections[i].year=="2016"){
                                 cong16=elections[i];
                             }
-                            if(elections[i].type=="CONG" && elections[i].year=="18"){
+                            if(elections[i].type=="CONG" && elections[i].year=="2018"){
                                 cong18=elections[i];
                             }
                         }
@@ -1090,13 +1117,13 @@ and open the template in the editor.
             let cong16=[];
             let cong18=[];
             for(let i=0;i<elections.length;i++){
-                if(elections[i].type=="PRES" && elections[i].year=="16"){
+                if(elections[i].type=="PRES" && elections[i].year=="2016"){
                     pres16=elections[i];
                 }
-                if(elections[i].type=="CONG" && elections[i].year=="16"){
+                if(elections[i].type=="CONG" && elections[i].year=="2016"){
                     cong16=elections[i];
                 }
-                if(elections[i].type=="CONG" && elections[i].year=="18"){
+                if(elections[i].type=="CONG" && elections[i].year=="2018"){
                     cong18=elections[i];
                 }
             }
@@ -1126,6 +1153,18 @@ and open the template in the editor.
                 click:clickState
             });
             layer.setStyle(setShapeColor(layer,"STATE_STYLE"));
+        }
+        function clickCong(e){
+            let selectedId=e.target.feature.properties.congid;
+            let selectedState=e.target.feature.properties.statefp;
+            console.log("huh");
+            loadPrecinctsForState(selectedState,selectedId);
+        }
+        function onEachCong(feature,layer){
+            layer.on({
+               click: clickCong
+            });
+            layer.setStyle(setShapeColor(layer,"CONG_STYLE"));
         }
     </script>
 </html>
