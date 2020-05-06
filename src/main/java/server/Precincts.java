@@ -27,7 +27,7 @@ public class Precincts {
     private String name;
     private String statefp;
     private List<Neighbors> neighbors;
-    private Neighbors neighbor;
+    private List<Neighbors> secondNeighbor;
  
     public Precincts(){
         super();
@@ -63,16 +63,16 @@ public class Precincts {
         return elections;
     }
     
-    @OneToMany(cascade=CascadeType.ALL,mappedBy="firstPrecinct", orphanRemoval=true)
+    @OneToMany(fetch=FetchType.LAZY,cascade=CascadeType.ALL,mappedBy="firstPrecinct", orphanRemoval=true)
     @JsonManagedReference 
     public List<Neighbors> getNeighbors(){
         return neighbors;
     }
     
-    @OneToOne(cascade=CascadeType.ALL,mappedBy="secondPrecinct")
+    @OneToMany(fetch=FetchType.LAZY,cascade=CascadeType.ALL,mappedBy="secondPrecinct", orphanRemoval=true)
     @JsonBackReference 
-    public Neighbors getNeighbor(){
-        return neighbor;
+    public List<Neighbors> getSecondNeighbor(){
+        return secondNeighbor;
     }
     
     @Column(name="statefp")
@@ -94,8 +94,8 @@ public class Precincts {
         this.neighbors=neighbors;
     }
     
-    public void setNeighbor(Neighbors neighbor){
-        this.neighbor=neighbor;
+    public void setSecondNeighbor(List<Neighbors> secondNeighbor){
+        this.secondNeighbor=secondNeighbor;
     }
 
     public void setStatefp(String statefp){

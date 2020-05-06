@@ -105,12 +105,24 @@ public class PrecinctController {
         else{
             //if there are neighbors, for all neighbors set everything unimportant to null
             for(Neighbors neighbor:neighbors){
-                Precincts neighborPrecinct=neighbor.getSecondPrecinct();
+                Precincts neighborPrecinct=neighbor.getSecondPrecinct();              
                 neighborPrecinct.setDemographic(null);
                 neighborPrecinct.setError(null);
                 neighborPrecinct.setElections(null);
                 neighborPrecinct.setNeighbors(null);
                 neighborPrecinct.setShape_geojson("");
+            }
+            List<Neighbors> findNeighbors=neighborService.findBySecondPrecinct(precinct);
+            //for all those neighbors switch the edge and set everything unimportant to null
+            for(Neighbors findNeighbor:findNeighbors){
+                Precincts firstPrecinct=findNeighbor.getFirstPrecinct();
+                firstPrecinct.setDemographic(null);
+                firstPrecinct.setError(null);
+                firstPrecinct.setElections(null);
+                firstPrecinct.setNeighbors(null);
+                firstPrecinct.setShape_geojson("");
+                findNeighbor.setSecondPrecinct(firstPrecinct);
+                neighbors.add(findNeighbor);
             }
         }
 
@@ -119,7 +131,14 @@ public class PrecinctController {
     
     @GetMapping("/precincts/{id}")
     public List<Precincts> findPrecinctsInState(@PathVariable String id){
-        return precinctService.findByStatefp(id);
+        List<Precincts> allPrecincts=precinctService.findByStatefp(id);        
+        for(Precincts p: allPrecincts){
+            p.setDemographic(null);
+            p.setError(null);
+            p.setElections(null);
+            p.setNeighbors(null);
+        }
+        return allPrecincts;
     }
     
     // RESTful API method for Update operation

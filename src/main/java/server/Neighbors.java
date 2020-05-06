@@ -7,6 +7,7 @@ package server;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -42,14 +43,14 @@ public class Neighbors {
         return id;
     }
     
-    @ManyToOne()
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="first_precinct_id")
     @JsonBackReference
     public Precincts getFirstPrecinct(){
         return firstPrecinct;
     }
     
-    @OneToOne()
+    @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="second_precinct_id")
     @JsonManagedReference
     public Precincts getSecondPrecinct(){
