@@ -98,6 +98,7 @@ public class Precincts {
         return districtid;
     }
 
+    @Lob
     @Column(name="shape_geojson")
     public String getShape_geojson() {
         return shape_geojson;

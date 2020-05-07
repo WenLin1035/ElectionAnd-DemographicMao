@@ -30,7 +30,8 @@ and open the template in the editor.
                     </select>
                 </div>
                 <div id="searchWindow">
-                    <input id="precinctSearch" type="text" placeholder="Search for Precinct" onkeyup="findPrecincts()">
+                    <input id="precinctSearch" type="text" placeholder="Search for Precinct">
+                    <button onclick="findPrecincts()">Submit Search</button>
                     <div id="searchResults"></div>
                 </div>
                 <br/>
@@ -284,17 +285,19 @@ and open the template in the editor.
                 searchData=JSON.parse(searchRequest.response);
                 document.getElementById("searchResults").innerHTML="";
                 for(let i=0;i<searchData.length;i++){
-                    let newOption=document.createElement("button");
-                    let name=searchData[i];
-                    console.log(name);
-                    newOption.onclick=()=>{
-                        precMenuChange(name);
-                        document.getElementById("precinctSearch").value="";
-                        document.getElementById("searchResults").innerHTML="";
-                        document.getElementById("selectedPrecinct").innerHTML=name;
+                    if(searchData[i]!=undefined){
+                        let newOption=document.createElement("button");
+                        let name=searchData[i].name;
+                        console.log(name);
+                        newOption.onclick=()=>{
+                            loadForCong(searchData[i].districtid,statefp,name);
+                            document.getElementById("precinctSearch").value="";
+                            document.getElementById("searchResults").innerHTML="";
+                            document.getElementById("selectedPrecinct").innerHTML=name;
+                        }
+                        newOption.innerHTML=name;
+                        document.getElementById("searchResults").append(newOption);
                     }
-                    newOption.innerHTML=name;
-                    document.getElementById("searchResults").append(newOption);
                 }
             }
             searchRequest.send();
@@ -396,13 +399,14 @@ and open the template in the editor.
             statesCache={};
             congs={};
             loadFeature();
+            secondSelectedPrecinctName="";
         }
         function loadFeature(){
             let statesMenu = document.getElementById("States");
             let stateName=statesMenu.value;
             //0 is rhodeisland,1 is north carolina, 2 is arizona
-            let stateCoords={"Rhode Island":[41.5801,-71.4774]};
-            let zoomLevel={"Rhode Island":10};
+            let stateCoords={"Rhode Island":[41.5801,-71.4774],"North Carolina":[35.7596,-79.0193]};
+            let zoomLevel={"Rhode Island":9.5,"North Carolina":7.5};
             unloadAll();
             let precinctFilter=document.getElementById("precinctFilter").checked;
             switch(stateName){
@@ -418,7 +422,14 @@ and open the template in the editor.
                 default:
                     let stateFP=states[stateName].properties.statefp;
                     mymap.setView(stateCoords[stateName], zoomLevel[stateName]);
-                    loadCongForState(stateFP);
+                    if(checkEmpty(statesCache[stateFP])){
+                        loadCongForState(stateFP);
+                    }
+                    else{
+                        for(let i in statesCache[stateFP]){
+                            congLayer.addData(statesCache[stateFP][i][0]);
+                        }
+                    }
                     break;
             }
         }
@@ -430,6 +441,7 @@ and open the template in the editor.
         }
         function unloadAll(){
             precinctLayer.clearLayers();
+            congLayer.clearLayers();
             precincts={};
             errors={};
             clearBothSections();
@@ -439,6 +451,8 @@ and open the template in the editor.
             document.getElementById("optionSection").style.display="";
             document.getElementById("dataSection").selectedIndex=0;
             document.getElementById("year").selectedIndex=0;
+            document.getElementById("searchResults").innerHTML="";
+            document.getElementById("precinctSearch").value="";
         }
         function loadErrorsForState(stateFP){
             let errorsRequest=new XMLHttpRequest();
@@ -462,7 +476,6 @@ and open the template in the editor.
                 let congData=JSON.parse(congRequest.response);
                 for(i=0;i<congData.length;i++){
                     let cong=prepareCongToUse(congData[i]);
-                    console.log(cong);
                     congLayer.addData(cong);
                     congs[cong.properties.congid]=cong;
                     statesCache[stateFP][cong.properties.congid]=[];
@@ -509,11 +522,12 @@ and open the template in the editor.
             }
             stateLayer.eachLayer(eachLayer);
         }
-        function loadPrecinctsForState(stateFP,congid){
+        function loadPrecinctsForCong(stateFP,congid,name){
             let countiesRequest=new XMLHttpRequest();
             countiesRequest.open('GET','http://localhost:8080/precincts/counties/'+stateFP+"/"+congid);
             countiesRequest.onload=()=>{
                 let countiesData=JSON.parse(countiesRequest.response);
+                let called=false;
                 for(let i=0;i<countiesData.length;i++){
                     let precinctsRequest=new XMLHttpRequest();
                     precinctsRequest.open('GET','http://localhost:8080/precincts/'+stateFP+"/"+countiesData[i]);
@@ -525,6 +539,10 @@ and open the template in the editor.
                             statesCache[stateFP][congid].push(preparedFeature);
                         }
                         loadPrecinctDictionary();
+                        if(precincts[name]!=undefined && !called){
+                            precMenuChange(name);
+                            called=true;
+                        }
                     }
                     precinctsRequest.send();
                 }
@@ -583,6 +601,7 @@ and open the template in the editor.
             newPrecinct["type"]="Feature";
             newPrecinct["properties"]={};
             newPrecinct.properties["id"]=precinct["id"];
+            newPrecinct.properties["districtid"]=precinct["districtid"];
             newPrecinct.properties["countyname"]=precinct["countyname"];
             newPrecinct.properties["origname"]=precinct["origname"];
             newPrecinct.properties["name"]=precinct["name"]
@@ -1000,6 +1019,7 @@ and open the template in the editor.
         function preparePrecinctToSend(feature){
             let preparedPrecinct={};
             preparedPrecinct["id"]=feature.properties.id;
+            preparedPrecinct["districtid"]=feature.properties.districtid;
             preparedPrecinct["name"]=feature.properties.name;
             preparedPrecinct["statefp"]=feature.properties.statefp;
             preparedPrecinct["error"]=feature.properties.error;
@@ -1157,8 +1177,21 @@ and open the template in the editor.
         function clickCong(e){
             let selectedId=e.target.feature.properties.congid;
             let selectedState=e.target.feature.properties.statefp;
-            console.log("huh");
-            loadPrecinctsForState(selectedState,selectedId);
+            loadForCong(selectedId,selectedState);
+        }
+        function loadForCong(selectedId,selectedState,name){
+            if(statesCache[selectedState][selectedId].length>1){
+                for(let i=1;i<statesCache[selectedState][selectedId].length;i++){
+                    precinctLayer.addData(statesCache[selectedState][selectedId][i]);
+                }
+                loadPrecinctDictionary();
+                if(name!=undefined){
+                    precMenuChange(name);
+                }
+            }
+            else{
+                loadPrecinctsForCong(selectedState,selectedId,name);
+            }
         }
         function onEachCong(feature,layer){
             layer.on({

@@ -10,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.Table;
 
 /**
@@ -40,6 +41,7 @@ public class Districts {
         return congid;
     }
     
+    @Lob
     @Column(name="shape_geojson")
     public String getShape_geojson() {
         return shape_geojson;
