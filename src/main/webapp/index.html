@@ -288,7 +288,6 @@ and open the template in the editor.
                     if(searchData[i]!=undefined){
                         let newOption=document.createElement("button");
                         let name=searchData[i].name;
-                        console.log(name);
                         newOption.onclick=()=>{
                             loadForCong(searchData[i].districtid,statefp,name);
                             document.getElementById("precinctSearch").value="";
@@ -297,6 +296,8 @@ and open the template in the editor.
                         }
                         newOption.innerHTML=name;
                         document.getElementById("searchResults").append(newOption);
+                        let linebreak = document.createElement("br");
+                        document.getElementById("searchResults").append(linebreak);
                     }
                 }
             }
