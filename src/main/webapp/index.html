@@ -291,7 +291,7 @@ and open the template in the editor.
             else if(feature.properties.error.errorType=="VOTANOM"){
                 whatError="Voting Anomaly Found";
             }
-            let secondPart="["+feature.properties.name+"](Requires Verification)</button></div>";
+            let secondPart=" ["+feature.properties.name+"]</button></div>";
             document.getElementById("errorLog").innerHTML+=firstPart+whatError+secondPart;
         }
         function findPrecincts(){
@@ -483,6 +483,9 @@ and open the template in the editor.
                     else{
                         for(let i in statesCache[stateFP]){
                             congLayer.addData(statesCache[stateFP][i][0]);
+                            if(precinctFilter && statesCache[stateFP][i].length>1) {
+                                loadForCong(statesCache[stateFP][i][0].properties.congid,stateFP);
+                            }
                         }
                     }
                     break;
@@ -1261,7 +1264,8 @@ and open the template in the editor.
         function clickCong(e){
             let selectedId=e.target.feature.properties.congid;
             let selectedState=e.target.feature.properties.statefp;
-            loadForCong(selectedId,selectedState);
+            let precinctFilter=document.getElementById("precinctFilter").checked;
+            if(precinctFilter) loadForCong(selectedId,selectedState);
         }
         function loadForCong(selectedId,selectedState,name){
             if(statesCache[selectedState][selectedId].length>1){
