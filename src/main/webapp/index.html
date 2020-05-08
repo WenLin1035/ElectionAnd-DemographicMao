@@ -47,7 +47,7 @@ and open the template in the editor.
                     <tr>
                         <td><label for="dataSection">Data Type:</label></td>
                         <td>
-                            <select id="dataSection" onchange="switchDataSection()" style="">
+                            <select id="dataSection" onchange="switchDataSection();changeAllColor()" style="">
                                 <option value="none" selected>None</option>
                                 <option value="election">Election</option>
                                 <option value="demographic">Demographic</option>
@@ -57,7 +57,7 @@ and open the template in the editor.
                     <tr id="electionDropdownArea" style="display:none">
                         <td><label for="year">Election Type:</label></td>
                         <td>
-                            <select id="year" onchange="loadElectionSection()" style="">
+                            <select id="year" onchange="setElectionSection();changeAllColor()" style="">
                                 <option id="noElection" value="none" selected>None</option>
                                 <option id="pres16" value="pres16">Presidential 2016</option>
                                 <option id="cong16" value="cong16">Congressional 2016</option>
@@ -264,6 +264,7 @@ and open the template in the editor.
             document.getElementById("optionSection").style.display="";
             let statefp=states[stateName].properties.statefp;
             loadErrorsForPrecinct(statefp);
+            document.getElementById("errorLog").innerHTML="";
         }
         function loadErrorsForPrecinct(statefp){
             let errorRequest=new XMLHttpRequest();
@@ -274,7 +275,6 @@ and open the template in the editor.
                     let precinct=allPrecinctsWithError[i];
                     if(precincts[precinct.name]!=undefined){
                         precincts[precinct.name].feature.properties.error=precinct.error;
-                        document.getElementById("errorLog").innerHTML="";
                         putErrorsInLog(precincts[precinct.name].feature);
                         changeFeatColor(precincts[precinct.name].feature,precincts[precinct.name]);
                     }
@@ -366,18 +366,8 @@ and open the template in the editor.
                 
                 let selectedLayer=precincts[selectedPrecinct];
                 let selectedFeature=selectedLayer.feature;
-                if(selectedFeature.properties.demographic==undefined || selectedFeature.properties.election==undefined){
-                    loadDemographicForPrecinct(selectedFeature).then(response=>{
-                        selectedFeature.properties.demographic=response;
-                        setDemographicSection(selectedFeature);
-                        populateDemographicData(selectedFeature);
-                    });
-                    loadElectionForPrecinct(selectedFeature).then(response=>{
-                        selectedFeature.properties.election=response;
-                        setElectionSection(selectedFeature);
-                        populateElectionData(selectedFeature);
-                    });
-                }
+                populateDemographicData(selectedFeature);
+                populateElectionData(selectedFeature);
             }
             
         }
@@ -419,13 +409,11 @@ and open the template in the editor.
                 document.getElementById("electionDropdownArea").style.display="";
                 document.getElementById('electionSection').style.display = "block";
                 document.getElementById('demographicSection').style.display = "none";
-                loadElectionSection();
             }
             if(document.getElementById("dataSection").value == "demographic"){
                 document.getElementById("electionDropdownArea").style.display="none";
                 document.getElementById('electionSection').style.display = "none";
                 document.getElementById('demographicSection').style.display = "block";
-                loadDemographicSection();
             }
             if(document.getElementById("dataSection").value == "none"){
                 document.getElementById("electionDropdownArea").style.display="none";
@@ -512,20 +500,6 @@ and open the template in the editor.
             document.getElementById("searchResults").innerHTML="";
             document.getElementById("precinctSearch").value="";
         }
-        function loadErrorsForState(stateFP){
-            let errorsRequest=new XMLHttpRequest();
-            errorsRequest.open('GET','http://localhost:8080/errors/'+stateFP);
-            errorsRequest.onload=()=> {
-                let errorData=JSON.parse(errorsRequest.response);
-                loadErrorDictionary(errorData);
-            }
-            errorsRequest.send();
-        }
-        function loadErrorDictionary(errorData){
-            for(i=0;i<errorData.length;i++){
-                errors[errorData[i].precinctID]=errorData[i].errorType;
-            }
-        }
         function loadCongForState(stateFP){
             statesCache[stateFP]={};
             let congRequest=new XMLHttpRequest();
@@ -607,28 +581,6 @@ and open the template in the editor.
             }
             countiesRequest.send();
         }
-        function loadDemographicForPrecinct(precinctFeature){
-            let promise = new Promise((resolve,reject)=>{
-                let demographicRequest=new XMLHttpRequest();
-                demographicRequest.open('GET','http://localhost:8080/precincts/demographic/'+precinctFeature.properties.id);
-                demographicRequest.onload=()=>{
-                    resolve(JSON.parse(demographicRequest.response));
-                };
-                demographicRequest.send();
-            });
-            return promise;
-        }
-        function loadElectionForPrecinct(precinctFeature){
-            let promise = new Promise((resolve,reject)=>{
-                let electionRequest=new XMLHttpRequest();
-                electionRequest.open('GET','http://localhost:8080/precincts/election/'+precinctFeature.properties.id);
-                electionRequest.onload=()=>{
-                    resolve(JSON.parse(electionRequest.response));
-                };
-                electionRequest.send();
-            });
-            return promise;
-        }
         function loadNeighborsForPrecinct(precinctFeature){
             let promise = new Promise((resolve,reject)=>{
                 let neighborRequest=new XMLHttpRequest();
@@ -661,6 +613,8 @@ and open the template in the editor.
             newPrecinct.properties["id"]=precinct["id"];
             newPrecinct.properties["districtid"]=precinct["districtid"];
             newPrecinct.properties["countyname"]=precinct["countyname"];
+            newPrecinct.properties["demographic"]=precinct["demographic"];
+            newPrecinct.properties["election"]=precinct["elections"];
             newPrecinct.properties["origname"]=precinct["origname"];
             newPrecinct.properties["name"]=precinct["name"]
             newPrecinct.properties["statefp"]=precinct["statefp"]
@@ -695,7 +649,7 @@ and open the template in the editor.
                 case "NEW_PREC_STYLE":
                     return{
                         color:"red",
-                        weight:3,
+                        weight:6,
                         fillOpacity: 0.95
                     };
                 case "OLD_PREC_STYLE":
@@ -793,24 +747,6 @@ and open the template in the editor.
             mymap.setView(new L.LatLng(0,0),precinctZoomLevel);
             mymap.setView(new L.LatLng(centerCoords[1],centerCoords[0]),precinctZoomLevel);
         }
-        function loadDemographicSection(){
-            let selectedPrecinct=document.getElementById("selectedPrecinct").innerHTML;
-            if(selectedPrecinct=="") return;
-            let selectedLayer=precincts[selectedPrecinct];
-            let selectedFeature=selectedLayer.feature;
-            let selectedDemographic=document.getElementById("dataSection").value;
-            if(selectedDemographic!="demographic") return;
-            if(selectedFeature.properties.demographic==undefined){
-                loadDemographicForPrecinct(selectedFeature).then(response=>{
-                    selectedFeature.properties.demographic=response;
-                    setDemographicSection(selectedFeature);
-                    populateDemographicData(selectedFeature);
-                });
-            }
-            else{
-                setDemographicSection(selectedFeature);
-            }
-        }
         function loadNeighbors(){
             let selectedPrecinct=document.getElementById("selectedPrecinct").innerHTML;
             if(selectedPrecinct=="") return;
@@ -836,7 +772,11 @@ and open the template in the editor.
                 }
             }
         }
-        function setDemographicSection(selectedFeature){
+        function setDemographicSection(){
+            let selectedPrecinct=document.getElementById("selectedPrecinct").innerHTML;
+            if(selectedPrecinct=="") return;
+            let selectedLayer=precincts[selectedPrecinct];
+            let selectedFeature=selectedLayer.feature;
             let whiteVotePop=selectedFeature.properties.demographic.whiteov18;
             let blackVotePop=selectedFeature.properties.demographic.blackov18;
             let asianVotePop=selectedFeature.properties.demographic.asianov18;
@@ -852,27 +792,11 @@ and open the template in the editor.
             document.getElementById("totVotePop").innerHTML=Math.floor(totVotePop);
             changeAllColor();
         }
-        function loadElectionSection(){
+        function setElectionSection(){
             let selectedPrecinct=document.getElementById("selectedPrecinct").innerHTML;
             if(selectedPrecinct=="") return;
             let selectedLayer=precincts[selectedPrecinct];
             let selectedFeature=selectedLayer.feature;
-            let selectedElection=document.getElementById("dataSection").value;
-            if(selectedElection!="election") return;
-            selectedElection = document.getElementById("year").value;
-            if(selectedElection=="none") return;
-            if(selectedFeature.properties.election==undefined){
-                loadElectionForPrecinct(selectedFeature).then(response=>{
-                    selectedFeature.properties.election=response;
-                    setElectionSection(selectedFeature);
-                    populateElectionData(selectedFeature);
-                });
-            }
-            else{
-                setElectionSection(selectedFeature);
-            }
-        }
-        function setElectionSection(selectedFeature){
             let selectedElection = document.getElementById("year").value;
             let elections=selectedFeature.properties.election;
             let pres16=[];
@@ -934,8 +858,8 @@ and open the template in the editor.
             changeAllColor();
             precinctLayer.setStyle(setShapeColor(precinctLayer,"OLD_PREC_STYLE"));
             selectedLayer.setStyle(setShapeColor(selectedLayer,"NEW_PREC_STYLE"));
-            loadDemographicSection();
-            loadElectionSection();
+            setElectionSection();
+            setDemographicSection();
             loadNeighbors();
             showError(selectedLayer,selectedFeature.properties.error);
         }
@@ -945,6 +869,11 @@ and open the template in the editor.
                 let feature=singleLayer.feature;
                 changeFeatColor(feature,singleLayer);
             }
+            
+            
+            let selectedPrecinct=document.getElementById("selectedPrecinct").innerHTML;
+            if(selectedPrecinct=="") return;
+            precincts[selectedPrecinct].setStyle(setShapeColor(precincts[selectedPrecinct],"NEW_PREC_STYLE"));
         }
         function changeFeatColor(selectedFeature,selectedLayer){
             let properties=selectedFeature.properties;
@@ -981,7 +910,6 @@ and open the template in the editor.
                         let pres16=[];
                         let cong16=[];
                         let cong18=[];
-                        console.log(selectedFeature);
                         for(let i=0;i<elections.length;i++){
                             if(elections[i].type=="PRES" && elections[i].year=="2016"){
                                 pres16=elections[i];

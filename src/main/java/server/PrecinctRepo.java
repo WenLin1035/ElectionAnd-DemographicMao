@@ -18,6 +18,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface PrecinctRepo extends JpaRepository<Precincts, Integer> {
     List<Precincts> findAll();
+    List<Precincts> findByStatefp(String statefp);
     List<Precincts> findByStatefpAndDistrictidAndCountyname(String statefp,String districtid,String countyname);
     Precincts findByName(String name);
     List<Precincts> findByNameStartingWithIgnoreCaseAndStatefp(String partOfName, String statefp);

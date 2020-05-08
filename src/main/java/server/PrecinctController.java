@@ -83,18 +83,6 @@ public class PrecinctController {
         return precincts;
     }
     
-    @GetMapping("/precincts/demographic/{id}")
-    public Demographics findDemographicForPrecincts(@PathVariable String id){
-        Precincts precinct=precinctService.findById(Integer.parseInt(id)).get();
-        return precinct.getDemographic();
-    }
-    
-    @GetMapping("/precincts/election/{id}")
-    public List<Elections> findElectionForPrecincts(@PathVariable String id){
-        Precincts precinct=precinctService.findById(Integer.parseInt(id)).get();
-        return precinct.getElections();
-    }
-    
     @GetMapping("/precincts/neighbors/{id}")
     public List<Neighbors> findNeighborsForPrecincts(@PathVariable String id){
         Precincts precinct=precinctService.findById(Integer.parseInt(id)).get();
@@ -146,9 +134,7 @@ public class PrecinctController {
     public List<Precincts> findPrecinctsInCong(@PathVariable String statefp,@PathVariable String districtid,@PathVariable String countyname){
         List<Precincts> allPrecincts=precinctService.findByStatefpAndDistrictidAndCountyname(statefp,districtid,countyname);        
         for(Precincts p: allPrecincts){
-            p.setDemographic(null);
             p.setError(null);
-            p.setElections(null);
             p.setNeighbors(null);
         }
         return allPrecincts;
