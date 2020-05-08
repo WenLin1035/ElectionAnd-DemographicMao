@@ -96,7 +96,7 @@ and open the template in the editor.
                 </div>
                 <br>
                 <br>
-                <input type ="image" src="ee.png" alt="Errors" class="nicebuttons" onclick="document.getElementById('errorPopup').style.display='block'">
+                <input type ="image" src="ee.png" alt="Errors" class="nicebuttons" onclick="getAllErrors();document.getElementById('errorPopup').style.display='block'">
                 <input type ="image" src="cog.png" alt="Settings" class="nicebuttons" onclick="document.getElementById('settingsPopup').style.display='block'">
                 <div>Sources:</div>
                 <div>US Census Bureau</div>
@@ -248,6 +248,7 @@ and open the template in the editor.
     <script>
         function getAllErrors(){
             let stateName=document.getElementById("States").value;
+            if(stateName=="State") return;
             let statefp=states[stateName].properties.statefp;
             loadErrorsForPrecinct(statefp);
         }
@@ -258,9 +259,11 @@ and open the template in the editor.
                 let allPrecinctsWithError=JSON.parse(errorRequest.response);
                 for(let i=0;i<allPrecinctsWithError.length;i++){
                     let precinct=allPrecinctsWithError[i];
-                    precincts[precinct.name].feature.properties.error=precinct.error;
-                    putErrorsInLog(precincts[precinct.name].feature);
-                    changeFeatColor(precincts[precinct.name].feature,precincts[precinct.name]);
+                    if(precincts[precinct.name]!=undefined){
+                        precincts[precinct.name].feature.properties.error=precinct.error;
+                        putErrorsInLog(precincts[precinct.name].feature);
+                        changeFeatColor(precincts[precinct.name].feature,precincts[precinct.name]);
+                    }
                 }
                 
             }
@@ -544,7 +547,7 @@ and open the template in the editor.
                 let called=false;
                 for(let i=0;i<countiesData.length;i++){
                     let precinctsRequest=new XMLHttpRequest();
-                    precinctsRequest.open('GET','http://localhost:8080/precincts/'+stateFP+"/"+countiesData[i]);
+                    precinctsRequest.open('GET','http://localhost:8080/precincts/'+stateFP+"/"+congid+"/"+countiesData[i]);
                     precinctsRequest.onload=()=> {
                         let precinctsData=JSON.parse(precinctsRequest.response);
                         for(i=0;i<precinctsData.length;i++){
@@ -645,7 +648,7 @@ and open the template in the editor.
                     return{
                         weight:4,
                         fillColor:'#864665',
-                        fillOpacity: 1,
+                        fillOpacity: .3,
                         color:'black'
                     };
                 case "NEW_PREC_STYLE":
@@ -785,9 +788,12 @@ and open the template in the editor.
         function showNeighbors(selectedFeature){
             let neighbors=selectedFeature.properties.neighbors;
             for(let i=0;i<neighbors.length;i++){
+                console.log(neighbors[i]);
                 let precinctName=neighbors[i].secondPrecinct.name;
                 let selectedLayer=precincts[precinctName];
-                selectedLayer.setStyle(setShapeColor(selectedLayer,"NEIGHBOR_STYLE"));
+                if(selectedLayer!=undefined){
+                    selectedLayer.setStyle(setShapeColor(selectedLayer,"NEIGHBOR_STYLE"));
+                }
             }
         }
         function setDemographicSection(selectedFeature){
@@ -901,16 +907,15 @@ and open the template in the editor.
         }
         function changeFeatColor(selectedFeature,selectedLayer){
             let properties=selectedFeature.properties;
-            if(properties.demographic==undefined && properties.error==undefined && properties.election==undefined){
-                selectedLayer.setStyle(setShapeColor(selectedLayer,"DEFAULT_STYLE"));
-            }
-            else if(properties.error!=undefined && properties.error.errorType!="NONE" && properties.error.errorType!="RESOLVED"){
+            selectedLayer.setStyle(setShapeColor(selectedLayer,"DEFAULT_STYLE"));
+            if(properties.error!=undefined && properties.error.errorType!="NONE" && properties.error.errorType!="RESOLVED"){
                 selectedLayer.setStyle(setShapeColor(selectedLayer,"ERROR_STYLE"));
             }
             else{
                 let dataType=document.getElementById("dataSection").value;
                 switch (dataType){
                     case "demographic":
+                        if(properties.demographic==undefined)return;
                         let whiteov18=properties.demographic.whiteov18;
                         let blackov18=properties.demographic.blackov18;
                         let asianov18=properties.demographic.asianov18;
@@ -931,6 +936,7 @@ and open the template in the editor.
                         let electionValue=document.getElementById("year").value;
                         
                         let elections=selectedFeature.properties.election;
+                        if(elections==undefined)return;
                         let pres16=[];
                         let cong16=[];
                         let cong18=[];

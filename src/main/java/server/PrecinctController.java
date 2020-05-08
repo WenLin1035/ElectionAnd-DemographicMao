@@ -142,9 +142,9 @@ public class PrecinctController {
         return neighbors;
     }
     
-    @GetMapping("/precincts/{statefp}/{countyname}")
-    public List<Precincts> findPrecinctsInCong(@PathVariable String statefp,@PathVariable String countyname){
-        List<Precincts> allPrecincts=precinctService.findByStatefpAndCountyname(statefp,countyname);        
+    @GetMapping("/precincts/{statefp}/{districtid}/{countyname}")
+    public List<Precincts> findPrecinctsInCong(@PathVariable String statefp,@PathVariable String districtid,@PathVariable String countyname){
+        List<Precincts> allPrecincts=precinctService.findByStatefpAndDistrictidAndCountyname(statefp,districtid,countyname);        
         for(Precincts p: allPrecincts){
             p.setDemographic(null);
             p.setError(null);
