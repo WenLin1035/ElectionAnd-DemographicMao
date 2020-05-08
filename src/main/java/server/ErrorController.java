@@ -41,7 +41,7 @@ public class ErrorController {
         try {
             Errors existError = service.findById(Integer.parseInt(id)).get();
             error.setId(existError.getId());
-            error.setCommentTime(new Timestamp(System.currentTimeMillis()));
+            //error.setCommentTime(new Timestamp(System.currentTimeMillis()));
             service.save(error);
         } catch (NoSuchElementException e) {
         } 

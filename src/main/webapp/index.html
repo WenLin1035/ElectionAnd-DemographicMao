@@ -89,7 +89,6 @@ and open the template in the editor.
                 </div>
                 <p>Options:</p>
                 <div id="optionSection">
-                    <button onclick="getAllErrors()">Show Errors</button><br>
                     <button onclick="openChangeDataSection()" style="width:auto;">Change Data</button><br>
                     <button onclick="document.getElementById('bordersPopup').style.display='block'">Fix Borders</button>
                     <br>
@@ -247,6 +246,7 @@ and open the template in the editor.
     </body>
     <script>
         function getAllErrors(){
+            document.getElementById("optionSection").style.display="";
             let stateName=document.getElementById("States").value;
             if(stateName=="State") return;
             let statefp=states[stateName].properties.statefp;
@@ -433,7 +433,6 @@ and open the template in the editor.
                         loadStatesForMap(stateName);
                     }
                     document.getElementById("searchWindow").style.display="none";
-                    document.getElementById("optionSection").style.display="none";
                     zoomOut();
                     break;
                 default:
@@ -457,6 +456,7 @@ and open the template in the editor.
             return true;
         }
         function unloadAll(){
+            document.getElementById("optionSection").style.display="none";
             precinctLayer.clearLayers();
             congLayer.clearLayers();
             precincts={};
@@ -465,7 +465,6 @@ and open the template in the editor.
             document.getElementById("selectedPrecinct").innerHTML="";
             document.getElementById("errorLog").innerHTML="";
             document.getElementById("searchWindow").style.display="inline";
-            document.getElementById("optionSection").style.display="";
             document.getElementById("dataSection").selectedIndex=0;
             document.getElementById("year").selectedIndex=0;
             document.getElementById("searchResults").innerHTML="";

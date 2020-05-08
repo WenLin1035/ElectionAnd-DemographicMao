@@ -175,9 +175,9 @@ public class PrecinctController {
                 precinct.setError(existPrecinct.getError());
             }
             else{
-                if(precinct.getError().getCommentTime()==null){
+                /**if(precinct.getError().getCommentTime()==null){
                     precinct.getError().setCommentTime(new Timestamp(System.currentTimeMillis()));
-                }
+                }**/
             }
             precinctService.save(precinct);
         } catch (NoSuchElementException e) {
