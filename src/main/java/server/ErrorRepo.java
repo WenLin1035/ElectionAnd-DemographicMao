@@ -14,10 +14,8 @@ import org.springframework.data.repository.query.Param;
  *
  * @author webst
  */
-public interface ErrorRepo extends JpaRepository<Errors, Integer> {
+public interface ErrorRepo extends JpaRepository<FixedErrors, Integer> {
     //A Native Query means it is a SQL statement, normally by default it is JPQL Queries which can only perform CRUD queries.
     //The : binds the variable stateFP to the param stateFP to dynamically load errors from specific states
-    @Query(value="SELECT * FROM error e join precinct p WHERE p.OGR_FID=e.precinct_id AND p.statefp= :stateFP",nativeQuery=true)
-    List<Errors> findByStatefp(@Param("stateFP") String stateFP);
-    //Error findById(Integer id);
+
 }

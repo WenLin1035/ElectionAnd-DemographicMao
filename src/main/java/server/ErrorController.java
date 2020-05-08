@@ -27,22 +27,22 @@ public class ErrorController {
     private ErrorRepo service;
     
     @GetMapping("/errors/{id}")
-    public List<Errors> findErrorById(@PathVariable String id){
-        return service.findByStatefp(id);
+    public FixedErrors findErrorById(@PathVariable String id){
+        return service.findById(Integer.parseInt(id)).get();
     }
     
     @GetMapping("/errors")
-    public List<Errors> findAllErrors() {
+    public List<FixedErrors> findAllErrors() {
         return service.findAll();
     }
     
     @PutMapping("/errors/{id}")
     public void update(@RequestBody Errors error, @PathVariable String id){
         try {
-            Errors existError = service.findById(Integer.parseInt(id)).get();
-            error.setId(existError.getId());
-            //error.setCommentTime(new Timestamp(System.currentTimeMillis()));
-            service.save(error);
+//            Errors existError = service.findById(Integer.parseInt(id)).get();
+//            error.setId(existError.getId());
+//            error.setCommentTime(new Timestamp(System.currentTimeMillis()));
+//            service.save(error);
         } catch (NoSuchElementException e) {
         } 
     }
