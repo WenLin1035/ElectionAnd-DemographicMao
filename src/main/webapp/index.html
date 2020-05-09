@@ -975,8 +975,6 @@ and open the template in the editor.
                 let feature=singleLayer.feature;
                 changeFeatColor(feature,singleLayer);
             }
-            
-            
             let selectedPrecinct=document.getElementById("selectedPrecinct").innerHTML;
             if(selectedPrecinct=="") return;
             precincts[selectedPrecinct].setStyle(setShapeColor(precincts[selectedPrecinct],"NEW_PREC_STYLE"));
@@ -1264,6 +1262,7 @@ and open the template in the editor.
             let featureName=layer.feature.properties.name;
             let errorDiv=document.getElementById("currentError");
             document.getElementById("errorSection").style.display="none";
+            errorDiv.style.display="none";
             if(error==undefined) return;
             console.log(error.errorType);
             document.getElementById("errorSection").style.display="block";
@@ -1271,6 +1270,7 @@ and open the template in the editor.
             document.getElementById("votAnomSection").style.display="none";
             document.getElementById("demAnomSection").style.display="none";
             document.getElementById("mergeSection").style.display="none";
+            errorDiv.style.display="block";
             console.log(error.errorType);
             switch(error.errorType){
                 case "GHOST":
