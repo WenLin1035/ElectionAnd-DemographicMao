@@ -60,19 +60,17 @@ public class Precincts {
         return demographic;
     }
     
-    @OneToMany(cascade=CascadeType.ALL,mappedBy="precinct", orphanRemoval=true)
-    @JsonManagedReference 
+    @OneToMany(cascade=CascadeType.ALL,mappedBy="precinct")
     public List<Elections> getElections(){
         return elections;
     }
     
-    @OneToMany(fetch=FetchType.LAZY,cascade=CascadeType.ALL,mappedBy="firstPrecinct", orphanRemoval=true)
-    @JsonManagedReference 
+    @OneToMany(fetch=FetchType.LAZY,cascade=CascadeType.ALL,mappedBy="firstPrecinct")
     public List<Neighbors> getNeighbors(){
         return neighbors;
     }
     
-    @OneToMany(fetch=FetchType.LAZY,cascade=CascadeType.ALL,mappedBy="secondPrecinct", orphanRemoval=true)
+    @OneToMany(fetch=FetchType.LAZY,cascade=CascadeType.ALL,mappedBy="secondPrecinct")
     @JsonBackReference 
     public List<Neighbors> getSecondNeighbor(){
         return secondNeighbor;
@@ -108,52 +106,53 @@ public class Precincts {
     public String getName() {
         return name;
     }
-    
-    public void setDistrictid(String districtid){
-        this.districtid=districtid;
-    }
-    
-    public void setOrigname(String origname){
-        this.origname=origname;
-    }
-    
-    public void setCountyname(String countyname){
-        this.countyname=countyname;
-    }
-    
-    public void setNeighbors(List<Neighbors> neighbors){
-        this.neighbors=neighbors;
-    }
-    
-    public void setSecondNeighbor(List<Neighbors> secondNeighbor){
-        this.secondNeighbor=secondNeighbor;
+
+    public void setError(Errors error) {
+        this.error = error;
     }
 
-    public void setStatefp(String statefp){
-        this.statefp=statefp;
+    public void setDemographic(Demographics demographic) {
+        this.demographic = demographic;
     }
-    
-    public void setError(Errors error){
-        this.error=error;
+
+    public void setElections(List<Elections> elections) {
+        this.elections = elections;
     }
-    
-    public void setDemographic(Demographics demographic){
-        this.demographic=demographic;
+
+    public void setId(Integer id) {
+        this.id = id;
     }
-    
-    public void setElections(List<Elections> elections){
-        this.elections=elections;
+
+    public void setShape_geojson(String shape_geojson) {
+        this.shape_geojson = shape_geojson;
     }
 
     public void setName(String name) {
         this.name = name;
     }
 
-    public void setShape_geojson(String shape_geojson) {
-        this.shape_geojson = shape_geojson;
+    public void setOrigname(String origname) {
+        this.origname = origname;
     }
-    
-    public void setId(Integer id){
-        this.id=id;
+
+    public void setStatefp(String statefp) {
+        this.statefp = statefp;
     }
+
+    public void setCountyname(String countyname) {
+        this.countyname = countyname;
+    }
+
+    public void setNeighbors(List<Neighbors> neighbors) {
+        this.neighbors = neighbors;
+    }
+
+    public void setSecondNeighbor(List<Neighbors> secondNeighbor) {
+        this.secondNeighbor = secondNeighbor;
+    }
+
+    public void setDistrictid(String districtid) {
+        this.districtid = districtid;
+    }
+
 }

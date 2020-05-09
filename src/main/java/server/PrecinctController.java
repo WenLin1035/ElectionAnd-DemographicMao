@@ -32,6 +32,10 @@ public class PrecinctController {
     private NeighborsRepo neighborService;
     @Autowired
     private DistrictsRepo districtService;
+    @Autowired
+    private FixedErrorsRepo fixedErrorsService;
+    @Autowired
+    private ErrorRepo unfixedErrorsService;
     
     // RESTful API methods for Retrieval operations
     @GetMapping("/precincts")
@@ -44,6 +48,12 @@ public class PrecinctController {
             p.setNeighbors(null);
         }
         return allPrecincts;
+    }
+    
+    @GetMapping("/precincts/{id}")
+    public Precincts findPrecinct(@PathVariable String id) {
+        Precincts precinct=precinctService.findById(Integer.parseInt(id)).get();
+        return precinct;
     }
     
     @GetMapping("/cong/{statefp}")
@@ -81,6 +91,12 @@ public class PrecinctController {
             p.setNeighbors(null);
         }
         return precincts;
+    }
+    
+    @PostMapping("/fixederrors")
+    public void setFixedError(@RequestBody FixedErrors error){
+        error.setCommentTime(new Timestamp(System.currentTimeMillis()));
+        fixedErrorsService.save(error);
     }
     
     @GetMapping("/precincts/neighbors/{id}")
@@ -151,19 +167,15 @@ public class PrecinctController {
         try {
             Precincts existPrecinct = precinctService.findById(Integer.parseInt(id)).get();
             precinct.setId(Integer.parseInt(id));
-            if(precinct.getDemographic()==null){
-                precinct.setDemographic(existPrecinct.getDemographic());
+            for(Elections e:precinct.getElections()){
+                e.setPrecinct(precinct);
             }
-            if(precinct.getElections()==null){
-                precinct.setElections(existPrecinct.getElections());
+            for(Neighbors n:precinct.getNeighbors()){
+                if(n.getFirstPrecinct()==null) n.setFirstPrecinct(precinct);
+                else n.setSecondPrecinct(precinct);
             }
-            if(precinct.getError()==null){
-                precinct.setError(existPrecinct.getError());
-            }
-            else{
-                /**if(precinct.getError().getCommentTime()==null){
-                    precinct.getError().setCommentTime(new Timestamp(System.currentTimeMillis()));
-                }**/
+            if(precinct.getError().getErrorType().equals("RESOLVED")){
+                unfixedErrorsService.deleteById(precinct.getId());
             }
             precinctService.save(precinct);
         } catch (NoSuchElementException e) {

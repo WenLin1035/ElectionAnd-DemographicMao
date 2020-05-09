@@ -273,7 +273,7 @@ and open the template in the editor.
                 let allPrecinctsWithError=JSON.parse(errorRequest.response);
                 for(let i=0;i<allPrecinctsWithError.length;i++){
                     let precinct=allPrecinctsWithError[i];
-                    if(precincts[precinct.name]!=undefined){
+                    if(precincts[precinct.name]!=undefined && precinct.error.errorType!="RESOLVED"){
                         precincts[precinct.name].feature.properties.error=precinct.error;
                         putErrorsInLog(precincts[precinct.name].feature);
                         changeFeatColor(precincts[precinct.name].feature,precincts[precinct.name]);
@@ -486,6 +486,7 @@ and open the template in the editor.
             return true;
         }
         function unloadAll(){
+            document.getElementById("errorSection").style.display="none";
             document.getElementById("optionSection").style.display="none";
             precinctLayer.clearLayers();
             congLayer.clearLayers();
@@ -648,7 +649,7 @@ and open the template in the editor.
                     };
                 case "NEW_PREC_STYLE":
                     return{
-                        color:"red",
+                        color:"#FF00FF",
                         weight:6,
                         fillOpacity: 0.95
                     };
@@ -979,14 +980,37 @@ and open the template in the editor.
             }
         }
         function updateError(feature){
+            let newError={};
             let today = new Date();
             let dateTime = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate()+" "+today.getHours() + ":" + today.getMinutes()+":"+today.getSeconds();
             let comment="["+dateTime+"] >>"+document.getElementById("commentArea").value+"<br/>";
+            newError.comment=document.getElementById("commentArea").value;
+            newError.errorType=feature.properties.error.errorType;
+            newError.precinctID=feature.properties.id;
+            if(newError.errorType=="GHOST"){
+                newError.relevantInfo=JSON.stringify(feature.properties.election)+" "+JSON.stringify(feature.properties.demographic);
+            }
+            else if(newError.errorType=="VOTANOM"){
+                newError.relevantInfo=JSON.stringify(feature.properties.election);
+            }
+            else if(newError.errorType=="DEMANOM"){
+                newError.relevantInfo=JSON.stringify(feature.properties.demographic);
+            }
             let preparedError=feature.properties.error;
-            preparedError["comment"]=document.getElementById("commentArea").value;
             document.getElementById("errorLog").innerHTML+="<div style=\'border-style:solid\'>Error Resolved on: "+feature.properties.name+" from ERROR: "+feature.properties.error.errorType+". <br/> Optional Comment: "+comment+"</div><br/>";
             preparedError["errorType"]="RESOLVED";
             document.getElementById("commentArea").value="";
+            addFixedError(newError);
+        }
+        function addFixedError(newError){
+            let errorRequest=new XMLHttpRequest();
+            errorRequest.open('POST','http://localhost:8080/fixederrors/');
+            if(newError){
+                errorRequest.setRequestHeader('Content-Type','application/json');
+            }
+            let error=JSON.stringify(newError);
+            console.log(error);
+            errorRequest.send(error);
         }
         function setGhostPrecinct(){
             let selectedPrecinctName=document.getElementById("selectedPrecinct").innerHTML;
@@ -1014,7 +1038,6 @@ and open the template in the editor.
         }
         function preparePrecinctToSend(feature){
             let preparedPrecinct={};
-            preparedPrecinct["id"]=feature.properties.id;
             preparedPrecinct["districtid"]=feature.properties.districtid;
             preparedPrecinct["name"]=feature.properties.name;
             preparedPrecinct["statefp"]=feature.properties.statefp;

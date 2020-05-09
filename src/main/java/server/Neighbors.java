@@ -52,7 +52,6 @@ public class Neighbors {
     
     @ManyToOne(fetch=FetchType.LAZY)
     @JoinColumn(name="second_precinct_id")
-    @JsonManagedReference
     public Precincts getSecondPrecinct(){
         return secondPrecinct;
     }
