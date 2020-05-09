@@ -116,9 +116,9 @@ and open the template in the editor.
                 <div id="optionSection">
                     <p>Options:</p>
                     <button onclick="openChangeDataSection()" style="width:auto;">Change Data</button><br>
-                    <button onclick="document.getElementById('bordersPopup').style.display='block'">Fix Borders</button><br>
                     <button onclick="openNeighborSection()">Edit Neighbors</button>
                     <button onclick="openMergingSection()">Open "Merge Precincts" Section</button>
+                    <button onclick="editBorder()">Edit Border</button>
                     <br>
                 </div>
                 <div id="neighborSection" style="display:none">
@@ -196,26 +196,6 @@ and open the template in the editor.
                 </table>
                 
                 <center><button id="saveButton" onclick="changePrecinctData()">Save</button></center>
-            </div>
-        </div>
-        <!-- this is popup window for changing border -->
-        <div id="bordersPopup" class="modal">
-            <div class="modal-content">
-                <button onclick="document.getElementById('bordersPopup').style.display='none'" style="float:right;">X</button>
-                <label for="precinct1">Precinct to extend:</label>
-                <select id="precinct1">
-                    <option value="num1">precinct</option>
-                    <option>precinct1</option>
-                </select>
-                <br>
-                <br>
-                <label for="precinct2">Precinct to connect to:</label>
-                <select id="precinct2">
-                    <option value="num2">precinct</option>
-                    <option>precinct1</option>
-                </select>
-                <br><br>
-                <center><button>Save</button></center>
             </div>
         </div>
         <!-- shows log of what user has done -->
@@ -365,17 +345,6 @@ and open the template in the editor.
                 }
             }
             searchRequest.send();
-        }
-        function editBorder(){
-            let selectedPrecinctName=document.getElementById("selectedPrecinct").innerHTML;
-            let selectedPrecinct=precincts[selectedPrecinctName];
-            selectedPrecinct.pm.toggleEdit({
-                limitMarkersToCount:50
-            });
-            if(!selectedPrecinct.pm.enabled()){
-                let newFeature=selectedPrecinct.toGeoJSON();
-                console.log(newFeature);
-            }
         }
         function openNeighborSection(){
             let selectedPrecinct=document.getElementById("selectedPrecinct").innerHTML;
@@ -1159,7 +1128,9 @@ and open the template in the editor.
             let layer=precincts[selectedPrecinctName];
             let feature=layer.feature;
             let featureID=feature.properties.id;
-            layer.pm.toggleEdit();
+            layer.pm.toggleEdit({
+                limitMarkersToCount:50
+            });
             if(!layer.pm.enabled()){
                 updateError(feature);
                 updatePrecinct(featureID,preparePrecinctToSend(layer.toGeoJSON()));
