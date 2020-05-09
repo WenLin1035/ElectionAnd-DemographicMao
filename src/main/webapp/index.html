@@ -85,7 +85,7 @@ and open the template in the editor.
                     <div id="currentError">
                         <div id="ghostSection" style="display:none">
                             Ghost Precinct?<br/>
-                            <button onclick="setGhostPrecinct()">Yes</button><br/>
+                            <button onclick="setNotError()">Yes</button><br/>
                             <button onclick="openChangeDataSection()">Set Data</button>
                         </div>
                         <div id="votAnomSection" style="display:none">
@@ -95,6 +95,10 @@ and open the template in the editor.
                         <div id="demAnomSection" style="display:none">
                             Demographic Anomaly<br/>
                             <button onclick="openChangeDataSection()">Set Data</button>
+                        </div>
+                        <div id="mergeSection" style="display:none">
+                            Merge Precinct<br/>
+                            <button onclick="openMergingSection()">Open "Merge Precincts" Section</button>
                         </div>
                     </div>
                     <br>
@@ -113,6 +117,11 @@ and open the template in the editor.
                     Second Selected Precinct: <div id="selectedNeighbor"></div>
                     <button onclick="addNeighbors()">Add Neighbors</button>
                     <button onclick="deleteNeighbors()">Delete Neighbors</button>
+                </div>
+                <div id="mergingSection" style="display:none">
+                    <h4>Merge Selected Precincts</h4>
+                    Second Selected Precinct: <div id="selectedMerger"></div>
+                    <button onclick="mergePrecincts()">Merge Precincts</button>
                 </div>
                 <br>
                 <br>
@@ -302,6 +311,9 @@ and open the template in the editor.
             else if(feature.properties.error.errorType=="DEMANOM"){
                 whatError="Demographic Anomaly Found";
             }
+            else if(feature.properties.error.errorType=="ENCLOSED"){
+                whatError="Enclosed Precinct Found";
+            }
             let secondPart=" ["+feature.properties.name+"]</button></div>";
             document.getElementById("errorLog").innerHTML+=firstPart+whatError+secondPart;
         }
@@ -353,17 +365,37 @@ and open the template in the editor.
             if(selectedPrecinct!=""){
                 let neighborSection=document.getElementById("neighborSection");
                 if(neighborSection.style.display=="none"){
-                    edittingNeighbors=true;
+                    editingNeighbors=true;
                     neighborSection.style.display="";
                 }
                 else{
-                    edittingNeighbors=false;
+                    editingNeighbors=false;
                     neighborSection.style.display="none";
                     let neighboringLayer=precincts[document.getElementById("selectedNeighbor").innerHTML];
                     if(neighboringLayer!=undefined){
                         neighboringLayer.setStyle(setShapeColor(neighboringLayer,"OLD_PREC_STYLE"));
                     }
                     document.getElementById("selectedNeighbor").innerHTML="";
+                }
+            }
+        }        
+        function openMergingSection(){
+            let selectedPrecinct=document.getElementById("selectedPrecinct").innerHTML;
+            document.getElementById('precinctName').value = selectedPrecinct;
+            if(selectedPrecinct!=""){
+                let mergingSection=document.getElementById("mergingSection");
+                if(mergingSection.style.display=="none"){
+                    mergingPrecincts=true;
+                    mergingSection.style.display="";
+                }
+                else{
+                    mergingPrecincts=false;
+                    mergingSection.style.display="none";
+                    let mergingLayer=precincts[document.getElementById("selectedMerger").innerHTML];
+                    if(mergingLayer!=undefined){
+                        mergingLayer.setStyle(setShapeColor(mergingLayer,"OLD_PREC_STYLE"));
+                    }
+                    document.getElementById("selectedMerger").innerHTML="";
                 }
             }
         }
@@ -388,10 +420,6 @@ and open the template in the editor.
             if(!neighborExist){
                 sendAddedNeighbor(firstPrecinct,secondPrecinct.properties.id);
             }
-//            let addedNeighbor={};
-//            addedNeighbor.secondPrecinct=preparePrecinctToSend(secondPrecinct);
-//            neighbors.push(addedNeighbor);
-            //updatePrecinct(firstPrecinct.properties.id,preparePrecinctToSend(firstPrecinct));
         }
         function deleteNeighbors(){
             let selectedPrecinctName=document.getElementById("selectedPrecinct").innerHTML;
@@ -519,8 +547,6 @@ and open the template in the editor.
             statesCache={};
             congs={};
             loadFeature();
-            secondSelectedPrecinctName="";
-            edittingNeighbors=false;
         }
         function loadFeature(){
             let statesMenu = document.getElementById("States");
@@ -563,8 +589,13 @@ and open the template in the editor.
             return true;
         }
         function unloadAll(){
+            secondSelectedPrecinctName="";
+            editingNeighbors=false;
+            mergingPrecincts=false;
             document.getElementById("errorSection").style.display="none";
             document.getElementById("optionSection").style.display="none";
+            document.getElementById("neighborSection").style.display="none";
+            document.getElementById("mergingSection").style.display="none";
             precinctLayer.clearLayers();
             congLayer.clearLayers();
             precincts={};
@@ -1037,13 +1068,22 @@ and open the template in the editor.
         }
         function onClick(e){
             let selectedName=e.target.feature.properties.name;
-            if(edittingNeighbors){
+            if(editingNeighbors){
                 let selectedLayer=precincts[selectedName];
                 if(document.getElementById("selectedNeighbor").innerHTML!=""){
                     let oldLayer=precincts[document.getElementById("selectedNeighbor").innerHTML];
                     oldLayer.setStyle(setShapeColor(oldLayer,"OLD_PREC_STYLE"));
                 }
                 document.getElementById("selectedNeighbor").innerHTML=selectedName;
+                selectedLayer.setStyle(setShapeColor(selectedLayer,"NEW_PREC_STYLE"));
+            }
+            else if(mergingPrecincts){
+                let selectedLayer=precincts[selectedName];
+                if(document.getElementById("selectedMerger").innerHTML!=""){
+                    let oldLayer=precincts[document.getElementById("selectedMerger").innerHTML];
+                    oldLayer.setStyle(setShapeColor(oldLayer,"OLD_PREC_STYLE"));
+                }
+                document.getElementById("selectedMerger").innerHTML=selectedName;
                 selectedLayer.setStyle(setShapeColor(selectedLayer,"NEW_PREC_STYLE"));
             }
             else{
@@ -1068,6 +1108,9 @@ and open the template in the editor.
             else if(newError.errorType=="DEMANOM"){
                 newError.relevantInfo=JSON.stringify(feature.properties.demographic);
             }
+            else if(newError.errorType=="ENCLOSED"){
+                newError.relevantInfo=JSON.stringify(feature.geometry);
+            }
             let preparedError=feature.properties.error;
             document.getElementById("errorLog").innerHTML+="<div style=\'border-style:solid\'>Error Resolved on: "+feature.properties.name+" from ERROR: "+feature.properties.error.errorType+". <br/> Optional Comment: "+comment+"</div><br/>";
             preparedError["errorType"]="RESOLVED";
@@ -1084,7 +1127,7 @@ and open the template in the editor.
             console.log(error);
             errorRequest.send(error);
         }
-        function setGhostPrecinct(){
+        function setNotError(){
             let selectedPrecinctName=document.getElementById("selectedPrecinct").innerHTML;
             let layer=precincts[selectedPrecinctName];
             let feature=layer.feature;
@@ -1092,7 +1135,6 @@ and open the template in the editor.
             let buttonToBeDeleted=document.getElementById(feature.properties.name+"_error");
             buttonToBeDeleted.parentNode.removeChild(buttonToBeDeleted);
             let errorDiv=document.getElementById("currentError");
-            layer.setStyle(setShapeColor(layer,"GHOST_STYLE"));
             errorDiv.style.display="none";
             document.getElementById("errorSection").style.display="none";
             updateError(feature);
@@ -1122,28 +1164,49 @@ and open the template in the editor.
             preparedPrecinct["shape_geojson"]=JSON.stringify(feature.geometry);
             return preparedPrecinct;
         }
-        function mergePrecincts(layer){
-            let feature=layer.feature;
-            let buttonToBeDeleted=document.getElementById(feature.properties.name+"_error");
-            buttonToBeDeleted.parentNode.removeChild(buttonToBeDeleted);
-            let errorDiv=document.getElementById("currentError");
-            errorDiv.style.display="none";
-            document.getElementById("errorSection").style.display="none";
-            
-            console.log(feature);
-            let newPrecinct={"type":"Feature",
-                "properties":feature.properties,
-                "geometry":{
-                    "type":"Polygon",
-                    "coordinates":[feature.geometry.coordinates[0][0]]
-                }
-            };
-            layer.remove();
-            precinctLayer.removeLayer(layer);
-            precinctLayer.addData(newPrecinct);
-            
-            updateError(feature);
-            updatePrecinct(feature.properties.id,newPrecinct);
+        function mergePrecincts(){
+            let selectedPrecinctName=document.getElementById("selectedPrecinct").innerHTML;
+            let secondPrecinctName=document.getElementById("selectedMerger").innerHTML;
+            if(secondPrecinctName=="" || secondPrecinctName==selectedPrecinctName) return;
+            let firstPrecinct=precincts[selectedPrecinctName].feature;
+            let secondPrecinct=precincts[secondPrecinctName].feature;
+            let newPrecinct=turf.union(firstPrecinct,secondPrecinct);
+            console.log(firstPrecinct);
+            console.log(secondPrecinct);
+            let properties=newPrecinct.properties;
+            let demographics=properties.demographic;
+            let test={};
+            test.aminov18=(secondPrecinct.properties.demographic.aminov18 + firstPrecinct.properties.demographic.aminov18);
+            demographics.aminov18=(secondPrecinct.properties.demographic.aminov18 + firstPrecinct.properties.demographic.aminov18);
+            properties.demographic=demographics;
+            console.log(secondPrecinct.properties.demographic.aminov18);
+            console.log(firstPrecinct.properties.demographic.aminov18);
+            console.log((secondPrecinct.properties.demographic.aminov18 + firstPrecinct.properties.demographic.aminov18));
+                console.log(newPrecinct);
+            console.log(test);
+            demographics.aminov18=2000;
+            console.log(newPrecinct);
+//            let feature=layer.feature;
+//            let buttonToBeDeleted=document.getElementById(feature.properties.name+"_error");
+//            buttonToBeDeleted.parentNode.removeChild(buttonToBeDeleted);
+//            let errorDiv=document.getElementById("currentError");
+//            errorDiv.style.display="none";
+//            document.getElementById("errorSection").style.display="none";
+//            
+//            console.log(feature);
+//            let newPrecinct={"type":"Feature",
+//                "properties":feature.properties,
+//                "geometry":{
+//                    "type":"Polygon",
+//                    "coordinates":[feature.geometry.coordinates[0][0]]
+//                }
+//            };
+//            layer.remove();
+//            precinctLayer.removeLayer(layer);
+//            precinctLayer.addData(newPrecinct);
+//            
+//            updateError(feature);
+//            updatePrecinct(feature.properties.id,newPrecinct);
         }
         function showError(layer,error){
             let featureName=layer.feature.properties.name;
@@ -1155,25 +1218,14 @@ and open the template in the editor.
             document.getElementById("ghostSection").style.display="none";
             document.getElementById("votAnomSection").style.display="none";
             document.getElementById("demAnomSection").style.display="none";
+            document.getElementById("mergeSection").style.display="none";
             
             switch(error.errorType){
                 case "GHOST":
                     document.getElementById("ghostSection").style.display="block";
                     break;
-                case "DONUT":
-                    /**
-                     * let newErrorMessage=document.createElement("div");
-                     * newErrorMessage.innerHTML="Merge With?";
-                     * newErrorMessage.append(document.createElement("br"));
-                     * let button1=document.createElement("button");
-                     * button1.setAttribute('onclick','mergePrecincts(precincts['+featureName+'])');
-                     * button2.innerHTML="Yes";
-                     * newErrorMessage.append(button1);
-                     * errorDiv.append(newErrorMessage);
-                     */
-                    document.getElementById("errorSection").style.display="block";
-                    errorDiv.innerHTML="Merge Precinct<br>\n\
-                        <button onclick='mergePrecincts(precincts[\""+featureName+"\"])'>Yes</button>";
+                case "ENCLOSED":
+                    document.getElementById("mergeSection").style.display="block";
                     break;
                 case "VOTANOM":
                     document.getElementById("votAnomSection").style.display="block";
