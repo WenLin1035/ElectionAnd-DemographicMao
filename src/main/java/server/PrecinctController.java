@@ -224,8 +224,7 @@ public class PrecinctController {
     
     @Transactional
     @PutMapping("/merge/{name1}/{name2}")
-    public ResponseEntity<?> merge(@RequestBody Precincts newPrecinct,@PathVariable String enclosingPrecinctID, @PathVariable String enclosedPrecinctID){
-        //TO-DO
+    public ResponseEntity<?> merge(@RequestBody Precincts newPrecinct, @PathVariable String enclosingPrecinctID, @PathVariable String enclosedPrecinctID){
         try {
             //delete precinct 1
             //delete precinct 2

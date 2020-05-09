@@ -1168,42 +1168,75 @@ and open the template in the editor.
             let selectedPrecinctName=document.getElementById("selectedPrecinct").innerHTML;
             let secondPrecinctName=document.getElementById("selectedMerger").innerHTML;
             if(secondPrecinctName=="" || secondPrecinctName==selectedPrecinctName) return;
-            let firstPrecinct=precincts[selectedPrecinctName].feature;
-            let secondPrecinct=precincts[secondPrecinctName].feature;
+            let firstLayer=precincts[selectedPrecinctName];
+            let secondLayer=precincts[secondPrecinctName];
+            let firstPrecinct=firstLayer.feature;
+            let secondPrecinct=secondLayer.feature;
+            let firstProperties=firstPrecinct.properties;
+            firstPrecinct.properties="";
+            let secondProperties=secondPrecinct.properties;
+            secondPrecinct.properties="";
             let newPrecinct=turf.union(firstPrecinct,secondPrecinct);
-            console.log(firstPrecinct);
-            console.log(secondPrecinct);
+            
+            newPrecinct.properties=firstProperties;
             let properties=newPrecinct.properties;
+            console.log(properties);
             let demographics=properties.demographic;
-            let test={};
-            test.aminov18=(secondPrecinct.properties.demographic.aminov18 + firstPrecinct.properties.demographic.aminov18);
-            demographics.aminov18=(secondPrecinct.properties.demographic.aminov18 + firstPrecinct.properties.demographic.aminov18);
-            properties.demographic=demographics;
-            console.log(secondPrecinct.properties.demographic.aminov18);
-            console.log(firstPrecinct.properties.demographic.aminov18);
-            console.log((secondPrecinct.properties.demographic.aminov18 + firstPrecinct.properties.demographic.aminov18));
-                console.log(newPrecinct);
-            console.log(test);
-            demographics.aminov18=2000;
+            
+            demographics.aminov18 += secondProperties.demographic.aminov18;
+            demographics.asianov18 += secondProperties.demographic.asianov18;
+            demographics.blackov18 += secondProperties.demographic.blackov18;
+            demographics.hawov18 += secondProperties.demographic.hawov18;
+            demographics.hisov18 += secondProperties.demographic.hisov18;
+            demographics.otherov18 += secondProperties.demographic.otherov18;
+            demographics.pop100 += secondProperties.demographic.pop100;
+            demographics.whiteov18 += secondProperties.demographic.whiteov18;
+            
+            let elections=properties.election;
+            let newpres16=[];
+            let newcong16=[];
+            let newcong18=[];
+            for(let i=0;i<elections.length;i++){
+                if(elections[i].type=="PRES" && elections[i].year=="2016") newpres16=elections[i];
+                if(elections[i].type=="CONG" && elections[i].year=="2016") newcong16=elections[i];
+                if(elections[i].type=="CONG" && elections[i].year=="2018") newcong18=elections[i];
+            }
+            let secondElections=secondProperties.election;
+            let secpres16=[];
+            let seccong16=[];
+            let seccong18=[];
+            for(let i=0;i<secondElections.length;i++){
+                if(secondElections[i].type=="PRES" && secondElections[i].year=="2016") secpres16=elections[i];
+                if(secondElections[i].type=="CONG" && secondElections[i].year=="2016") seccong16=elections[i];
+                if(secondElections[i].type=="CONG" && secondElections[i].year=="2018") seccong18=elections[i];
+            }
+            newpres16.dem += secpres16.dem;
+            newpres16.rep += secpres16.rep;
+            newpres16.other += secpres16.other;
+            newpres16.tot += secpres16.tot
+            newcong16.dem += seccong16.dem;
+            newcong16.rep += seccong16.rep;
+            newcong16.other += seccong16.other;
+            newcong16.tot += seccong16.tot;
+            newcong18.dem += seccong18.dem;
+            newcong18.rep += seccong18.rep;
+            newcong18.other += seccong18.other;
+            newcong18.tot += seccong18.tot;
             console.log(newPrecinct);
-//            let feature=layer.feature;
-//            let buttonToBeDeleted=document.getElementById(feature.properties.name+"_error");
-//            buttonToBeDeleted.parentNode.removeChild(buttonToBeDeleted);
-//            let errorDiv=document.getElementById("currentError");
-//            errorDiv.style.display="none";
-//            document.getElementById("errorSection").style.display="none";
-//            
-//            console.log(feature);
-//            let newPrecinct={"type":"Feature",
-//                "properties":feature.properties,
-//                "geometry":{
-//                    "type":"Polygon",
-//                    "coordinates":[feature.geometry.coordinates[0][0]]
-//                }
-//            };
-//            layer.remove();
-//            precinctLayer.removeLayer(layer);
-//            precinctLayer.addData(newPrecinct);
+
+            console.log(firstProperties.name);
+            let errorDiv=document.getElementById("currentError");
+            errorDiv.style.display="none";
+            document.getElementById("errorSection").style.display="none";
+//              
+            firstLayer.feature=newPrecinct;
+            secondLayer.remove();
+            precinctLayer.removeLayer(secondLayer);
+            delete precincts[secondPrecinctName];
+            precincts[selectedPrecinctName]=firstLayer;
+            document.getElementById("mergingSection").style.display="none";
+            mergingPrecincts=false;
+            console.log(newPrecinct);
 //            
 //            updateError(feature);
 //            updatePrecinct(feature.properties.id,newPrecinct);
