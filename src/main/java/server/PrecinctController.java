@@ -171,11 +171,17 @@ public class PrecinctController {
                 e.setPrecinct(precinct);
             }
             for(Neighbors n:precinct.getNeighbors()){
-                if(n.getFirstPrecinct()==null) n.setFirstPrecinct(precinct);
-                else n.setSecondPrecinct(precinct);
+                if(n.getFirstPrecinct()==null){
+                    n.setFirstPrecinct(precinct);
+                }
+                else{
+                    n.setSecondPrecinct(precinct);
+                }
             }
-            if(precinct.getError().getErrorType().equals("RESOLVED")){
-                unfixedErrorsService.deleteById(precinct.getId());
+            if(precinct.getError()!=null){
+                if(precinct.getError().getErrorType().equals("RESOLVED")){
+                    unfixedErrorsService.deleteById(precinct.getId());
+                }
             }
             precinctService.save(precinct);
         } catch (NoSuchElementException e) {

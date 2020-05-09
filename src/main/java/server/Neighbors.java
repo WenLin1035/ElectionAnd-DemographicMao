@@ -43,14 +43,14 @@ public class Neighbors {
         return id;
     }
     
-    @ManyToOne(fetch=FetchType.LAZY)
+    @ManyToOne(fetch=FetchType.LAZY,cascade=CascadeType.ALL)
     @JoinColumn(name="first_precinct_id")
     @JsonBackReference
     public Precincts getFirstPrecinct(){
         return firstPrecinct;
     }
     
-    @ManyToOne(fetch=FetchType.LAZY)
+    @ManyToOne(fetch=FetchType.LAZY,cascade=CascadeType.ALL)
     @JoinColumn(name="second_precinct_id")
     public Precincts getSecondPrecinct(){
         return secondPrecinct;

@@ -88,6 +88,14 @@ and open the template in the editor.
                             <button onclick="setGhostPrecinct()">Yes</button><br/>
                             <button onclick="openChangeDataSection()">Set Data</button>
                         </div>
+                        <div id="votAnomSection" style="display:none">
+                            Voting Anomaly<br/>
+                            <button onclick="openChangeDataSection()">Set Data</button>
+                        </div>
+                        <div id="demAnomSection" style="display:none">
+                            Demographic Anomaly<br/>
+                            <button onclick="openChangeDataSection()">Set Data</button>
+                        </div>
                     </div>
                     <br>
                     <label for="commentArea">Comments:</label><br>
@@ -291,6 +299,9 @@ and open the template in the editor.
             else if(feature.properties.error.errorType=="VOTANOM"){
                 whatError="Voting Anomaly Found";
             }
+            else if(feature.properties.error.errorType=="DEMANOM"){
+                whatError="Demographic Anomaly Found";
+            }
             let secondPart=" ["+feature.properties.name+"]</button></div>";
             document.getElementById("errorLog").innerHTML+=firstPart+whatError+secondPart;
         }
@@ -357,6 +368,22 @@ and open the template in the editor.
         function addNeighbors(){
             let selectedPrecinctName=document.getElementById("selectedPrecinct").innerHTML;
             let secondPrecinctName=document.getElementById("selectedNeighbor").innerHTML;
+            if(secondPrecinctName=="")return;
+            console.log(selectedPrecinctName);
+            console.log(secondPrecinctName);
+//            let firstPrecinct=precincts[selectedPrecinctName].feature;
+//            let secondPrecinct=precincts[secondPrecinctName].feature;
+//            let neighbors=firstPrecinct.properties.neighbors;
+//            let addedNeighbor={};
+//            addedNeighbor.secondPrecinct=preparePrecinctToSend(secondPrecinct);
+//            neighbors.push(addedNeighbor);
+            //updatePrecinct(firstPrecinct.properties.id,preparePrecinctToSend(firstPrecinct));
+        }
+        function deleteNeighbors(){
+            let selectedPrecinctName=document.getElementById("selectedPrecinct").innerHTML;
+            let secondPrecinctName=document.getElementById("selectedNeighbor").innerHTML;
+            console.log(selectedPrecinctName);
+            console.log(secondPrecinctName);
         }
         function openChangeDataSection(){
             let selectedPrecinct=document.getElementById("selectedPrecinct").innerHTML;
@@ -607,6 +634,7 @@ and open the template in the editor.
             return newState;
         }
         function preparePrecinctToUse(precinct){
+            console.log(precinct["name"]);
             let precinctShape=JSON.parse(precinct["shape_geojson"]);
             let newPrecinct={};
             newPrecinct["type"]="Feature";
@@ -1081,6 +1109,8 @@ and open the template in the editor.
             console.log(error.errorType);
             document.getElementById("errorSection").style.display="block";
             document.getElementById("ghostSection").style.display="none";
+            document.getElementById("votAnomSection").style.display="none";
+            document.getElementById("demAnomSection").style.display="none";
             
             switch(error.errorType){
                 case "GHOST":
@@ -1102,7 +1132,10 @@ and open the template in the editor.
                         <button onclick='mergePrecincts(precincts[\""+featureName+"\"])'>Yes</button>";
                     break;
                 case "VOTANOM":
-                    console.log("hi");
+                    document.getElementById("votAnomSection").style.display="block";
+                    break;
+                case "DEMANOM":
+                    document.getElementById("detAnomSection").style.display="block";
                     break;
                 default:
                     document.getElementById("errorSection").style.display="none";
@@ -1132,6 +1165,22 @@ and open the template in the editor.
             changePrecinctVotingData(selectedFeature,pres16Dem,pres16Rep,pres16Oth,cong16Dem,cong16Rep,cong16Oth,cong18Dem,cong18Rep,cong18Oth);
             changePrecinctDemographicData(selectedFeature,whiteVotePop,blackVotePop,asianVotePop,hispanicVotePop,otherVotePop);
             
+            let elections=selectedFeature.properties.election;
+            let pres16=[];
+            let cong16=[];
+            let cong18=[];
+            for(let i=0;i<elections.length;i++){
+                if(elections[i].type=="PRES" && elections[i].year=="2016"){
+                    pres16=elections[i];
+                }
+                if(elections[i].type=="CONG" && elections[i].year=="2016"){
+                    cong16=elections[i];
+                }
+                if(elections[i].type=="CONG" && elections[i].year=="2018"){
+                    cong18=elections[i];
+                }
+            }
+            
             //changes the name of the feature, removes the name off the dropdown, and adds the new name in
             if(selectedValue!=document.getElementById("precinctName").value){
                 selectedFeature.properties.name=document.getElementById("precinctName").value;
@@ -1142,7 +1191,25 @@ and open the template in the editor.
             }
             showPrecinctOnClick(selectedLayer,selectedFeature);
             if(selectedFeature.properties.error!=undefined){
-                if(selectedFeature.properties.error.errorType=="GHOST" && document.getElementById("pres16Dem").value!=0){
+                if(selectedFeature.properties.error.errorType=="GHOST" && selectedFeature.properties.demographic.pop100!=0 && pres16.tot!=0 && cong16.tot!=0 && cong18.tot!=0){
+                    let selectedError=document.getElementById(selectedValue+"_error");
+                    if(selectedError!=undefined){
+                        selectedError.parentNode.removeChild(selectedError);
+                        document.getElementById("currentError").style.display="none";
+                        document.getElementById("errorSection").style.display="none";
+                    }
+                    updateError(selectedFeature);
+                }
+                else if(selectedFeature.properties.error.errorType=="VOTANOM" && pres16.tot!=0 && cong16.tot!=0 && cong18.tot!=0){
+                    let selectedError=document.getElementById(selectedValue+"_error");
+                    if(selectedError!=undefined){
+                        selectedError.parentNode.removeChild(selectedError);
+                        document.getElementById("currentError").style.display="none";
+                        document.getElementById("errorSection").style.display="none";
+                    }
+                    updateError(selectedFeature);
+                }
+                else if(selectedFeature.properties.error.errorType=="DEMANOM" && selectedFeature.properties.demographic.pop100!=0){
                     let selectedError=document.getElementById(selectedValue+"_error");
                     if(selectedError!=undefined){
                         selectedError.parentNode.removeChild(selectedError);
