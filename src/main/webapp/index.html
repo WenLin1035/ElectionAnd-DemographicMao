@@ -360,7 +360,9 @@ and open the template in the editor.
                     edittingNeighbors=false;
                     neighborSection.style.display="none";
                     let neighboringLayer=precincts[document.getElementById("selectedNeighbor").innerHTML];
-                    neighboringLayer.setStyle(setShapeColor(neighboringLayer,"OLD_PREC_STYLE"));
+                    if(neighboringLayer!=undefined){
+                        neighboringLayer.setStyle(setShapeColor(neighboringLayer,"OLD_PREC_STYLE"));
+                    }
                     document.getElementById("selectedNeighbor").innerHTML="";
                 }
             }
@@ -371,9 +373,21 @@ and open the template in the editor.
             if(secondPrecinctName=="")return;
             console.log(selectedPrecinctName);
             console.log(secondPrecinctName);
-//            let firstPrecinct=precincts[selectedPrecinctName].feature;
-//            let secondPrecinct=precincts[secondPrecinctName].feature;
-//            let neighbors=firstPrecinct.properties.neighbors;
+            let firstPrecinct=precincts[selectedPrecinctName].feature;
+            let secondPrecinct=precincts[secondPrecinctName].feature;
+            let neighbors=firstPrecinct.properties.neighbors;
+            console.log(neighbors);
+            neighborExist=false;
+            for(let i=0;i<neighbors.length;i++){
+                let precinctName=neighbors[i].secondPrecinct.name;
+                let selectedLayer=precincts[precinctName];
+                if(precincts[precinctName].feature.properties.id==secondPrecinct.properties.id){
+                    neighborExist=true;
+                }
+            }
+            if(!neighborExist){
+                sendAddedNeighbor(firstPrecinct,secondPrecinct.properties.id);
+            }
 //            let addedNeighbor={};
 //            addedNeighbor.secondPrecinct=preparePrecinctToSend(secondPrecinct);
 //            neighbors.push(addedNeighbor);
@@ -382,8 +396,44 @@ and open the template in the editor.
         function deleteNeighbors(){
             let selectedPrecinctName=document.getElementById("selectedPrecinct").innerHTML;
             let secondPrecinctName=document.getElementById("selectedNeighbor").innerHTML;
+            if(secondPrecinctName=="")return;
             console.log(selectedPrecinctName);
             console.log(secondPrecinctName);
+            let firstPrecinct=precincts[selectedPrecinctName].feature;
+            let secondPrecinct=precincts[secondPrecinctName].feature;
+            let neighbors=firstPrecinct.properties.neighbors;
+            console.log(neighbors);
+            neighborExist=false;
+            for(let i=0;i<neighbors.length;i++){
+                let precinctName=neighbors[i].secondPrecinct.name;
+                let selectedLayer=precincts[precinctName];
+                if(precincts[precinctName].feature.properties.id==secondPrecinct.properties.id){
+                    neighborExist=true;
+                }
+            }
+            if(neighborExist){
+                sendDeletedNeighbor(firstPrecinct,secondPrecinct.properties.id);
+            }
+//            let addedNeighbor={};
+//            addedNeighbor.secondPrecinct=preparePrecinctToSend(secondPrecinct);
+//            neighbors.push(addedNeighbor);
+            //updatePrecinct(firstPrecinct.properties.id,preparePrecinctToSend(firstPrecinct));
+        }
+        function sendAddedNeighbor(firstFeature,secondID){
+            let addNeighborRequest=new XMLHttpRequest();
+            addNeighborRequest.open('POST','http://localhost:8080/addNeighbors/'+firstFeature.properties.id+"/"+secondID);
+            addNeighborRequest.onload=()=>{
+                loadNeighbors(firstFeature);
+            };
+            addNeighborRequest.send();
+        }
+        function sendDeletedNeighbor(firstFeature,secondID){
+            let addNeighborRequest=new XMLHttpRequest();
+            addNeighborRequest.open('DELETE','http://localhost:8080/deleteNeighbors/'+firstFeature.properties.id+"/"+secondID);
+            addNeighborRequest.onload=()=>{
+                loadNeighbors(firstFeature);
+            };
+            addNeighborRequest.send();
         }
         function openChangeDataSection(){
             let selectedPrecinct=document.getElementById("selectedPrecinct").innerHTML;
@@ -634,7 +684,6 @@ and open the template in the editor.
             return newState;
         }
         function preparePrecinctToUse(precinct){
-            console.log(precinct["name"]);
             let precinctShape=JSON.parse(precinct["shape_geojson"]);
             let newPrecinct={};
             newPrecinct["type"]="Feature";
@@ -781,15 +830,10 @@ and open the template in the editor.
             if(selectedPrecinct=="") return;
             let selectedLayer=precincts[selectedPrecinct];
             let selectedFeature=selectedLayer.feature;
-            if(selectedFeature.properties.neighbors==undefined){
-                loadNeighborsForPrecinct(selectedFeature).then(response=>{
-                    selectedFeature.properties.neighbors=response;
-                    showNeighbors(selectedFeature);
-                });
-            }
-            else{
+            loadNeighborsForPrecinct(selectedFeature).then(response=>{
+                selectedFeature.properties.neighbors=response;
                 showNeighbors(selectedFeature);
-            }
+            });
         }
         function showNeighbors(selectedFeature){
             let neighbors=selectedFeature.properties.neighbors;

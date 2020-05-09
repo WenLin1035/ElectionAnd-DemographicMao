@@ -178,14 +178,40 @@ public class PrecinctController {
                     n.setSecondPrecinct(precinct);
                 }
             }
+            precinctService.save(precinct);
             if(precinct.getError()!=null){
                 if(precinct.getError().getErrorType().equals("RESOLVED")){
                     unfixedErrorsService.deleteById(precinct.getId());
                 }
             }
-            precinctService.save(precinct);
         } catch (NoSuchElementException e) {
         }      
+    }
+    
+    @PostMapping("/addNeighbors/{id1}/{id2}")
+    public void addNeighbor(@PathVariable String id1, @PathVariable String id2){
+        Precincts firstPrecinct=precinctService.findById(Integer.parseInt(id1)).get();
+        Precincts secondPrecinct=precinctService.findById(Integer.parseInt(id2)).get();
+        Neighbors newNeighbor=new Neighbors();
+        newNeighbor.setFirstPrecinct(firstPrecinct);
+        newNeighbor.setSecondPrecinct(secondPrecinct);
+        neighborService.save(newNeighbor);
+    }
+    
+    // RESTful API method for Delete operation
+    @DeleteMapping("/deleteNeighbors/{id1}/{id2}")
+    public void deleteNeighbor(@PathVariable String id1, @PathVariable String id2) {
+        Precincts firstPrecinct=precinctService.findById(Integer.parseInt(id1)).get();
+        Precincts secondPrecinct=precinctService.findById(Integer.parseInt(id2)).get();
+        Neighbors toDelete=neighborService.findByFirstPrecinctAndSecondPrecinct(firstPrecinct, secondPrecinct);
+        if(toDelete==null){
+            toDelete=neighborService.findByFirstPrecinctAndSecondPrecinct(secondPrecinct, firstPrecinct);
+            System.out.println(toDelete.getId());
+            neighborService.deleteById(toDelete.getId());
+        }
+        else{
+            neighborService.deleteById(toDelete.getId());
+        }
     }
     
     // RESTful API method for Create operation

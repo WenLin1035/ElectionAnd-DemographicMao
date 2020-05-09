@@ -14,4 +14,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 public interface NeighborsRepo extends JpaRepository<Neighbors, Integer> {
     List<Neighbors> findBySecondPrecinct(Precincts precinct);
+    Neighbors findByFirstPrecinctAndSecondPrecinct(Precincts first, Precincts second);
 }
