@@ -206,7 +206,6 @@ public class PrecinctController {
         Neighbors toDelete=neighborService.findByFirstPrecinctAndSecondPrecinct(firstPrecinct, secondPrecinct);
         if(toDelete==null){
             toDelete=neighborService.findByFirstPrecinctAndSecondPrecinct(secondPrecinct, firstPrecinct);
-            System.out.println(toDelete.getId());
             neighborService.deleteById(toDelete.getId());
         }
         else{
@@ -223,12 +222,12 @@ public class PrecinctController {
     }
     
     @Transactional
-    @PutMapping("/merge/{name1}/{name2}")
-    public ResponseEntity<?> merge(@RequestBody Precincts newPrecinct, @PathVariable String enclosingPrecinctID, @PathVariable String enclosedPrecinctID){
+    @PutMapping("/merge/{id1}/{id2}")
+    public ResponseEntity<?> merge(@RequestBody Precincts newPrecinct, @PathVariable String id1, @PathVariable String id2){
         try {
-            //delete precinct 1
-            //delete precinct 2
-            //add new precinct
+            update(newPrecinct, id2);
+            deleteNeighbor(id1, id2);
+            precinctService.deleteById(Integer.parseInt(id1));
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (NoSuchElementException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

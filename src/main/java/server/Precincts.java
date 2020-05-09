@@ -60,7 +60,7 @@ public class Precincts {
         return demographic;
     }
     
-    @OneToMany(cascade=CascadeType.ALL,mappedBy="precinct")
+    @OneToMany(cascade=CascadeType.ALL,mappedBy="precinct",orphanRemoval=true)
     public List<Elections> getElections(){
         return elections;
     }

@@ -110,6 +110,7 @@ and open the template in the editor.
                     <button onclick="openChangeDataSection()" style="width:auto;">Change Data</button><br>
                     <button onclick="document.getElementById('bordersPopup').style.display='block'">Fix Borders</button><br>
                     <button onclick="openNeighborSection()">Edit Neighbors</button>
+                    <button onclick="openMergingSection()">Open "Merge Precincts" Section</button>
                     <br>
                 </div>
                 <div id="neighborSection" style="display:none">
@@ -451,7 +452,7 @@ and open the template in the editor.
             let addNeighborRequest=new XMLHttpRequest();
             addNeighborRequest.open('POST','http://localhost:8080/addNeighbors/'+firstFeature.properties.id+"/"+secondID);
             addNeighborRequest.onload=()=>{
-                loadNeighbors(firstFeature);
+                loadNeighbors();
             };
             addNeighborRequest.send();
         }
@@ -459,7 +460,7 @@ and open the template in the editor.
             let addNeighborRequest=new XMLHttpRequest();
             addNeighborRequest.open('DELETE','http://localhost:8080/deleteNeighbors/'+firstFeature.properties.id+"/"+secondID);
             addNeighborRequest.onload=()=>{
-                loadNeighbors(firstFeature);
+                loadNeighbors();
             };
             addNeighborRequest.send();
         }
@@ -857,8 +858,9 @@ and open the template in the editor.
             mymap.setView(new L.LatLng(centerCoords[1],centerCoords[0]),precinctZoomLevel);
         }
         function loadNeighbors(){
-            let selectedPrecinct=document.getElementById("selectedPrecinct").innerHTML;
+            selectedPrecinct=document.getElementById("selectedPrecinct").innerHTML;            
             if(selectedPrecinct=="") return;
+
             let selectedLayer=precincts[selectedPrecinct];
             let selectedFeature=selectedLayer.feature;
             loadNeighborsForPrecinct(selectedFeature).then(response=>{
@@ -1068,6 +1070,7 @@ and open the template in the editor.
         }
         function onClick(e){
             let selectedName=e.target.feature.properties.name;
+            console.log(selectedName);
             if(editingNeighbors){
                 let selectedLayer=precincts[selectedName];
                 if(document.getElementById("selectedNeighbor").innerHTML!=""){
@@ -1092,6 +1095,7 @@ and open the template in the editor.
             }
         }
         function updateError(feature){
+            if(feature.properties.error==undefined)return;
             let newError={};
             let today = new Date();
             let dateTime = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate()+" "+today.getHours() + ":" + today.getMinutes()+":"+today.getSeconds();
@@ -1178,19 +1182,18 @@ and open the template in the editor.
             secondPrecinct.properties="";
             let newPrecinct=turf.union(firstPrecinct,secondPrecinct);
             
-            newPrecinct.properties=firstProperties;
+            newPrecinct.properties=secondProperties;
             let properties=newPrecinct.properties;
-            console.log(properties);
             let demographics=properties.demographic;
             
-            demographics.aminov18 += secondProperties.demographic.aminov18;
-            demographics.asianov18 += secondProperties.demographic.asianov18;
-            demographics.blackov18 += secondProperties.demographic.blackov18;
-            demographics.hawov18 += secondProperties.demographic.hawov18;
-            demographics.hisov18 += secondProperties.demographic.hisov18;
-            demographics.otherov18 += secondProperties.demographic.otherov18;
-            demographics.pop100 += secondProperties.demographic.pop100;
-            demographics.whiteov18 += secondProperties.demographic.whiteov18;
+            demographics.aminov18 += firstProperties.demographic.aminov18;
+            demographics.asianov18 += firstProperties.demographic.asianov18;
+            demographics.blackov18 += firstProperties.demographic.blackov18;
+            demographics.hawov18 += firstProperties.demographic.hawov18;
+            demographics.hisov18 += firstProperties.demographic.hisov18;
+            demographics.otherov18 += firstProperties.demographic.otherov18;
+            demographics.pop100 += firstProperties.demographic.pop100;
+            demographics.whiteov18 += firstProperties.demographic.whiteov18;
             
             let elections=properties.election;
             let newpres16=[];
@@ -1201,14 +1204,14 @@ and open the template in the editor.
                 if(elections[i].type=="CONG" && elections[i].year=="2016") newcong16=elections[i];
                 if(elections[i].type=="CONG" && elections[i].year=="2018") newcong18=elections[i];
             }
-            let secondElections=secondProperties.election;
+            let secondElections=firstProperties.election;
             let secpres16=[];
             let seccong16=[];
             let seccong18=[];
             for(let i=0;i<secondElections.length;i++){
-                if(secondElections[i].type=="PRES" && secondElections[i].year=="2016") secpres16=elections[i];
-                if(secondElections[i].type=="CONG" && secondElections[i].year=="2016") seccong16=elections[i];
-                if(secondElections[i].type=="CONG" && secondElections[i].year=="2018") seccong18=elections[i];
+                if(secondElections[i].type=="PRES" && secondElections[i].year=="2016") secpres16=secondElections[i];
+                if(secondElections[i].type=="CONG" && secondElections[i].year=="2016") seccong16=secondElections[i];
+                if(secondElections[i].type=="CONG" && secondElections[i].year=="2018") seccong18=secondElections[i];
             }
             newpres16.dem += secpres16.dem;
             newpres16.rep += secpres16.rep;
@@ -1222,24 +1225,40 @@ and open the template in the editor.
             newcong18.rep += seccong18.rep;
             newcong18.other += seccong18.other;
             newcong18.tot += seccong18.tot;
-            console.log(newPrecinct);
-
-            console.log(firstProperties.name);
+            
             let errorDiv=document.getElementById("currentError");
             errorDiv.style.display="none";
             document.getElementById("errorSection").style.display="none";
 //              
-            firstLayer.feature=newPrecinct;
+            firstLayer.remove();
+            precinctLayer.removeLayer(firstLayer);
             secondLayer.remove();
             precinctLayer.removeLayer(secondLayer);
             delete precincts[secondPrecinctName];
-            precincts[selectedPrecinctName]=firstLayer;
+            delete precincts[selectedPrecinctName];
+            precinctLayer.addData(newPrecinct);
+            loadPrecinctDictionary();
             document.getElementById("mergingSection").style.display="none";
             mergingPrecincts=false;
             console.log(newPrecinct);
-//            
-//            updateError(feature);
-//            updatePrecinct(feature.properties.id,newPrecinct);
+            
+
+            firstPrecinct.properties=firstProperties;
+            loadNeighborsForPrecinct(newPrecinct).then(response=>{
+                newPrecinct.properties.neighbors=response;
+                showNeighbors(newPrecinct);            
+                updateError(firstPrecinct);
+                mergePrec(firstProperties.id,newPrecinct.properties.id,preparePrecinctToSend(newPrecinct));
+            });
+        }
+        function mergePrec(id,id2,feature){
+            let mergeRequest=new XMLHttpRequest();
+            mergeRequest.open('PUT','http://localhost:8080/merge/'+id+"/"+id2);            
+            if(feature){
+                mergeRequest.setRequestHeader('Content-Type','application/json');
+            }
+            let newPrec=JSON.stringify(feature);
+            mergeRequest.send(newPrec);
         }
         function showError(layer,error){
             let featureName=layer.feature.properties.name;
@@ -1252,7 +1271,7 @@ and open the template in the editor.
             document.getElementById("votAnomSection").style.display="none";
             document.getElementById("demAnomSection").style.display="none";
             document.getElementById("mergeSection").style.display="none";
-            
+            console.log(error.errorType);
             switch(error.errorType){
                 case "GHOST":
                     document.getElementById("ghostSection").style.display="block";
