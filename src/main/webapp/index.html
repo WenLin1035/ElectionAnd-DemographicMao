@@ -100,6 +100,14 @@ and open the template in the editor.
                             Merge Precinct<br/>
                             <button onclick="openMergingSection()">Open "Merge Precincts" Section</button>
                         </div>
+                        <div id="multiSection" style="display:none">
+                            Multi-polygon<br/>
+                            <button onclick="setNotError()">Not an Error</button>
+                        </div>
+                        <div id="gapIntersectSection" style="display:none">
+                            Precinct Gap/Intersection
+                            <button onclick="editBorder()">Edit Border</button>
+                        </div>
                     </div>
                     <br>
                     <label for="commentArea">Comments:</label><br>
@@ -314,6 +322,15 @@ and open the template in the editor.
             }
             else if(feature.properties.error.errorType=="ENCLOSED"){
                 whatError="Enclosed Precinct Found";
+            }
+            else if(feature.properties.error.errorType=="MULTI"){
+                whatError="Multi-Polygon Precinct Found";
+            }
+            else if(feature.properties.error.errorType=="GAP"){
+                whatError="Precinct Gap Found";
+            }
+            else if(feature.properties.error.errorType=="INTERSECT"){
+                whatError="Precinct Intersection Found";
             }
             let secondPart=" ["+feature.properties.name+"]</button></div>";
             document.getElementById("errorLog").innerHTML+=firstPart+whatError+secondPart;
@@ -593,6 +610,7 @@ and open the template in the editor.
             secondSelectedPrecinctName="";
             editingNeighbors=false;
             mergingPrecincts=false;
+            editingBorder=false;
             document.getElementById("errorSection").style.display="none";
             document.getElementById("optionSection").style.display="none";
             document.getElementById("neighborSection").style.display="none";
@@ -1087,6 +1105,9 @@ and open the template in the editor.
                 document.getElementById("selectedMerger").innerHTML=selectedName;
                 selectedLayer.setStyle(setShapeColor(selectedLayer,"NEW_PREC_STYLE"));
             }
+            else if(editingBorder){
+                
+            }
             else{
                 document.getElementById("selectedPrecinct").innerHTML=selectedName;
                 precMenuChange(selectedName);
@@ -1110,8 +1131,11 @@ and open the template in the editor.
             else if(newError.errorType=="DEMANOM"){
                 newError.relevantInfo=JSON.stringify(feature.properties.demographic);
             }
-            else if(newError.errorType=="ENCLOSED"){
+            else if(newError.errorType=="ENCLOSED" || newError.errorType=="GAP" || newError.errorType=="INTERSECT"){
                 newError.relevantInfo=JSON.stringify(feature.geometry);
+            }
+            else if(newError.errorType=="MULTI"){
+                newError.relevantInfo="";
             }
             let preparedError=feature.properties.error;
             document.getElementById("errorLog").innerHTML+="<div style=\'border-style:solid\'>Error Resolved on: "+feature.properties.name+" from ERROR: "+feature.properties.error.errorType+". <br/> Optional Comment: "+comment+"</div><br/>";
@@ -1128,6 +1152,22 @@ and open the template in the editor.
             let error=JSON.stringify(newError);
             console.log(error);
             errorRequest.send(error);
+        }
+        function editBorder(){
+            let selectedPrecinctName=document.getElementById("selectedPrecinct").innerHTML;
+            if(selectedPrecinctName=="")return;
+            let layer=precincts[selectedPrecinctName];
+            let feature=layer.feature;
+            let featureID=feature.properties.id;
+            layer.pm.toggleEdit();
+            if(!layer.pm.enabled()){
+                updateError(feature);
+                updatePrecinct(featureID,preparePrecinctToSend(layer.toGeoJSON()));
+                editingBorder=false;
+            }
+            else{
+                editingBorder=true;
+            }
         }
         function setNotError(){
             let selectedPrecinctName=document.getElementById("selectedPrecinct").innerHTML;
@@ -1270,6 +1310,7 @@ and open the template in the editor.
             document.getElementById("votAnomSection").style.display="none";
             document.getElementById("demAnomSection").style.display="none";
             document.getElementById("mergeSection").style.display="none";
+            document.getElementById("gapIntersectSection").style.display="none";
             errorDiv.style.display="block";
             console.log(error.errorType);
             switch(error.errorType){
@@ -1284,6 +1325,15 @@ and open the template in the editor.
                     break;
                 case "DEMANOM":
                     document.getElementById("detAnomSection").style.display="block";
+                    break;
+                case "MULTI":
+                    document.getElementById("multiSection").style.display="block";
+                    break;
+                case "GAP":
+                    document.getElementById("gapIntersectSection").style.display="block";
+                    break;
+                case "INTERSECT":
+                    document.getElementById("gapIntersectSection").style.display="block";
                     break;
                 default:
                     document.getElementById("errorSection").style.display="none";
