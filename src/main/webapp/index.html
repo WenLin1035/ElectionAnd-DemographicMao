@@ -431,6 +431,7 @@ and open the template in the editor.
                 }
             }
             if(neighborExist){
+                changeFeatColor(secondPrecinct,precincts[secondPrecinctName]);
                 sendDeletedNeighbor(firstPrecinct,secondPrecinct.properties.id);
             }
 //            let addedNeighbor={};
@@ -1133,10 +1134,10 @@ and open the template in the editor.
             let feature=layer.feature;
             let featureID=feature.properties.id;
             layer.pm.toggleEdit({
-                limitMarkersToCount:50
+                limitMarkersToCount:20
             });
             if(!layer.pm.enabled()){
-                if(feature.properties.error.errorType=="GAP" || feature.properties.error.errorType=="INTERSECT"){
+                if(feature.properties.error!=undefined && feature.properties.error.errorType=="GAP" || feature.properties.error.errorType=="INTERSECT"){
                     updateError(feature);
                 }
                 updatePrecinct(featureID,preparePrecinctToSend(layer.toGeoJSON()));
@@ -1156,7 +1157,9 @@ and open the template in the editor.
             let errorDiv=document.getElementById("currentError");
             errorDiv.style.display="none";
             document.getElementById("errorSection").style.display="none";
-            updateError(feature);
+            if(feature.properties.error!=undefined){
+                updateError(feature);
+            }
             updatePrecinct(featureID,preparePrecinctToSend(feature));
             changeFeatColor(feature,layer);
         }
