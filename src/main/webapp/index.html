@@ -116,9 +116,10 @@ and open the template in the editor.
                 <div id="optionSection">
                     <p>Options:</p>
                     <button onclick="openChangeDataSection()" style="width:auto;">Change Data</button><br>
-                    <button onclick="openNeighborSection()">Edit Neighbors</button>
-                    <button onclick="openMergingSection()">Open "Merge Precincts" Section</button>
-                    <button onclick="editBorder()">Edit Border</button>
+                    <button onclick="openNeighborSection()">Edit Neighbors</button><br>
+                    <button onclick="openMergingSection()">Open "Merge Precincts" Section</button><br>
+                    <button onclick="editBorder()">Edit Border</button><br>           
+                    <button onclick="setNotError()">Set As Not an Error</button><br>
                     <br>
                 </div>
                 <div id="neighborSection" style="display:none">
@@ -1132,7 +1133,9 @@ and open the template in the editor.
                 limitMarkersToCount:50
             });
             if(!layer.pm.enabled()){
-                updateError(feature);
+                if(feature.properties.error.errorType=="GAP" || feature.properties.error.errorType=="INTERSECT"){
+                    updateError(feature);
+                }
                 updatePrecinct(featureID,preparePrecinctToSend(layer.toGeoJSON()));
                 editingBorder=false;
             }
@@ -1255,8 +1258,10 @@ and open the template in the editor.
             firstPrecinct.properties=firstProperties;
             loadNeighborsForPrecinct(newPrecinct).then(response=>{
                 newPrecinct.properties.neighbors=response;
-                showNeighbors(newPrecinct);            
-                updateError(firstPrecinct);
+                showNeighbors(newPrecinct);
+                if(firstProperties.properties.error.errorType=="ENCLOSED"){
+                    updateError(firstPrecinct);
+                }
                 mergePrec(firstProperties.id,newPrecinct.properties.id,preparePrecinctToSend(newPrecinct));
             });
         }
