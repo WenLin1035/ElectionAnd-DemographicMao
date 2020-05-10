@@ -393,7 +393,7 @@ and open the template in the editor.
         function addNeighbors(){
             let selectedPrecinctName=document.getElementById("selectedPrecinct").innerHTML;
             let secondPrecinctName=document.getElementById("selectedNeighbor").innerHTML;
-            if(secondPrecinctName=="")return;
+            if(secondPrecinctName=="" || secondPrecinctName==selectedPrecinctName)return;
             console.log(selectedPrecinctName);
             console.log(secondPrecinctName);
             let firstPrecinct=precincts[selectedPrecinctName].feature;
@@ -415,7 +415,7 @@ and open the template in the editor.
         function deleteNeighbors(){
             let selectedPrecinctName=document.getElementById("selectedPrecinct").innerHTML;
             let secondPrecinctName=document.getElementById("selectedNeighbor").innerHTML;
-            if(secondPrecinctName=="")return;
+            if(secondPrecinctName=="" || secondPrecinctName==selectedPrecinctName)return;
             console.log(selectedPrecinctName);
             console.log(secondPrecinctName);
             let firstPrecinct=precincts[selectedPrecinctName].feature;
@@ -1137,7 +1137,7 @@ and open the template in the editor.
                 limitMarkersToCount:20
             });
             if(!layer.pm.enabled()){
-                if(feature.properties.error!=undefined && feature.properties.error.errorType=="GAP" || feature.properties.error.errorType=="INTERSECT"){
+                if(feature.properties.error!=undefined && (feature.properties.error.errorType=="GAP" || feature.properties.error.errorType=="INTERSECT")){
                     updateError(feature);
                 }
                 updatePrecinct(featureID,preparePrecinctToSend(layer.toGeoJSON()));
@@ -1266,7 +1266,7 @@ and open the template in the editor.
             loadNeighborsForPrecinct(newPrecinct).then(response=>{
                 newPrecinct.properties.neighbors=response;
                 showNeighbors(newPrecinct);
-                if(firstProperties.properties.error.errorType=="ENCLOSED"){
+                if(firstProperties.error.errorType=="ENCLOSED"){
                     updateError(firstPrecinct);
                 }
                 mergePrec(firstProperties.id,newPrecinct.properties.id,preparePrecinctToSend(newPrecinct));
