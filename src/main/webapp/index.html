@@ -1266,7 +1266,7 @@ and open the template in the editor.
             loadNeighborsForPrecinct(newPrecinct).then(response=>{
                 newPrecinct.properties.neighbors=response;
                 showNeighbors(newPrecinct);
-                if(firstProperties.error.errorType=="ENCLOSED"){
+                if(firstProperties.error!=undefined && firstProperties.error.errorType=="ENCLOSED"){
                     updateError(firstPrecinct);
                 }
                 mergePrec(firstProperties.id,newPrecinct.properties.id,preparePrecinctToSend(newPrecinct));
