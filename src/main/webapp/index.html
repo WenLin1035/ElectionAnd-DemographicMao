@@ -91,14 +91,17 @@ and open the template in the editor.
                         <div id="votAnomSection" style="display:none">
                             Voting Anomaly<br/>
                             <button onclick="openChangeDataSection()">Set Data</button>
+                            <button onclick="setNotError()">Set As Not an Error</button><br>
                         </div>
                         <div id="demAnomSection" style="display:none">
                             Demographic Anomaly<br/>
                             <button onclick="openChangeDataSection()">Set Data</button>
+                            <button onclick="setNotError()">Set As Not an Error</button><br>
                         </div>
                         <div id="mergeSection" style="display:none">
                             Merge Precinct<br/>
                             <button onclick="openMergingSection()">Open "Merge Precincts" Section</button>
+                            <button onclick="setNotError()">Set As Not an Error</button><br>
                         </div>
                         <div id="multiSection" style="display:none">
                             Multi-polygon<br/>
@@ -107,6 +110,7 @@ and open the template in the editor.
                         <div id="gapIntersectSection" style="display:none">
                             Precinct Gap/Intersection
                             <button onclick="editBorder()">Edit Border</button>
+                            <button onclick="setNotError()">Set As Not an Error</button><br>
                         </div>
                     </div>
                     <br>
@@ -119,7 +123,6 @@ and open the template in the editor.
                     <button onclick="openNeighborSection()">Edit Neighbors</button><br>
                     <button onclick="openMergingSection()">Open "Merge Precincts" Section</button><br>
                     <button onclick="editBorder()">Edit Border</button><br>           
-                    <button onclick="setNotError()">Set As Not an Error</button><br>
                     <br>
                 </div>
                 <div id="neighborSection" style="display:none">
@@ -1155,6 +1158,7 @@ and open the template in the editor.
             document.getElementById("errorSection").style.display="none";
             updateError(feature);
             updatePrecinct(featureID,preparePrecinctToSend(feature));
+            changeFeatColor(feature,layer);
         }
         function updatePrecinct(selectedID,newPrecinct){
             let precinctRequest=new XMLHttpRequest();
