@@ -1084,7 +1084,7 @@ and open the template in the editor.
             }
         }
         function updateError(feature){
-            if(feature.properties.error==undefined)return;
+            if(feature.properties.error==undefined || feature.properties.error.errorType=="RESOLVED")return;
             let newError={};
             let today = new Date();
             let dateTime = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate()+" "+today.getHours() + ":" + today.getMinutes()+":"+today.getSeconds();
