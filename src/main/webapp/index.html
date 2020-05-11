@@ -109,7 +109,7 @@ and open the template in the editor.
                         </div>
                         <div id="gapIntersectSection" style="display:none">
                             Precinct Gap/Intersection
-                            <button onclick="editBorder()">Edit Border</button>
+                            <button class="editBorderButton" onclick="editBorder()">Edit Border</button>
                             <button onclick="setNotError()">Set As Not an Error</button><br>
                         </div>
                     </div>
@@ -120,9 +120,9 @@ and open the template in the editor.
                 <div id="optionSection">
                     <p>Options:</p>
                     <button onclick="openChangeDataSection()" style="width:auto;">Change Data</button><br>
-                    <button onclick="openNeighborSection()">Edit Neighbors</button><br>
-                    <button onclick="openMergingSection()">Open "Merge Precincts" Section</button><br>
-                    <button onclick="editBorder()">Edit Border</button><br>           
+                    <button id="neighborButton" onclick="openNeighborSection()">Edit Neighbors</button><br>
+                    <button id="mergeButton" onclick="openMergingSection()">Open "Merge Precincts" Section</button><br>
+                    <button  class="editBorderButton" onclick="editBorder()">Edit Border</button><br>           
                     <br>
                 </div>
                 <div id="neighborSection" style="display:none">
@@ -270,6 +270,7 @@ and open the template in the editor.
             function getAllErrors(){
                 let stateName=document.getElementById("States").value;
                 if(stateName=="State") return;
+                if(checkEmpty(precincts)) return;
                 document.getElementById("optionSection").style.display="";
                 let statefp=states[stateName].properties.statefp;
                 loadErrorsForPrecinct(statefp);
@@ -355,20 +356,35 @@ and open the template in the editor.
                 if(selectedPrecinct!=""){
                     let neighborSection=document.getElementById("neighborSection");
                     if(neighborSection.style.display=="none"){
+                        disappearMergingSection();
+                        resetEditBorder();
+                        let allEditBorderButtons=document.getElementsByClassName("editBorderButton");
+                        for(let i=0;i<allEditBorderButtons.length;i++){
+                            console.log(allEditBorderButtons);
+                            allEditBorderButtons[i].disabled=true;
+                        }
                         editingNeighbors=true;
                         neighborSection.style.display="";
                     }
                     else{
-                        editingNeighbors=false;
-                        neighborSection.style.display="none";
-                        let neighboringLayer=precincts[document.getElementById("selectedNeighbor").innerHTML];
-                        if(neighboringLayer!=undefined){
-                            neighboringLayer.setStyle(setShapeColor(neighboringLayer,"OLD_PREC_STYLE"));
+                        disappearNeighborSection();
+                        let allEditBorderButtons=document.getElementsByClassName("editBorderButton");
+                        for(let i=0;i<allEditBorderButtons.length;i++){
+                            allEditBorderButtons[i].disabled=false;
                         }
-                        document.getElementById("selectedNeighbor").innerHTML="";
                     }
                 }
-            }        
+            }
+            function disappearNeighborSection(){
+                editingNeighbors=false;
+                let neighborSection=document.getElementById("neighborSection");
+                neighborSection.style.display="none";
+                let neighboringLayer=precincts[document.getElementById("selectedNeighbor").innerHTML];
+                if(neighboringLayer!=undefined){
+                    neighboringLayer.setStyle(setShapeColor(neighboringLayer,"OLD_PREC_STYLE"));
+                }
+                document.getElementById("selectedNeighbor").innerHTML="";
+            }
             function openMergingSection(){
                 let selectedPrecinct=document.getElementById("selectedPrecinct").innerHTML;
                 document.getElementById('precinctName').value = selectedPrecinct;
@@ -377,17 +393,31 @@ and open the template in the editor.
                     if(mergingSection.style.display=="none"){
                         mergingPrecincts=true;
                         mergingSection.style.display="";
+                        resetEditBorder();
+                        disappearNeighborSection();
+                        let allEditBorderButtons=document.getElementsByClassName("editBorderButton");
+                        for(let i=0;i<allEditBorderButtons.length;i++){
+                            allEditBorderButtons[i].disabled=true;
+                        }
                     }
                     else{
-                        mergingPrecincts=false;
-                        mergingSection.style.display="none";
-                        let mergingLayer=precincts[document.getElementById("selectedMerger").innerHTML];
-                        if(mergingLayer!=undefined){
-                            mergingLayer.setStyle(setShapeColor(mergingLayer,"OLD_PREC_STYLE"));
+                        disappearMergingSection();
+                        let allEditBorderButtons=document.getElementsByClassName("editBorderButton");
+                        for(let i=0;i<allEditBorderButtons.length;i++){
+                            allEditBorderButtons[i].disabled=false;
                         }
-                        document.getElementById("selectedMerger").innerHTML="";
                     }
                 }
+            }
+            function disappearMergingSection(){
+                let mergingSection=document.getElementById("mergingSection");
+                mergingPrecincts=false;
+                mergingSection.style.display="none";
+                let mergingLayer=precincts[document.getElementById("selectedMerger").innerHTML];
+                if(mergingLayer!=undefined){
+                    mergingLayer.setStyle(setShapeColor(mergingLayer,"OLD_PREC_STYLE"));
+                }
+                document.getElementById("selectedMerger").innerHTML="";
             }
             function addNeighbors(){
                 let selectedPrecinctName=document.getElementById("selectedPrecinct").innerHTML;
@@ -406,6 +436,11 @@ and open the template in the editor.
                 }
                 if(!neighborExist){
                     sendAddedNeighbor(firstPrecinct,secondPrecinct.properties.id);
+                    disappearNeighborSection();
+                    let allEditBorderButtons=document.getElementsByClassName("editBorderButton");
+                    for(let i=0;i<allEditBorderButtons.length;i++){
+                        allEditBorderButtons[i].disabled=false;
+                    }
                 }
             }
             function deleteNeighbors(){
@@ -426,6 +461,11 @@ and open the template in the editor.
                 if(neighborExist){
                     changeFeatColor(secondPrecinct,precincts[secondPrecinctName]);
                     sendDeletedNeighbor(firstPrecinct,secondPrecinct.properties.id);
+                    disappearNeighborSection();
+                    let allEditBorderButtons=document.getElementsByClassName("editBorderButton");
+                    for(let i=0;i<allEditBorderButtons.length;i++){
+                        allEditBorderButtons[i].disabled=false;
+                    }
                 }
     //            let addedNeighbor={};
     //            addedNeighbor.secondPrecinct=preparePrecinctToSend(secondPrecinct);
@@ -1136,10 +1176,37 @@ and open the template in the editor.
                         updateError(feature);
                     }
                     updatePrecinct(featureID,preparePrecinctToSend(layer.toGeoJSON()));
-                    editingBorder=false;
+                    resetEditBorder();
+                    document.getElementById("neighborButton").disabled=false;
+                    document.getElementById("mergeButton").disabled=false;
                 }
                 else{
+                    disappearMergingSection();
+                    disappearNeighborSection();
+                    document.getElementById("neighborButton").disabled=true;
+                    document.getElementById("mergeButton").disabled=true;
                     editingBorder=true;
+                    let allEditBorderButtons=document.getElementsByClassName("editBorderButton");
+                    for(let i=0;i<allEditBorderButtons.length;i++){
+                        allEditBorderButtons[i].innerHTML="Save Border";
+                    }
+                }
+            }
+            function resetEditBorder(){
+                editingBorder=false;
+                let allEditBorderButtons=document.getElementsByClassName("editBorderButton");
+                for(let i=0;i<allEditBorderButtons.length;i++){
+                    allEditBorderButtons[i].innerHTML="Edit Border";
+                }
+            }
+            function cancelEditBorder(){
+                let selectedPrecinctName=document.getElementById("selectedPrecinct").innerHTML;
+                if(selectedPrecinctName=="")return;
+                let layer=precincts[selectedPrecinctName];
+                let feature=layer.feature;
+                if(layer.pm.enabled()){
+                    editingBorder=false;
+                    //TO-DO
                 }
             }
             function setNotError(){
@@ -1263,6 +1330,11 @@ and open the template in the editor.
                         updateError(firstPrecinct);
                     }
                     mergePrec(firstProperties.id,newPrecinct.properties.id,preparePrecinctToSend(newPrecinct));
+                    disappearMergingSection();
+                    let allEditBorderButtons=document.getElementsByClassName("editBorderButton");
+                    for(let i=0;i<allEditBorderButtons.length;i++){
+                        allEditBorderButtons[i].disabled=false;
+                    }
                 });
             }
             function mergePrec(id,id2,feature){
