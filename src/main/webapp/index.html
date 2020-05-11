@@ -5,7 +5,7 @@ To change this license header, choose License Headers in Project Properties.
 To change this template file, choose Tools | Templates
 and open the template in the editor.
 -->
-<html>
+<html style="border: solid black;">
     <head>
         <title>State Election and Demographic Data</title>
         <meta charset="UTF-8">
@@ -21,11 +21,21 @@ and open the template in the editor.
         <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
         <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.css" />
     </head>
-    <body onload="initLoad()">
+    <body style="font-family:Helvetica" onload="initLoad()">
+        <div>
+                <div style="visibility: hidden; float:left; width: 42.5%">_</div>
+                <div style="font-size: 40px; float:left;">Election Data Quality</div>
+                <div style="visibility: hidden; float:right;">_</div>
+                <input style="border: solid black;padding-right:15px; padding-left:15px; float:right;" type ="image" src="cog.png" alt="Settings" class="nicebuttons" onclick="document.getElementById('settingsPopup').style.display='block'">
+                <input style="border: solid black;padding-right:15px;padding-left:15px; float:right;" type ="image" src="checklist.png" alt="Settings" class="nicebuttons" >
+                <input style="border: solid black;padding-right:15px; padding-left:15px; float:right;" type ="image" src="ee.png" alt="Errors" class="nicebuttons" onclick="getAllErrors();document.getElementById('errorPopup').style.display='block'">
+                
+        </div>
+        
         <div class="split left">
-            <div class="centered">
+            <div class="centered1">
                 <h3>Information</h3>
-                <div style="padding-bottom:10px">
+                <div style=" padding-bottom:10px">
                     <label for="States" style="font-size: 20px;padding-right: 26px">State:</label>
                     <select id="States" onchange="loadFeature()"> <!-- needs to be replaced by data from DB -->
                         <option value="State" onclick="">States</option>
@@ -41,7 +51,12 @@ and open the template in the editor.
                     Selected Precinct: <br/>
                     <label id="selectedPrecinct"></label>
                 </div>
+            </div>
+            <div style=" border-bottom:solid black;"></div>
+            <div class="centered2">
                 <h4>Population:</h4>
+                
+                
                 <label id="totVotePop"> X people</label>
                 <table cellpadding="0">
                     <tr>
@@ -80,6 +95,9 @@ and open the template in the editor.
                     <label>Hispanic: </label><label id="hispanicNum">Y people</label><br/> <!-- needs to be replaced by DB data -->
                     <label>Other: </label><label id="otherNum" style="padding-left: 20px">Y people</label><br/> <!-- needs to be replaced by DB data -->
                 </div>
+            </div>
+            <div style=" border-bottom:solid black;"></div>
+            <div class="centered3">
                 <div id="errorSection" style="display:none">
                     <h3>Error Type:</h3>
                     <div id="currentError">
@@ -139,8 +157,9 @@ and open the template in the editor.
                 <br>
                 <br>
                 <input type ="image" src="" alt="Errors" class="nicebuttons" onclick="getAllErrors()">
-                <input type ="image" src="ee.png" alt="Errors" class="nicebuttons" onclick="getAllErrors();document.getElementById('errorPopup').style.display='block'">
-                <input type ="image" src="cog.png" alt="Settings" class="nicebuttons" onclick="document.getElementById('settingsPopup').style.display='block'">
+            </div>
+            <div style=" border-bottom:solid black;"></div>
+            <div class="centered4">
                 <div>Sources:</div>
                 <div>US Census Bureau</div>
                 <div>Rhode Island Geographic Information System</div>
@@ -151,6 +170,7 @@ and open the template in the editor.
             <div id="forMap">
             </div>
         </div>
+        
         <!-- this is popup window for changing data info -->
         <div id="changeDataSection" class="modal">
             <div class="modal-content">
