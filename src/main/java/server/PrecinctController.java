@@ -36,6 +36,8 @@ public class PrecinctController {
     private FixedErrorsRepo fixedErrorsService;
     @Autowired
     private ErrorRepo unfixedErrorsService;
+    @Autowired
+    private SourcesRepo sourcesService;
     
     // RESTful API methods for Retrieval operations
     @GetMapping("/precincts")
@@ -97,6 +99,11 @@ public class PrecinctController {
     public void setFixedError(@RequestBody FixedErrors error){
         error.setCommentTime(new Timestamp(System.currentTimeMillis()));
         fixedErrorsService.save(error);
+    }
+    
+    @GetMapping("/sources/{statefp}")
+    public Sources getSourcesForStatate(@PathVariable String statefp){
+        return sourcesService.findByStatefp(statefp);
     }
     
     @GetMapping("/precincts/neighbors/{id}")

@@ -161,8 +161,11 @@ and open the template in the editor.
             <div style=" border-bottom:solid black;"></div>
             <div class="centered4">
                 <div>Sources:</div>
-                <div>US Census Bureau</div>
-                <div>Rhode Island Geographic Information System</div>
+                State: <span id="stateSource"></span><br/>
+                District: <span id="districtSource"></span><br/>
+                Precinct Shapes: <span id="precinctSource"></span><br/>
+                Precinct Voting Data: <span id="votingSource"></span><br/>
+                Precinct Demographic Data: <span id="demSource"></span>
             </div>
         </div>
         <!-- right side of the page -->
@@ -296,6 +299,28 @@ and open the template in the editor.
             </div>
         </div>
         <script>
+            function getSourcesForState(){
+                document.getElementById("stateSource").innerHTML="";
+                document.getElementById("districtSource").innerHTML="";
+                document.getElementById("precinctSource").innerHTML="";
+                document.getElementById("votingSource").innerHTML="";
+                document.getElementById("demSource").innerHTML="";
+                let stateName=document.getElementById("States").value;
+                if(stateName=="State") return;
+                let statefp=states[stateName].properties.statefp;
+                let sourcesRequest=new XMLHttpRequest();
+                sourcesRequest.open('GET','http://localhost:8080/sources/'+statefp);
+                sourcesRequest.onload=()=>{
+                    if(sourcesRequest.response=="") return;
+                    let sources=JSON.parse(sourcesRequest.response);
+                    document.getElementById("stateSource").innerHTML=sources.state;
+                    document.getElementById("districtSource").innerHTML=sources.district;
+                    document.getElementById("precinctSource").innerHTML=sources.precinct;
+                    document.getElementById("votingSource").innerHTML=sources.voting;
+                    document.getElementById("demSource").innerHTML=sources.demographic;
+                };
+                sourcesRequest.send();
+            }
             function getAllErrors(){
                 let stateName=document.getElementById("States").value;
                 if(stateName=="State") return;
@@ -634,6 +659,7 @@ and open the template in the editor.
                         zoomOut();
                         break;
                     default:
+                        getSourcesForState();
                         let stateFP=states[stateName].properties.statefp;
                         mymap.setView(stateCoords[stateName], zoomLevel[stateName]);
                         if(checkEmpty(statesCache[stateFP])){
