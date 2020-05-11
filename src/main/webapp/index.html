@@ -138,6 +138,7 @@ and open the template in the editor.
                 </div>
                 <br>
                 <br>
+                <input type ="image" src="" alt="Errors" class="nicebuttons" onclick="getAllErrors()">
                 <input type ="image" src="ee.png" alt="Errors" class="nicebuttons" onclick="getAllErrors();document.getElementById('errorPopup').style.display='block'">
                 <input type ="image" src="cog.png" alt="Settings" class="nicebuttons" onclick="document.getElementById('settingsPopup').style.display='block'">
                 <div>Sources:</div>
@@ -163,38 +164,38 @@ and open the template in the editor.
                         <td style="padding-right: 30px;">
                             <p><b>2016 Presidential Election:</b></p>
                             <label for="pres16Dem" style="padding-right: 10px">Democrats:</label>
-                            <input type="number" id="pres16Dem" name="pres16Dem" value="0"><br><br>
+                            <input id="pres16Dem" name="pres16Dem" value="0"><br><br>
                             <label for="pres16Rep">Republicans:</label>
-                            <input type="number" id="pres16Rep" name="pres16Rep" value="0"><br><br>
+                            <input id="pres16Rep" name="pres16Rep" value="0"><br><br>
                             <label for="pres16Other" style="padding-right: 43px">Other:</label>
-                            <input type="number" id="pres16Other" name="pres16Other" value="0"><br><br>
+                            <input id="pres16Other" name="pres16Other" value="0"><br><br>
                             <p><b>2016 Congressional Election:</b></p>
                             <label for="cong16Dem" style="padding-right: 10px">Democrats:</label>
-                            <input type="number" id="cong16Dem" name="cong16Dem" value="0"><br><br>
+                            <input id="cong16Dem" name="cong16Dem" value="0"><br><br>
                             <label for="cong16Rep">Republicans:</label>
-                            <input type="number" id="cong16Rep" name="cong16Rep" value="0"><br><br>
+                            <input id="cong16Rep" name="cong16Rep" value="0"><br><br>
                             <label for="cong16Other" style="padding-right: 43px">Other:</label>
-                            <input type="number" id="cong16Other" name="cong16Other" value="0"><br><br>
+                            <input id="cong16Other" name="cong16Other" value="0"><br><br>
                             <p><b>2018 Congressional Election:</b></p>
                             <label for="cong18Dem" style="padding-right: 10px">Democrats:</label>
-                            <input type="number" id="cong18Dem" name="cong18Dem" value="0"><br><br>
+                            <input id="cong18Dem" name="cong18Dem" value="0"><br><br>
                             <label for="cong18Rep">Republicans:</label>
-                            <input type="number" id="cong18Rep" name="cong18Rep" value="0"><br><br>
+                            <input  id="cong18Rep" name="cong18Rep" value="0"><br><br>
                             <label for="cong18Other" style="padding-right: 43px">Other:</label>
-                            <input type="number" id="cong18Other" name="cong18Other" value="0"><br><br>
+                            <input id="cong18Other" name="cong18Other" value="0"><br><br>
                         </td>
                         <td>
                             <p><b>Demographic Data:</b></p>
                             <label for="whiteVotePop" style="padding-right: 20px">White:</label>
-                            <input type="number" id="whiteVotePop" name="whiteVotePop" value="0"><br><br>
+                            <input id="whiteVotePop" name="whiteVotePop" value="0"><br><br>
                             <label for="blackVotePop" style="padding-right: 20px">Black:</label>
-                            <input type="number" id="blackVotePop" name="blackVotePop" value="0"><br><br>
+                            <input id="blackVotePop" name="blackVotePop" value="0"><br><br>
                             <label for="asianVotePop" style="padding-right: 20px">Asian:</label>
-                            <input type="number" id="asianVotePop" name="asianVotePop" value="0"><br><br>
+                            <input id="asianVotePop" name="asianVotePop" value="0"><br><br>
                             <label for="hispanicVotePop">Hispanic:</label>
-                            <input type="number" id="hispanicVotePop" name="hispanicVotePop" value="0"><br><br>
+                            <input id="hispanicVotePop" name="hispanicVotePop" value="0"><br><br>
                             <label for="otherVotePop" style="padding-right: 20px">Other:</label>
-                            <input type="number" id="otherVotePop" name="otherVotePop" value="0"><br><br>
+                            <input id="otherVotePop" name="otherVotePop" value="0"><br><br>
                         </td>
                     </tr>
                 </table>
@@ -503,6 +504,9 @@ and open the template in the editor.
             }
             function addCommas(num) {
                 return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            }
+            function removeCommas(numString){
+                return parseInt(numString.replace(/,/g,""));
             }
             function populateElectionData(selectedFeature){
                 let elections=selectedFeature.properties.election;
@@ -1388,20 +1392,20 @@ and open the template in the editor.
                 }
             }
             function changePrecinctData(){
-                let pres16Dem=document.getElementById("pres16Dem").value;
-                let pres16Rep=document.getElementById("pres16Rep").value;
-                let pres16Oth=document.getElementById("pres16Other").value;
-                let cong16Dem=document.getElementById("cong16Dem").value;
-                let cong16Rep=document.getElementById("cong16Rep").value;
-                let cong16Oth=document.getElementById("cong16Other").value;
-                let cong18Dem=document.getElementById("cong18Dem").value;
-                let cong18Rep=document.getElementById("cong18Rep").value;
-                let cong18Oth=document.getElementById("cong18Other").value;
-                let whiteVotePop=document.getElementById("whiteVotePop").value;
-                let blackVotePop=document.getElementById("blackVotePop").value;
-                let asianVotePop=document.getElementById("asianVotePop").value;
-                let hispanicVotePop=document.getElementById("hispanicVotePop").value;
-                let otherVotePop=document.getElementById("otherVotePop").value;
+                let pres16Dem=removeCommas(document.getElementById("pres16Dem").value);
+                let pres16Rep=removeCommas(document.getElementById("pres16Rep").value);
+                let pres16Oth=removeCommas(document.getElementById("pres16Other").value);
+                let cong16Dem=removeCommas(document.getElementById("cong16Dem").value);
+                let cong16Rep=removeCommas(document.getElementById("cong16Rep").value);
+                let cong16Oth=removeCommas(document.getElementById("cong16Other").value);
+                let cong18Dem=removeCommas(document.getElementById("cong18Dem").value);
+                let cong18Rep=removeCommas(document.getElementById("cong18Rep").value);
+                let cong18Oth=removeCommas(document.getElementById("cong18Other").value);
+                let whiteVotePop=removeCommas(document.getElementById("whiteVotePop").value);
+                let blackVotePop=removeCommas(document.getElementById("blackVotePop").value);
+                let asianVotePop=removeCommas(document.getElementById("asianVotePop").value);
+                let hispanicVotePop=removeCommas(document.getElementById("hispanicVotePop").value);
+                let otherVotePop=removeCommas(document.getElementById("otherVotePop").value);
 
                 let selectedValue=document.getElementById("selectedPrecinct").innerHTML;
                 let selectedLayer=precincts[selectedValue];
@@ -1466,6 +1470,7 @@ and open the template in the editor.
 
                 document.getElementById('changeDataSection').style.display='none';
                 changeFeatColor(selectedLayer.feature,selectedLayer);
+                selectedLayer.setStyle(setShapeColor(selectedLayer,"NEW_PREC_STYLE"));
                 updatePrecinct(selectedID,preparePrecinctToSend(selectedFeature));
             }
             function changePrecinctDemographicData(feature,whiteVotePop,blackVotePop,asianVotePop,hispanicVotePop,otherVotePop){
