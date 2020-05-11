@@ -233,13 +233,19 @@ and open the template in the editor.
                 <h4>Error Log</h4>
                 <br><br>
                 <div id="errorLog">
-                    Ghost Precincts<div id="ghostErrorSection"></div>
-                    Voting Anomalies<div id="votErrorSection"></div>
-                    Demographic Anomalies<div id="demErrorSection"></div>
-                    Enclosed Precincts<div id="enclosedErrorSection"></div>
-                    Multi-Polygon Precincts<div id="multiErrorSection"></div>
-                    Precinct Gaps<div id="gapErrorSection"></div>
-                    Precinct Intersections<div id="intersectErrorSection"></div>
+                    <button onclick="openErrorTab('VOTANOM')">Voting Anomalies</button>
+                    <button onclick="openErrorTab('DEMANOM')">Demographic Anomalies</button>
+                    <button onclick="openErrorTab('ENCLOSED')">Enclosed Precincts</button>
+                    <button onclick="openErrorTab('MULTI')">Multipolygon Precincts</button>
+                    <button onclick="openErrorTab('GAP')">Gaps</button>
+                    <button onclick="openErrorTab('INTERSECT')">Intersections</button>
+                    <div class="tab" id="GHOST"></div>
+                    <div class="tab" id="VOTANOM"></div>
+                    <div class="tab" id="DEMANOM"></div>
+                    <div class="tab" id="ENCLOSED"></div>
+                    <div class="tab" id="MULTI"></div>
+                    <div class="tab" id="GAP"></div>
+                    <div class="tab" id="INTERSECT"></div>
                 </div>
             </div>
         </div>
@@ -327,14 +333,14 @@ and open the template in the editor.
                 if(checkEmpty(precincts)) return;
                 document.getElementById("optionSection").style.display="";
                 let statefp=states[stateName].properties.statefp;
+                document.getElementById("GHOST").innerHTML="";
+                document.getElementById("VOTANOM").innerHTML="";
+                document.getElementById("DEMANOM").innerHTML="";
+                document.getElementById("ENCLOSED").innerHTML="";
+                document.getElementById("MULTI").innerHTML="";
+                document.getElementById("GAP").innerHTML="";
+                document.getElementById("INTERSECT").innerHTML="";
                 loadErrorsForPrecinct(statefp);
-                document.getElementById("ghostErrorSection").innerHTML="";
-                document.getElementById("votErrorSection").innerHTML="";
-                document.getElementById("demErrorSection").innerHTML="";
-                document.getElementById("enclosedErrorSection").innerHTML="";
-                document.getElementById("multiErrorSection").innerHTML="";
-                document.getElementById("gapErrorSection").innerHTML="";
-                document.getElementById("intersectErrorSection").innerHTML="";
             }
             function loadErrorsForPrecinct(statefp){
                 let errorRequest=new XMLHttpRequest();
@@ -352,33 +358,19 @@ and open the template in the editor.
                 }
                 errorRequest.send();
             }
+            function openErrorTab(errorType){
+                let errorTabs = document.getElementsByClassName('tab');
+                for(let i=0; i<errorTabs.length; i++){
+                    errorTabs[i].style.display = "none"
+                }
+                document.getElementById(errorType).style.display = "block";
+            }
             function putErrorsInLog(feature){
                 let firstPart="<div id=\""+feature.properties.name+"_error\"><button onclick='document.getElementById(\"errorPopup\").style.display=\"none\";precMenuChange(\""+feature.properties.name+"\");'>";
                 let secondPart=" ["+feature.properties.name+"]</button></div>";
-                if(feature.properties.error.errorType=="GHOST"){
-                    document.getElementById("ghostErrorSection").innerHTML+=firstPart+secondPart;
-                }
-                else if(feature.properties.error.errorType=="VOTANOM"){
-                    document.getElementById("votErrorSection").innerHTML+=firstPart+secondPart;
-                }
-                else if(feature.properties.error.errorType=="DEMANOM"){
-                    document.getElementById("demErrorSection").innerHTML+=firstPart+secondPart;
-                }
-                else if(feature.properties.error.errorType=="ENCLOSED"){
-                    document.getElementById("enclosedErrorSection").innerHTML+=firstPart+secondPart;
-                }
-                else if(feature.properties.error.errorType=="MULTI"){
-                    document.getElementById("multiErrorSection").innerHTML+=firstPart+secondPart;
-                }
-                else if(feature.properties.error.errorType=="GAP"){
-                    document.getElementById("gapErrorSection").innerHTML+=firstPart+secondPart;
-                }
-                else if(feature.properties.error.errorType=="INTERSECT"){
-                    document.getElementById("intersectErrorSection").innerHTML+=firstPart+secondPart;
-                }
-
-
-            }
+                openErrorTab(feature.properties.error.errorType);
+                document.getElementById(feature.properties.error.errorType).innerHTML+=firstPart+secondPart;
+            }	
             function findPrecincts(){
                 let searchResult=document.getElementById("precinctSearch").value;
                 if(searchResult=="")return;
@@ -697,13 +689,13 @@ and open the template in the editor.
                 errors={};
                 clearBothSections();
                 document.getElementById("selectedPrecinct").innerHTML="";
-                document.getElementById("ghostErrorSection").innerHTML="";
-                document.getElementById("votErrorSection").innerHTML="";
-                document.getElementById("demErrorSection").innerHTML="";
-                document.getElementById("enclosedErrorSection").innerHTML="";
-                document.getElementById("multiErrorSection").innerHTML="";
-                document.getElementById("gapErrorSection").innerHTML="";
-                document.getElementById("intersectErrorSection").innerHTML="";
+                document.getElementById("GHOST").innerHTML="";
+                document.getElementById("VOTANOM").innerHTML="";
+                document.getElementById("DEMANOM").innerHTML="";
+                document.getElementById("ENCLOSED").innerHTML="";
+                document.getElementById("MULTI").innerHTML="";
+                document.getElementById("GAP").innerHTML="";
+                document.getElementById("INTERSECT").innerHTML="";
                 document.getElementById("searchWindow").style.display="inline";
                 document.getElementById("dataSection").selectedIndex=0;
                 document.getElementById("year").selectedIndex=0;
