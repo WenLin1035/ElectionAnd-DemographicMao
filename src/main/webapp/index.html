@@ -209,7 +209,15 @@ and open the template in the editor.
                 <button onclick="document.getElementById('errorPopup').style.display='none'" style="float:right;">X</button>
                 <h4>Error Log</h4>
                 <br><br>
-                <div id="errorLog"></div>
+                <div id="errorLog">
+                    Ghost Precincts<div id="ghostErrorSection"></div>
+                    Voting Anomalies<div id="votErrorSection"></div>
+                    Demographic Anomalies<div id="demErrorSection"></div>
+                    Enclosed Precincts<div id="enclosedErrorSection"></div>
+                    Multi-Polygon Precincts<div id="multiErrorSection"></div>
+                    Precinct Gaps<div id="gapErrorSection"></div>
+                    Precinct Intersections<div id="intersectErrorSection"></div>
+                </div>
             </div>
         </div>
 
@@ -275,7 +283,13 @@ and open the template in the editor.
                 document.getElementById("optionSection").style.display="";
                 let statefp=states[stateName].properties.statefp;
                 loadErrorsForPrecinct(statefp);
-                document.getElementById("errorLog").innerHTML="";
+                document.getElementById("ghostErrorSection").innerHTML="";
+                document.getElementById("votErrorSection").innerHTML="";
+                document.getElementById("demErrorSection").innerHTML="";
+                document.getElementById("enclosedErrorSection").innerHTML="";
+                document.getElementById("multiErrorSection").innerHTML="";
+                document.getElementById("gapErrorSection").innerHTML="";
+                document.getElementById("intersectErrorSection").innerHTML="";
             }
             function loadErrorsForPrecinct(statefp){
                 let errorRequest=new XMLHttpRequest();
@@ -295,30 +309,30 @@ and open the template in the editor.
             }
             function putErrorsInLog(feature){
                 let firstPart="<div id=\""+feature.properties.name+"_error\"><button onclick='document.getElementById(\"errorPopup\").style.display=\"none\";precMenuChange(\""+feature.properties.name+"\");'>";
-                let whatError="";
+                let secondPart=" ["+feature.properties.name+"]</button></div>";
                 if(feature.properties.error.errorType=="GHOST"){
-                    whatError="Ghost Precinct Found";
+                    document.getElementById("ghostErrorSection").innerHTML+=firstPart+secondPart;
                 }
                 else if(feature.properties.error.errorType=="VOTANOM"){
-                    whatError="Voting Anomaly Found";
+                    document.getElementById("votErrorSection").innerHTML+=firstPart+secondPart;
                 }
                 else if(feature.properties.error.errorType=="DEMANOM"){
-                    whatError="Demographic Anomaly Found";
+                    document.getElementById("demErrorSection").innerHTML+=firstPart+secondPart;
                 }
                 else if(feature.properties.error.errorType=="ENCLOSED"){
-                    whatError="Enclosed Precinct Found";
+                    document.getElementById("enclosedErrorSection").innerHTML+=firstPart+secondPart;
                 }
                 else if(feature.properties.error.errorType=="MULTI"){
-                    whatError="Multi-Polygon Precinct Found";
+                    document.getElementById("multiErrorSection").innerHTML+=firstPart+secondPart;
                 }
                 else if(feature.properties.error.errorType=="GAP"){
-                    whatError="Precinct Gap Found";
+                    document.getElementById("gapErrorSection").innerHTML+=firstPart+secondPart;
                 }
                 else if(feature.properties.error.errorType=="INTERSECT"){
-                    whatError="Precinct Intersection Found";
+                    document.getElementById("intersectErrorSection").innerHTML+=firstPart+secondPart;
                 }
-                let secondPart=" ["+feature.properties.name+"]</button></div>";
-                document.getElementById("errorLog").innerHTML+=firstPart+whatError+secondPart;
+
+
             }
             function findPrecincts(){
                 let searchResult=document.getElementById("precinctSearch").value;
@@ -637,7 +651,13 @@ and open the template in the editor.
                 errors={};
                 clearBothSections();
                 document.getElementById("selectedPrecinct").innerHTML="";
-                document.getElementById("errorLog").innerHTML="";
+                document.getElementById("ghostErrorSection").innerHTML="";
+                document.getElementById("votErrorSection").innerHTML="";
+                document.getElementById("demErrorSection").innerHTML="";
+                document.getElementById("enclosedErrorSection").innerHTML="";
+                document.getElementById("multiErrorSection").innerHTML="";
+                document.getElementById("gapErrorSection").innerHTML="";
+                document.getElementById("intersectErrorSection").innerHTML="";
                 document.getElementById("searchWindow").style.display="inline";
                 document.getElementById("dataSection").selectedIndex=0;
                 document.getElementById("year").selectedIndex=0;
@@ -1152,7 +1172,7 @@ and open the template in the editor.
                     newError.relevantInfo="";
                 }
                 let preparedError=feature.properties.error;
-                document.getElementById("errorLog").innerHTML+="<div style=\'border-style:solid\'>Error Resolved on: "+feature.properties.name+" from ERROR: "+feature.properties.error.errorType+". <br/> Optional Comment: "+comment+"</div><br/>";
+                //document.getElementById("errorLog").innerHTML+="<div style=\'border-style:solid\'>Error Resolved on: "+feature.properties.name+" from ERROR: "+feature.properties.error.errorType+". <br/> Optional Comment: "+comment+"</div><br/>";
                 preparedError["errorType"]="RESOLVED";
                 document.getElementById("commentArea").value="";
                 addFixedError(newError);
