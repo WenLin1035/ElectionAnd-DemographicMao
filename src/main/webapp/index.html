@@ -619,11 +619,13 @@ and open the template in the editor.
                     document.getElementById("electionDropdownArea").style.display="none";
                     document.getElementById('electionSection').style.display = "none";
                     document.getElementById('demographicSection').style.display = "block";
+                    setDemographicSection();
                 }
                 if(document.getElementById("dataSection").value == "none"){
                     document.getElementById("electionDropdownArea").style.display="none";
                     document.getElementById('electionSection').style.display = "none";
                     document.getElementById('demographicSection').style.display = "none";
+                    document.getElementById("totVotePop").innerHTML="N/A";
                 }
             }
             function zoomOut(){
@@ -1010,14 +1012,16 @@ and open the template in the editor.
                 let aminVotPop = selectedFeature.properties.demographic.aminov18;
                 let totVotePop=selectedFeature.properties.demographic.pop100;
                 
-                document.getElementById("aminNum").innerHTML=addCommas(Math.floor(aminVotPop)) 
-                document.getElementById("hawaiiNum").innerHTML=addCommas(Math.floor(hawaiiVotPop))
-                document.getElementById("whiteNum").innerHTML=addCommas(Math.floor(whiteVotePop))
-                document.getElementById("blackNum").innerHTML=addCommas(Math.floor(blackVotePop))
-                document.getElementById("asianNum").innerHTML=addCommas(Math.floor(asianVotePop))
-                document.getElementById("hispanicNum").innerHTML=addCommas(Math.floor(hispanicVotePop))
-                document.getElementById("otherNum").innerHTML=addCommas(Math.floor(otherVotePop))
-                document.getElementById("totVotePop").innerHTML=addCommas(Math.floor(totVotePop));
+                document.getElementById("aminNum").innerHTML=addCommas(Math.floor(aminVotPop)) ;
+                document.getElementById("hawaiiNum").innerHTML=addCommas(Math.floor(hawaiiVotPop));
+                document.getElementById("whiteNum").innerHTML=addCommas(Math.floor(whiteVotePop));
+                document.getElementById("blackNum").innerHTML=addCommas(Math.floor(blackVotePop));
+                document.getElementById("asianNum").innerHTML=addCommas(Math.floor(asianVotePop));
+                document.getElementById("hispanicNum").innerHTML=addCommas(Math.floor(hispanicVotePop));
+                document.getElementById("otherNum").innerHTML=addCommas(Math.floor(otherVotePop));
+                if(document.getElementById("dataSection").value=="demographic"){
+                    document.getElementById("totVotePop").innerHTML=addCommas(Math.floor(totVotePop));
+                }
                 changeAllColor();
             }
             function setElectionSection(){
@@ -1042,7 +1046,9 @@ and open the template in the editor.
                     }
                 }
                 if(selectedElection == "pres16"){
-                    document.getElementById("totVotePop").innerHTML=addCommas(pres16.tot) + " people";
+                    if(document.getElementById("dataSection").value=="election"){
+                        document.getElementById("totVotePop").innerHTML=addCommas(pres16.tot) + " people";
+                    }
                     if(pres16.tot==0)document.getElementById("demNum").innerHTML = 0 + " people [0%]";
                     else document.getElementById("demNum").innerHTML = addCommas(pres16.dem)+ " people ["+Math.round(100*(pres16.dem/pres16.tot)) +"%]";
                     if(pres16.tot==0) document.getElementById("repNum").innerHTML = 0 + " people [0%]";
@@ -1051,7 +1057,9 @@ and open the template in the editor.
                     else document.getElementById("othNum").innerHTML = addCommas(pres16.other)+ " people ["+Math.round(100*(pres16.other/pres16.tot)) +"%]";
                 }
                 else if(selectedElection == "cong16"){
-                    document.getElementById("totVotePop").innerHTML=addCommas(cong16.tot) + " people";
+                    if(document.getElementById("dataSection").value=="election"){
+                        document.getElementById("totVotePop").innerHTML=addCommas(cong16.tot) + " people";
+                    }
                     if(cong16.tot==0)document.getElementById("demNum").innerHTML = 0 + " people [0%]";
                     else document.getElementById("demNum").innerHTML = addCommas(cong16.dem)+ " people ["+Math.round(100*(cong16.dem/cong16.tot)) +"%]";
                     if(cong16.tot==0) document.getElementById("repNum").innerHTML = 0 + " people [0%]";
@@ -1060,7 +1068,9 @@ and open the template in the editor.
                     else document.getElementById("othNum").innerHTML = addCommas(cong16.other)+ " people ["+Math.round(100*(cong16.other/cong16.tot)) +"%]";
                 }
                 else if(selectedElection == "cong18"){
-                    document.getElementById("totVotePop").innerHTML=addCommas(cong18.tot) + " people";
+                    if(document.getElementById("dataSection").value=="election"){
+                        document.getElementById("totVotePop").innerHTML=addCommas(cong18.tot) + " people";
+                    }
                     if(cong18.tot==0)document.getElementById("demNum").innerHTML = 0 + " people [0%]";
                     else document.getElementById("demNum").innerHTML = addCommas(cong18.dem)+ " people ["+Math.round(100*(cong18.dem/cong18.tot)) +"%]";
                     if(cong18.tot==0) document.getElementById("repNum").innerHTML = 0 + " people [0%]";
@@ -1089,6 +1099,7 @@ and open the template in the editor.
                 showPrecinctOnClick(selectedLayer,selectedFeature);
             }
             function showPrecinctOnClick(selectedLayer,selectedFeature){
+                document.getElementById("totVotePop").innerHTML="N/A";
                 document.getElementById("selectedPrecinct").innerHTML=selectedFeature.properties.name;
                 precinctZoom(turf.centroid(selectedFeature),turf.area(selectedFeature));
                 changeAllColor();
