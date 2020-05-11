@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-Author: Wen Lin
+Author: Team Icicles (the ones who could get the project running for some reason)
 To change this license header, choose License Headers in Project Properties.
 To change this template file, choose Tools | Templates
 and open the template in the editor.
@@ -89,11 +89,13 @@ and open the template in the editor.
                     <br>
                 </div>
                 <div id="demographicSection">
-                    <label>White: </label><label id="whiteNum" style="padding-left: 20px">X people</label><br/> <!-- needs to be replaced by DB data -->
-                    <label>Black: </label><label id="blackNum" style="padding-left: 20px">Y people</label><br/> <!-- needs to be replaced by DB data -->
-                    <label>Asian: </label><label id="asianNum" style="padding-left: 20px">Y people</label><br/> <!-- needs to be replaced by DB data -->
-                    <label>Hispanic: </label><label id="hispanicNum">Y people</label><br/> <!-- needs to be replaced by DB data -->
-                    <label>Other: </label><label id="otherNum" style="padding-left: 20px">Y people</label><br/> <!-- needs to be replaced by DB data -->
+                    <label>American Indian: </label><label id="aminNum" style="padding-left: 30px">X people</label><br/>
+                    <label>Asian: </label><label id="asianNum" style="padding-left: 30px">Y people</label><br/>
+                    <label>Black: </label><label id="blackNum" style="padding-left: 30px">X people</label><br/>
+                    <label>Hawaii: </label><label id="hawaiiNum" style="padding-left: 30px">X people</label><br/>
+                    <label>Hispanic: </label><label id="hispanicNum">Y people</label><br/> 
+                    <label>White: </label><label id="whiteNum" style="padding-left: 30px">X people</label><br/> 
+                    <label>Other: </label><label id="otherNum" style="padding-left: 30px">Y people</label><br/>
                 </div>
             </div>
             <div style=" border-bottom:solid black;"></div>
@@ -126,7 +128,7 @@ and open the template in the editor.
                             <button onclick="setNotError()">Not an Error</button>
                         </div>
                         <div id="gapIntersectSection" style="display:none">
-                            Precinct Gap/Intersection
+                            Precinct Gap/Intersection<br/>
                             <button class="editBorderButton" onclick="editBorder()">Edit Border</button>
                             <button onclick="setNotError()">Set As Not an Error</button><br>
                         </div>
@@ -215,8 +217,12 @@ and open the template in the editor.
                             <input id="blackVotePop" name="blackVotePop" value="0"><br><br>
                             <label for="asianVotePop" style="padding-right: 20px">Asian:</label>
                             <input id="asianVotePop" name="asianVotePop" value="0"><br><br>
-                            <label for="hispanicVotePop">Hispanic:</label>
+                            <label for="hispanicVotePop" style="padding-right: 20px">Hispanic:</label>
                             <input id="hispanicVotePop" name="hispanicVotePop" value="0"><br><br>
+                            <label for="hawaiiVotePop" style="padding-right: 20px">Hawaii:</label>
+                            <input id="hawaiiVotePop" name="hawaiiVotePop" value="0"><br><br>
+                            <label for="aminVotePop" style="padding-right: 20px">American Indian:</label>
+                            <input id="aminVotePop" name="aminVotePop" value="0"><br><br>
                             <label for="otherVotePop" style="padding-right: 20px">Other:</label>
                             <input id="otherVotePop" name="otherVotePop" value="0"><br><br>
                         </td>
@@ -296,6 +302,14 @@ and open the template in the editor.
                     <tr> 
                         <td><label>Hispanic: </label></td>
                         <td><input type="color" id="hisColor" onchange="changeAllColor()" name="hisColor" value="#6a0dad"></td>
+                    </tr>
+                    <tr> 
+                        <td><label>American Indian: </label></td>
+                        <td><input type="color" id="aminColor" onchange="changeAllColor()" name="hisColor" value="#d40c00"></td>
+                    </tr>
+                    <tr> 
+                        <td><label>Hawaii: </label></td>
+                        <td><input type="color" id="hawaiiColor" onchange="changeAllColor()" name="hisColor" value="#87c735"></td>
                     </tr>
                     <tr> 
                         <td><label>Other: </label></td>
@@ -388,6 +402,7 @@ and open the template in the editor.
                             let newOption=document.createElement("button");
                             let name=searchData[i].name;
                             newOption.onclick=()=>{
+                                changeAllColor()
                                 loadForCong(searchData[i].districtid,statefp,name);
                                 document.getElementById("precinctSearch").value="";
                                 document.getElementById("searchResults").innerHTML="";
@@ -590,6 +605,8 @@ and open the template in the editor.
                 document.getElementById("blackVotePop").value=addCommas(Math.floor(selectedFeature.properties.demographic.blackov18));
                 document.getElementById("asianVotePop").value=addCommas(Math.floor(selectedFeature.properties.demographic.asianov18));
                 document.getElementById("hispanicVotePop").value=addCommas(Math.floor(selectedFeature.properties.demographic.hisov18));
+                document.getElementById("aminVotePop").value=addCommas(Math.floor(selectedFeature.properties.demographic.aminov18));
+                document.getElementById("hawaiiVotePop").value=addCommas(Math.floor(selectedFeature.properties.demographic.hawov18));
                 document.getElementById("otherVotePop").value=addCommas(Math.floor(selectedFeature.properties.demographic.otherov18));
             }
             function switchDataSection(){
@@ -907,6 +924,16 @@ and open the template in the editor.
                             color:'black',
                             fillColor:document.getElementById("hisColor").value
                         };
+                    case "AMIN_STYLE":
+                        return{
+                            color:'black',
+                            fillColor:document.getElementById("aminColor").value
+                        };
+                    case "HAWAII_STYLE":
+                        return{
+                            color:'black',
+                            fillColor:document.getElementById("hawaiiColor").value
+                        };
                     case "GHOST_STYLE":
                         return{
                             color:'black',
@@ -979,13 +1006,17 @@ and open the template in the editor.
                 let asianVotePop=selectedFeature.properties.demographic.asianov18;
                 let hispanicVotePop=selectedFeature.properties.demographic.hisov18;
                 let otherVotePop=selectedFeature.properties.demographic.otherov18;
+                let hawaiiVotPop = selectedFeature.properties.demographic.hawov18;
+                let aminVotPop = selectedFeature.properties.demographic.aminov18;
                 let totVotePop=selectedFeature.properties.demographic.pop100;
-
-                document.getElementById("whiteNum").innerHTML=addCommas(Math.floor(whiteVotePop));
-                document.getElementById("blackNum").innerHTML=addCommas(Math.floor(blackVotePop));
-                document.getElementById("asianNum").innerHTML=addCommas(Math.floor(asianVotePop));
-                document.getElementById("hispanicNum").innerHTML=addCommas(Math.floor(hispanicVotePop));
-                document.getElementById("otherNum").innerHTML=addCommas(Math.floor(otherVotePop));
+                
+                document.getElementById("aminNum").innerHTML=addCommas(Math.floor(aminVotPop)) 
+                document.getElementById("hawaiiNum").innerHTML=addCommas(Math.floor(hawaiiVotPop))
+                document.getElementById("whiteNum").innerHTML=addCommas(Math.floor(whiteVotePop))
+                document.getElementById("blackNum").innerHTML=addCommas(Math.floor(blackVotePop))
+                document.getElementById("asianNum").innerHTML=addCommas(Math.floor(asianVotePop))
+                document.getElementById("hispanicNum").innerHTML=addCommas(Math.floor(hispanicVotePop))
+                document.getElementById("otherNum").innerHTML=addCommas(Math.floor(otherVotePop))
                 document.getElementById("totVotePop").innerHTML=addCommas(Math.floor(totVotePop));
                 changeAllColor();
             }
@@ -1020,16 +1051,22 @@ and open the template in the editor.
                     else document.getElementById("othNum").innerHTML = addCommas(pres16.other)+ " people ["+Math.round(100*(pres16.other/pres16.tot)) +"%]";
                 }
                 else if(selectedElection == "cong16"){
-                    document.getElementById("demNum").innerHTML = addCommas(cong16.dem);
-                    document.getElementById("repNum").innerHTML = addCommas(cong16.rep);
-                    document.getElementById("totVotePop").innerHTML= addCommas(cong16.tot) + " people";
-                    document.getElementById("othNum").innerHTML = addCommas(cong16.other);
+                    document.getElementById("totVotePop").innerHTML=addCommas(cong16.tot) + " people";
+                    if(cong16.tot==0)document.getElementById("demNum").innerHTML = 0 + " people [0%]";
+                    else document.getElementById("demNum").innerHTML = addCommas(cong16.dem)+ " people ["+Math.round(100*(cong16.dem/cong16.tot)) +"%]";
+                    if(cong16.tot==0) document.getElementById("repNum").innerHTML = 0 + " people [0%]";
+                    else document.getElementById("repNum").innerHTML = addCommas(cong16.rep)+ " people ["+Math.round(100*(cong16.rep/cong16.tot)) +"%]";
+                    if(cong16.other==0) document.getElementById("othNum").innerHTML = 0 + " people [0%]";
+                    else document.getElementById("othNum").innerHTML = addCommas(cong16.other)+ " people ["+Math.round(100*(cong16.other/cong16.tot)) +"%]";
                 }
                 else if(selectedElection == "cong18"){
-                    document.getElementById("demNum").innerHTML = addCommas(cong18.dem);
-                    document.getElementById("repNum").innerHTML = addCommas(cong18.rep);
-                    document.getElementById("othNum").innerHTML = addCommas(cong18.other);
-                    document.getElementById("totVotePop").innerHTML= addCommas(cong18.tot) + " people";
+                    document.getElementById("totVotePop").innerHTML=addCommas(cong18.tot) + " people";
+                    if(cong18.tot==0)document.getElementById("demNum").innerHTML = 0 + " people [0%]";
+                    else document.getElementById("demNum").innerHTML = addCommas(cong18.dem)+ " people ["+Math.round(100*(cong18.dem/cong18.tot)) +"%]";
+                    if(cong18.tot==0) document.getElementById("repNum").innerHTML = 0 + " people [0%]";
+                    else document.getElementById("repNum").innerHTML = addCommas(cong18.rep)+ " people ["+Math.round(100*(cong18.rep/cong18.tot)) +"%]";
+                    if(cong18.other==0) document.getElementById("othNum").innerHTML = 0 + " people [0%]";
+                    else document.getElementById("othNum").innerHTML = addCommas(cong18.other)+ " people ["+Math.round(100*(cong18.other/cong18.tot)) +"%]";
                 }
                 changeAllColor();
             }
@@ -1038,6 +1075,8 @@ and open the template in the editor.
                 document.getElementById("blackNum").innerHTML="N/A";
                 document.getElementById("asianNum").innerHTML="N/A";
                 document.getElementById("hispanicNum").innerHTML="N/A";
+                document.getElementById("aminNum").innerHTML="N/A";
+                document.getElementById("hawaiiNum").innerHTML="N/A";
                 document.getElementById("otherNum").innerHTML="N/A";
                 document.getElementById("totVotePop").innerHTML="N/A";
                 document.getElementById("demNum").innerHTML ="N/A";
@@ -1086,7 +1125,9 @@ and open the template in the editor.
                             let asianov18=properties.demographic.asianov18;
                             let hisov18=properties.demographic.hisov18;
                             let otherov18=properties.demographic.otherov18;
-                            let majorityRace=Math.max(whiteov18,blackov18,asianov18,hisov18,otherov18);
+                            let hawov18 = properties.demographic.hawov18;
+                            let aminov18 = properties.demographic.aminov18;
+                            let majorityRace=Math.max(whiteov18,blackov18,asianov18,hisov18,otherov18, hawov18, aminov18);
                             switch(majorityRace){
                                 case 0: {selectedLayer.setStyle(setShapeColor(selectedLayer,"GHOST_STYLE")); break;}
                                 case whiteov18: {selectedLayer.setStyle(setShapeColor(selectedLayer,"WHITE_STYLE")); break;}
@@ -1094,6 +1135,8 @@ and open the template in the editor.
                                 case asianov18: {selectedLayer.setStyle(setShapeColor(selectedLayer,"ASIAN_STYLE")); break;}
                                 case hisov18: {selectedLayer.setStyle(setShapeColor(selectedLayer,"HIS_STYLE")); break;}
                                 case otherov18: {selectedLayer.setStyle(setShapeColor(selectedLayer,"OTHER_DEMO_STYLE")); break;}
+                                case hawov18 : {selectedLayer.setStyle(setShapeColor(selectedLayer,"HAWAII_STYLE")); break;}
+                                case aminov18 : {selectedLayer.setStyle(setShapeColor(selectedLayer,"AMIN_STYLE")); break;}
                             }
                             break;
                         case "election":
@@ -1463,6 +1506,8 @@ and open the template in the editor.
                 let blackVotePop=removeCommas(document.getElementById("blackVotePop").value);
                 let asianVotePop=removeCommas(document.getElementById("asianVotePop").value);
                 let hispanicVotePop=removeCommas(document.getElementById("hispanicVotePop").value);
+                let hawaiiVotePop=removeCommas(document.getElementById("hawaiiVotePop").value);
+                let aminVotePop=removeCommas(document.getElementById("aminVotePop").value);
                 let otherVotePop=removeCommas(document.getElementById("otherVotePop").value);
 
                 let selectedValue=document.getElementById("selectedPrecinct").innerHTML;
@@ -1470,7 +1515,7 @@ and open the template in the editor.
                 let selectedFeature=selectedLayer.feature;
                 let selectedID=selectedFeature.properties.id;
                 changePrecinctVotingData(selectedFeature,pres16Dem,pres16Rep,pres16Oth,cong16Dem,cong16Rep,cong16Oth,cong18Dem,cong18Rep,cong18Oth);
-                changePrecinctDemographicData(selectedFeature,whiteVotePop,blackVotePop,asianVotePop,hispanicVotePop,otherVotePop);
+                changePrecinctDemographicData(selectedFeature,whiteVotePop,blackVotePop,asianVotePop,hispanicVotePop,otherVotePop, aminVotePop,hawaiiVotePop );
 
                 let elections=selectedFeature.properties.election;
                 let pres16=[];
@@ -1531,14 +1576,17 @@ and open the template in the editor.
                 selectedLayer.setStyle(setShapeColor(selectedLayer,"NEW_PREC_STYLE"));
                 updatePrecinct(selectedID,preparePrecinctToSend(selectedFeature));
             }
-            function changePrecinctDemographicData(feature,whiteVotePop,blackVotePop,asianVotePop,hispanicVotePop,otherVotePop){
+            function changePrecinctDemographicData(feature,whiteVotePop,blackVotePop,asianVotePop,hispanicVotePop,otherVotePop,aminVotePop, hawaiiVotePop){
                 let demographic=feature.properties.demographic;
                 demographic.whiteov18=parseInt(whiteVotePop);
                 demographic.blackov18=parseInt(blackVotePop);
                 demographic.asianov18=parseInt(asianVotePop);
                 demographic.hisov18=parseInt(hispanicVotePop);
                 demographic.otherov18=parseInt(otherVotePop);
+                demographic.aminov18 = parseInt(aminVotePop);
+                demographic.hawov18 = parseInt(hawaiiVotePop);
                 demographic.pop100=demographic.whiteov18+demographic.blackov18+demographic.asianov18+demographic.hisov18+demographic.otherov18;
+                
             }
             function changePrecinctVotingData(feature,pres16Dem,pres16Rep,pres16Oth,cong16Dem,cong16Rep,cong16Oth,cong18Dem,cong18Rep,cong18Oth){
                 let elections=feature.properties.election;
