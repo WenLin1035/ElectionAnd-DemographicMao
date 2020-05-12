@@ -330,13 +330,13 @@ and open the template in the editor.
         <script>
             function getAllFixedErrors(){
                 let fixedErrorRequest=new XMLHttpRequest();
-                fixedErrorRequest.open('GET','http://localhost:8080/fixedErrors');
+                fixedErrorRequest.open('GET','http://localhost:8080/fixederrors');
                 fixedErrorRequest.onload=()=>{
                     let allPrecinctsWithError=JSON.parse(fixedErrorRequest.response);
                     for(let i=0;i<allPrecinctsWithError.length;i++){
                         let fixedError=allPrecinctsWithError[i];
                         let structuredError="<div> Precinct ID:" +fixedError.precinctID+" [Resolved Error: "+ fixedError.errorType+"] <br> ";
-                        structuredError+="Relevant Comment: <"+fixedError.commentTime+"> :"+fixedError.comment+ "</div>";
+                        structuredError+="Relevant Comment: <"+fixedError.commentTime+"> :"+fixedError.comment+ "</div> </br>";
                         document.getElementById("fixedErrorLog").innerHTML+=structuredError;
                     }
                 }
