@@ -106,6 +106,11 @@ public class PrecinctController {
         return sourcesService.findByStatefp(statefp);
     }
     
+    @GetMapping("/fixederrors")
+    public List<FixedErrors> getAllFixedErrors(){
+        return fixedErrorsService.findAll();
+    }
+    
     @GetMapping("/precincts/neighbors/{id}")
     public List<Neighbors> findNeighborsForPrecincts(@PathVariable String id){
         Precincts precinct=precinctService.findById(Integer.parseInt(id)).get();
