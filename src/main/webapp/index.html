@@ -27,7 +27,7 @@ and open the template in the editor.
                 <div style="font-size: 40px; float:left;">Election Data Quality</div>
                 <div style="visibility: hidden; float:right;">_</div>
                 <input style="border: solid black;padding-right:15px; padding-left:15px; float:right;" type ="image" src="cog.png" alt="Settings" class="nicebuttons" onclick="document.getElementById('settingsPopup').style.display='block'">
-                <input style="border: solid black;padding-right:15px;padding-left:15px; float:right;" type ="image" src="checklist.png" alt="Settings" class="nicebuttons" >
+                <input style="border: solid black;padding-right:15px;padding-left:15px; float:right;" type ="image" src="checklist.png" alt="Settings" class="nicebuttons" onclick="getAllFixedErrors();document.getElementById('fixedErrorPopup').style.display='block'">
                 <input style="border: solid black;padding-right:15px; padding-left:15px; float:right;" type ="image" src="ee.png" alt="Errors" class="nicebuttons" onclick="getAllErrors();document.getElementById('errorPopup').style.display='block'">
                 
         </div>
@@ -83,19 +83,19 @@ and open the template in the editor.
                 </table>
                 <br><br>
                 <div id="electionSection">
-                    <label>Democratic: </label><label id="demNum">X people [X%]</label><br/> <!-- needs to be replaced by DB data -->
-                    <label>Republican: </label><label id="repNum">Y people [Y%]</label><br/> <!-- needs to be replaced by DB data -->
-                    <label style="padding-right: 43px">Other:</label><label id="othNum">Z people [Z%]</label><br/> <!-- needs to be replaced by DB data -->
+                    <label>Democratic: </label><span id="demNum" style="float:right;padding-right:25px">X people [X%]</span><br/>
+                    <label>Republican: </label><span id="repNum" style="float:right;padding-right:25px">Y people [Y%]</span><br/>
+                    <label style="padding-right: 43px">Other:</label><span id="othNum" style="float:right;padding-right:25px">Z people [Z%]</span>
                     <br>
                 </div>
                 <div id="demographicSection">
-                    <label>American Indian: </label><label id="aminNum" style="padding-left: 30px">X people</label><br/>
-                    <label>Asian: </label><label id="asianNum" style="padding-left: 30px">Y people</label><br/>
-                    <label>Black: </label><label id="blackNum" style="padding-left: 30px">X people</label><br/>
-                    <label>Hawaii: </label><label id="hawaiiNum" style="padding-left: 30px">X people</label><br/>
-                    <label>Hispanic: </label><label id="hispanicNum">Y people</label><br/> 
-                    <label>White: </label><label id="whiteNum" style="padding-left: 30px">X people</label><br/> 
-                    <label>Other: </label><label id="otherNum" style="padding-left: 30px">Y people</label><br/>
+                    <label>American Indian: </label><span id="aminNum" style="float:right;padding-right:25px">X</span><br/>
+                    <label>Asian: </label><span id="asianNum" style="float:right;padding-right:25px">Y</span><br/>
+                    <label>Black: </label><span id="blackNum" style="float:right;padding-right:25px">X</span><br/>
+                    <label>Hawaii: </label><span id="hawaiiNum" style="float:right;padding-right:25px">X</span><br/>
+                    <label>Hispanic: </label><span id="hispanicNum" style="float:right;padding-right:25px">Y</span><br/>
+                    <label>White: </label><span id="whiteNum" style="float:right;padding-right:25px">X</span><br/>
+                    <label>Other: </label><span id="otherNum" style="float:right;padding-right:25px">Y</span>
                 </div>
             </div>
             <div style=" border-bottom:solid black;"></div>
@@ -236,26 +236,35 @@ and open the template in the editor.
         <div id="errorPopup" class="modal">
             <div class="modal-content">
                 <button onclick="document.getElementById('errorPopup').style.display='none'" style="float:right;">X</button>
-                <h4>Error Log</h4>
+                <h1>Error Log</h1>
                 <br><br>
-                <div id="errorLog">
-                    <button onclick="openErrorTab('VOTANOM')">Voting Anomalies</button>
-                    <button onclick="openErrorTab('DEMANOM')">Demographic Anomalies</button>
-                    <button onclick="openErrorTab('ENCLOSED')">Enclosed Precincts</button>
-                    <button onclick="openErrorTab('MULTI')">Multipolygon Precincts</button>
-                    <button onclick="openErrorTab('GAP')">Gaps</button>
-                    <button onclick="openErrorTab('INTERSECT')">Intersections</button>
-                    <div class="tab" id="GHOST"></div>
-                    <div class="tab" id="VOTANOM"></div>
-                    <div class="tab" id="DEMANOM"></div>
-                    <div class="tab" id="ENCLOSED"></div>
-                    <div class="tab" id="MULTI"></div>
-                    <div class="tab" id="GAP"></div>
-                    <div class="tab" id="INTERSECT"></div>
+                <div class="errorTabs" id="errorLog">
+                    <button class="errorButton" onclick="openErrorTab(event, 'GHOST')">Ghost Precincts</button>
+                    <button class="errorButton" onclick="openErrorTab(event, 'VOTANOM')">Voting Anomalies</button>
+                    <button class="errorButton" onclick="openErrorTab(event, 'DEMANOM')">Demographic Anomalies</button>
+                    <button class="errorButton" onclick="openErrorTab(event, 'ENCLOSED')">Enclosed Precincts</button>
+                    <button class="errorButton" onclick="openErrorTab(event, 'MULTI')">Multipolygon Precincts</button>
+                    <button class="errorButton" onclick="openErrorTab(event, 'GAP')">Gaps</button>
+                    <button class="errorButton" onclick="openErrorTab(event, 'INTERSECT')">Intersections</button>
+                </div>
+                <div class="tab" id="GHOST"></div>
+                <div class="tab" id="VOTANOM"></div>
+                <div class="tab" id="DEMANOM"></div>
+                <div class="tab" id="ENCLOSED"></div>
+                <div class="tab" id="MULTI"></div>
+                <div class="tab" id="GAP"></div>
+                <div class="tab" id="INTERSECT"></div>
+            </div>
+        </div>
+        <div id="fixedErrorPopup" class="modal">
+            <div class="modal-content">
+                <button onclick="document.getElementById('fixedErrorPopup').style.display='none'" style="float:right;">X</button>
+                <h4>Log of Fixed Error</h4>
+                <br><br>
+                <div id="fixedErrorLog">
                 </div>
             </div>
         </div>
-
         <div id="settingsPopup" class="modal">
             <div class="modal-content">
                 <button onclick="document.getElementById('settingsPopup').style.display='none'" style="float:right;">X</button>
@@ -319,6 +328,20 @@ and open the template in the editor.
             </div>
         </div>
         <script>
+            function getAllFixedErrors(){
+                let fixedErrorRequest=new XMLHttpRequest();
+                fixedErrorRequest.open('GET','http://localhost:8080/fixedErrors');
+                fixedErrorRequest.onload=()=>{
+                    let allPrecinctsWithError=JSON.parse(fixedErrorRequest.response);
+                    for(let i=0;i<allPrecinctsWithError.length;i++){
+                        let fixedError=allPrecinctsWithError[i];
+                        let structuredError="<div> Precinct ID:" +fixedError.precinctID+" [Resolved Error: "+ fixedError.errorType+"] <br> ";
+                        structuredError+="Relevant Comment: <"+fixedError.commentTime+"> :"+fixedError.comment+ "</div>";
+                        document.getElementById("fixedErrorLog").innerHTML+=structuredError;
+                    }
+                }
+                    fixedErrorRequest.send();
+            }
             function getSourcesForState(){
                 document.getElementById("stateSource").innerHTML="";
                 document.getElementById("districtSource").innerHTML="";
@@ -371,18 +394,26 @@ and open the template in the editor.
                     }
                 }
                 errorRequest.send();
-            }
-            function openErrorTab(errorType){
                 let errorTabs = document.getElementsByClassName('tab');
                 for(let i=0; i<errorTabs.length; i++){
                     errorTabs[i].style.display = "none"
                 }
+            }
+            function openErrorTab(event, errorType){
+                let errorTabs = document.getElementsByClassName('tab');
+                for(let i=0; i<errorTabs.length; i++){
+                    errorTabs[i].style.display = "none"
+                }
+                let errorButtons = document.getElementsByClassName('errorButton');
+                for(let j=0; j<errorButtons.length; j++){
+                    errorButtons[j].style.backgroundColor = "inherit"
+                }
+                event.currentTarget.style.backgroundColor = "#aaa"
                 document.getElementById(errorType).style.display = "block";
             }
             function putErrorsInLog(feature){
                 let firstPart="<div id=\""+feature.properties.name+"_error\"><button onclick='document.getElementById(\"errorPopup\").style.display=\"none\";precMenuChange(\""+feature.properties.name+"\");'>";
                 let secondPart=" ["+feature.properties.name+"]</button></div>";
-                openErrorTab(feature.properties.error.errorType);
                 document.getElementById(feature.properties.error.errorType).innerHTML+=firstPart+secondPart;
             }	
             function findPrecincts(){
@@ -1049,34 +1080,34 @@ and open the template in the editor.
                     if(document.getElementById("dataSection").value=="election"){
                         document.getElementById("totVotePop").innerHTML=addCommas(pres16.tot) + " people";
                     }
-                    if(pres16.tot==0)document.getElementById("demNum").innerHTML = 0 + " people [0%]";
-                    else document.getElementById("demNum").innerHTML = addCommas(pres16.dem)+ " people ["+Math.round(100*(pres16.dem/pres16.tot)) +"%]";
-                    if(pres16.tot==0) document.getElementById("repNum").innerHTML = 0 + " people [0%]";
-                    else document.getElementById("repNum").innerHTML = addCommas(pres16.rep)+ " people ["+Math.round(100*(pres16.rep/pres16.tot)) +"%]";
-                    if(pres16.other==0) document.getElementById("othNum").innerHTML = 0 + " people [0%]";
-                    else document.getElementById("othNum").innerHTML = addCommas(pres16.other)+ " people ["+Math.round(100*(pres16.other/pres16.tot)) +"%]";
+                    if(pres16.tot==0)document.getElementById("demNum").innerHTML = 0 + " [0%]";
+                    else document.getElementById("demNum").innerHTML = addCommas(pres16.dem)+ " ["+Math.round(100*(pres16.dem/pres16.tot)) +"%]";
+                    if(pres16.tot==0) document.getElementById("repNum").innerHTML = 0 + " [0%]";
+                    else document.getElementById("repNum").innerHTML = addCommas(pres16.rep)+ " ["+Math.round(100*(pres16.rep/pres16.tot)) +"%]";
+                    if(pres16.other==0) document.getElementById("othNum").innerHTML = 0 + " [0%]";
+                    else document.getElementById("othNum").innerHTML = addCommas(pres16.other)+ " ["+Math.round(100*(pres16.other/pres16.tot)) +"%]";
                 }
                 else if(selectedElection == "cong16"){
                     if(document.getElementById("dataSection").value=="election"){
-                        document.getElementById("totVotePop").innerHTML=addCommas(cong16.tot) + " people";
+                        document.getElementById("totVotePop").innerHTML=addCommas(cong16.tot);
                     }
-                    if(cong16.tot==0)document.getElementById("demNum").innerHTML = 0 + " people [0%]";
-                    else document.getElementById("demNum").innerHTML = addCommas(cong16.dem)+ " people ["+Math.round(100*(cong16.dem/cong16.tot)) +"%]";
-                    if(cong16.tot==0) document.getElementById("repNum").innerHTML = 0 + " people [0%]";
-                    else document.getElementById("repNum").innerHTML = addCommas(cong16.rep)+ " people ["+Math.round(100*(cong16.rep/cong16.tot)) +"%]";
-                    if(cong16.other==0) document.getElementById("othNum").innerHTML = 0 + " people [0%]";
-                    else document.getElementById("othNum").innerHTML = addCommas(cong16.other)+ " people ["+Math.round(100*(cong16.other/cong16.tot)) +"%]";
+                    if(cong16.tot==0)document.getElementById("demNum").innerHTML = 0 + " [0%]";
+                    else document.getElementById("demNum").innerHTML = addCommas(cong16.dem)+ " ["+Math.round(100*(cong16.dem/cong16.tot)) +"%]";
+                    if(cong16.tot==0) document.getElementById("repNum").innerHTML = 0 + " [0%]";
+                    else document.getElementById("repNum").innerHTML = addCommas(cong16.rep)+ " ["+Math.round(100*(cong16.rep/cong16.tot)) +"%]";
+                    if(cong16.other==0) document.getElementById("othNum").innerHTML = 0 + " [0%]";
+                    else document.getElementById("othNum").innerHTML = addCommas(cong16.other)+ " ["+Math.round(100*(cong16.other/cong16.tot)) +"%]";
                 }
                 else if(selectedElection == "cong18"){
                     if(document.getElementById("dataSection").value=="election"){
-                        document.getElementById("totVotePop").innerHTML=addCommas(cong18.tot) + " people";
+                        document.getElementById("totVotePop").innerHTML=addCommas(cong18.tot);
                     }
-                    if(cong18.tot==0)document.getElementById("demNum").innerHTML = 0 + " people [0%]";
-                    else document.getElementById("demNum").innerHTML = addCommas(cong18.dem)+ " people ["+Math.round(100*(cong18.dem/cong18.tot)) +"%]";
-                    if(cong18.tot==0) document.getElementById("repNum").innerHTML = 0 + " people [0%]";
-                    else document.getElementById("repNum").innerHTML = addCommas(cong18.rep)+ " people ["+Math.round(100*(cong18.rep/cong18.tot)) +"%]";
-                    if(cong18.other==0) document.getElementById("othNum").innerHTML = 0 + " people [0%]";
-                    else document.getElementById("othNum").innerHTML = addCommas(cong18.other)+ " people ["+Math.round(100*(cong18.other/cong18.tot)) +"%]";
+                    if(cong18.tot==0)document.getElementById("demNum").innerHTML = 0 + " [0%]";
+                    else document.getElementById("demNum").innerHTML = addCommas(cong18.dem)+ " ["+Math.round(100*(cong18.dem/cong18.tot)) +"%]";
+                    if(cong18.tot==0) document.getElementById("repNum").innerHTML = 0 + " [0%]";
+                    else document.getElementById("repNum").innerHTML = addCommas(cong18.rep)+ " ["+Math.round(100*(cong18.rep/cong18.tot)) +"%]";
+                    if(cong18.other==0) document.getElementById("othNum").innerHTML = 0 + " [0%]";
+                    else document.getElementById("othNum").innerHTML = addCommas(cong18.other)+ " ["+Math.round(100*(cong18.other/cong18.tot)) +"%]";
                 }
                 changeAllColor();
             }

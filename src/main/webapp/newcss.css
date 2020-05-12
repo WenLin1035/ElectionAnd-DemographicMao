@@ -90,7 +90,7 @@ and open the template in the editor.
             margin: auto;
             padding: 20px;
             border: 1px solid #888;
-            width: 30%;
+            width: 50%;
             }
             #electionSection{
                 display:none;
@@ -109,4 +109,18 @@ and open the template in the editor.
                 border-color: #e6ffff;
                 padding: 1px;
                 background-color: #e6ffff;
+            }
+            .errorTabs{
+                overflow: hidden;
+                border: 1px solid #ccc;
+                background-color: #f1f1f1;
+            }
+            .errorButton{
+                background-color: inherit;
+                float: left;
+                border: none;
+                outline: none;
+                cursor: pointer;
+                padding: 10px 10px;
+                font-weight: bold;
             }
