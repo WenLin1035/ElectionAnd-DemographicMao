@@ -329,6 +329,7 @@ and open the template in the editor.
         </div>
         <script>
             function getAllFixedErrors(){
+                document.getElementById("fixedErrorLog").innerHTML="";
                 let fixedErrorRequest=new XMLHttpRequest();
                 fixedErrorRequest.open('GET','http://localhost:8080/fixederrors');
                 fixedErrorRequest.onload=()=>{
@@ -1474,7 +1475,7 @@ and open the template in the editor.
                 loadNeighborsForPrecinct(newPrecinct).then(response=>{
                     newPrecinct.properties.neighbors=response;
                     showNeighbors(newPrecinct);
-                    if(firstProperties.error!=undefined && firstProperties.error.errorType=="ENCLOSED" && firstProperties.error.errorType=="GAP"){
+                    if(firstProperties.error!=undefined && (firstProperties.error.errorType=="ENCLOSED" || firstProperties.error.errorType=="GAP")){
                         updateError(firstPrecinct);
                     }
                     mergePrec(firstProperties.id,newPrecinct.properties.id,preparePrecinctToSend(newPrecinct));
