@@ -1323,6 +1323,7 @@ and open the template in the editor.
                         updateError(feature);
                     }
                     updatePrecinct(featureID,preparePrecinctToSend(layer.toGeoJSON()));
+                    layer.feature=layer.toGeoJSON();
                     resetEditBorder();
                     document.getElementById("neighborButton").disabled=false;
                     document.getElementById("mergeButton").disabled=false;
