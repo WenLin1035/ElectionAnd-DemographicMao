@@ -50,13 +50,11 @@ and open the template in the editor.
             .centered3{
                 position: relative;
                 margin-left: 25px;
-                height:40%;
                 text-align: left;
             }
             .centered4{
                 position: relative;
                 margin-left: 25px;
-                bottom:0;
                 text-align: left;
             }
             .btns{
@@ -91,6 +89,8 @@ and open the template in the editor.
             padding: 20px;
             border: 1px solid #888;
             width: 50%;
+            height: 75%;
+            overflow-y: auto;
             }
             #electionSection{
                 display:none;

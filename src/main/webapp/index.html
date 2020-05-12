@@ -34,9 +34,9 @@ and open the template in the editor.
         
         <div class="split left">
             <div class="centered1">
-                <h3>Information</h3>
+                <h2>Location</h2>
                 <div style=" padding-bottom:10px">
-                    <label for="States" style="font-size: 20px;padding-right: 26px">State:</label>
+                    <label for="States" style="font-size: 17px;padding-right: 26px">State:</label>
                     <select id="States" onchange="loadFeature()"> <!-- needs to be replaced by data from DB -->
                         <option value="State" onclick="">States</option>
                     </select>
@@ -49,13 +49,12 @@ and open the template in the editor.
                 <br/>
                 <div>
                     Selected Precinct: <br/>
-                    <label id="selectedPrecinct"></label>
+                    <h3 id="selectedPrecinct"></h3>
                 </div>
             </div>
             <div style=" border-bottom:solid black;"></div>
             <div class="centered2">
-                <h4>Population:</h4>
-                
+                <h2>Information</h2>
                 
                 <label id="totVotePop"> X people</label>
                 <table cellpadding="0">
@@ -101,7 +100,7 @@ and open the template in the editor.
             <div style=" border-bottom:solid black;"></div>
             <div class="centered3">
                 <div id="errorSection" style="display:none">
-                    <h3>Error Type:</h3>
+                    <h2>Error Type</h2>
                     <div id="currentError">
                         <div id="ghostSection" style="display:none">
                             Ghost Precinct?<br/>
@@ -138,7 +137,7 @@ and open the template in the editor.
                     <textarea placeholder="Type your comment for the resolved error" id="commentArea" name="commentArea" rows="2" cols="20"></textarea>
                 </div>
                 <div id="optionSection">
-                    <p>Options:</p>
+                    <h2>Options</h2>
                     <button onclick="openChangeDataSection()" style="width:auto;">Change Data</button><br>
                     <button id="neighborButton" onclick="openNeighborSection()">Edit Neighbors</button><br>
                     <button id="mergeButton" onclick="openMergingSection()">Open "Merge Precincts" Section</button><br>
@@ -158,11 +157,12 @@ and open the template in the editor.
                 </div>
                 <br>
                 <br>
-                <input type ="image" src="" alt="Errors" class="nicebuttons" onclick="getAllErrors()">
+                <div style="text-align: center; padding-right: 45px"><button style="background-color:#e6ffff;color: black;padding: 5px 10px; font-size: 16px; cursor: pointer;" onclick="getAllErrors()">Load Precinct Errors</button></div>
+                <br>
             </div>
             <div style=" border-bottom:solid black;"></div>
             <div class="centered4">
-                <div>Sources:</div>
+                <h2 style="padding-top: 20px">Sources</h2>
                 State: <span id="stateSource"></span><br/>
                 District: <span id="districtSource"></span><br/>
                 Precinct Shapes: <span id="precinctSource"></span><br/>
