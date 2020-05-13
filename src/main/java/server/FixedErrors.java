@@ -27,6 +27,7 @@ public class FixedErrors {
     private String errorType;
     private Timestamp commentTime;
     private String relevantInfo;
+    private String precinctName;
     
     public FixedErrors(){
         super();
@@ -47,6 +48,12 @@ public class FixedErrors {
     public String getComment() {
         return comment;
     }
+    
+    @Column(name="precinctname")
+    public String getPrecinctName() {
+        return precinctName;
+    }
+
 
     @Column(name="error_type")
     public String getErrorType() {
@@ -67,6 +74,11 @@ public class FixedErrors {
     public void setId(Integer id) {
         this.id = id;
     }
+    
+    public void setPrecinctName(String precinctName) {
+        this.precinctName = precinctName;
+    }
+
 
     public void setPrecinctID(String precinctID) {
         this.precinctID = precinctID;

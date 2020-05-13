@@ -336,7 +336,7 @@ and open the template in the editor.
                     let allPrecinctsWithError=JSON.parse(fixedErrorRequest.response);
                     for(let i=0;i<allPrecinctsWithError.length;i++){
                         let fixedError=allPrecinctsWithError[i];
-                        let structuredError="<div> Precinct ID:" +fixedError.precinctID+" [Resolved Error: "+ fixedError.errorType+"] <br> ";
+                        let structuredError="<div> Precinct ID:" +fixedError.precinctID+"</br>Precinct Name: " + fixedError.precinctName + " [Resolved Error: "+ fixedError.errorType+"] <br> ";
                         structuredError+="Relevant Comment: <"+fixedError.commentTime+"> :"+fixedError.comment+ "</div> </br>";
                         document.getElementById("fixedErrorLog").innerHTML+=structuredError;
                     }
@@ -646,6 +646,7 @@ and open the template in the editor.
                     document.getElementById("electionDropdownArea").style.display="";
                     document.getElementById('electionSection').style.display = "block";
                     document.getElementById('demographicSection').style.display = "none";
+                    setElectionSection();
                 }
                 if(document.getElementById("dataSection").value == "demographic"){
                     document.getElementById("electionDropdownArea").style.display="none";
@@ -1052,7 +1053,7 @@ and open the template in the editor.
                 document.getElementById("hispanicNum").innerHTML=addCommas(Math.floor(hispanicVotePop));
                 document.getElementById("otherNum").innerHTML=addCommas(Math.floor(otherVotePop));
                 if(document.getElementById("dataSection").value=="demographic"){
-                    document.getElementById("totVotePop").innerHTML=addCommas(Math.floor(totVotePop));
+                    document.getElementById("totVotePop").innerHTML="Total Voting Population: " + addCommas(Math.floor(totVotePop));
                 }
                 changeAllColor();
             }
@@ -1079,7 +1080,7 @@ and open the template in the editor.
                 }
                 if(selectedElection == "pres16"){
                     if(document.getElementById("dataSection").value=="election"){
-                        document.getElementById("totVotePop").innerHTML=addCommas(pres16.tot) + " people";
+                        document.getElementById("totVotePop").innerHTML="Total Voters: " + addCommas(pres16.tot);
                     }
                     if(pres16.tot==0)document.getElementById("demNum").innerHTML = 0 + " [0%]";
                     else document.getElementById("demNum").innerHTML = addCommas(pres16.dem)+ " ["+Math.round(100*(pres16.dem/pres16.tot)) +"%]";
@@ -1090,7 +1091,7 @@ and open the template in the editor.
                 }
                 else if(selectedElection == "cong16"){
                     if(document.getElementById("dataSection").value=="election"){
-                        document.getElementById("totVotePop").innerHTML=addCommas(cong16.tot);
+                        document.getElementById("totVotePop").innerHTML="Total Voters: " + addCommas(cong16.tot);
                     }
                     if(cong16.tot==0)document.getElementById("demNum").innerHTML = 0 + " [0%]";
                     else document.getElementById("demNum").innerHTML = addCommas(cong16.dem)+ " ["+Math.round(100*(cong16.dem/cong16.tot)) +"%]";
@@ -1101,7 +1102,7 @@ and open the template in the editor.
                 }
                 else if(selectedElection == "cong18"){
                     if(document.getElementById("dataSection").value=="election"){
-                        document.getElementById("totVotePop").innerHTML=addCommas(cong18.tot);
+                        document.getElementById("totVotePop").innerHTML= "Total Voters: "+ addCommas(cong18.tot);
                     }
                     if(cong18.tot==0)document.getElementById("demNum").innerHTML = 0 + " [0%]";
                     else document.getElementById("demNum").innerHTML = addCommas(cong18.dem)+ " ["+Math.round(100*(cong18.dem/cong18.tot)) +"%]";
@@ -1280,6 +1281,7 @@ and open the template in the editor.
                 newError.comment=document.getElementById("commentArea").value;
                 newError.errorType=feature.properties.error.errorType;
                 newError.precinctID=feature.properties.id;
+                newError.precinctName=feature.properties.name;
                 if(newError.errorType=="GHOST"){
                     newError.relevantInfo=JSON.stringify(feature.properties.election)+" "+JSON.stringify(feature.properties.demographic);
                 }
