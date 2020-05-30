@@ -5,12 +5,12 @@ and open the template in the editor.
 */
 /* 
     Created on : Feb 20, 2020, 11:55:52 PM
-    Author     : Team Icicles (the ones who could get the project running for some reason)
+    Author     : Wen Lin, Kevin Ramos, Stanley Ren, Jason Lynn
 */
 
             .left{
                 position: fixed;
-                top:4.5%;
+                top:6%;
                 left: 0;
                 bottom: 0;
                 width:20%;
@@ -20,7 +20,7 @@ and open the template in the editor.
             }
             .right{
                 position: fixed;
-                top:4.5%;
+                top:6%;
                 right:0;
                 width:80%;
                 height:95%;
